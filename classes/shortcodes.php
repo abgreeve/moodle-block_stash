@@ -64,6 +64,10 @@ class shortcodes {
         if (empty($hash) || strlen($hash) < 6) {
             return '';
         }
+        
+        if (empty($env->context) || !method_exists($env->context, 'get_course_context')) {
+            return '';
+        }
 
         $context = $env->context->get_course_context(false);
         if (!$context) {
