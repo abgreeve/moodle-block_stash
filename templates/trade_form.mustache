@@ -109,7 +109,9 @@
             <input type="hidden" name="stashid" value="{{stashid}}" />
             <input type="hidden" name="hashcode" value="{{hashcode}}" />
             <input type="hidden" name="sesskey" value="{{sesskey}}" />
+            {{^removeformbuttons}}
             <input type="submit" value="{{#str}}savechanges, block_stash{{/str}}" class="btn btn-primary" />
+            {{/removeformbuttons}}
         </div>
     </div>
     </form>

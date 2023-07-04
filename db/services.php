@@ -125,4 +125,28 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_add_drop' => [
+        'classname'    => 'block_stash\\external\\add_drop',
+        'methodname'   => 'execute',
+        'description'  => 'Create a drop for an item',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_add_item' => [
+        'classname'    => 'block_stash\\external\\add_item',
+        'methodname'   => 'execute',
+        'description'  => 'Create an item',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_create_trade' => [
+        'classname'    => 'block_stash\\external\\create_trade',
+        'methodname'   => 'execute',
+        'description'  => 'Create a trade',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

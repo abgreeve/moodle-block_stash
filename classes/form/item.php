@@ -51,7 +51,7 @@ class item extends persistent {
         $mform->setConstant('stashid', $stash->get_id());
 
         // Name.
-        $mform->addElement('text', 'name', get_string('itemname', 'block_stash'), 'maxlength="255"');
+        $mform->addElement('text', 'name', get_string('itemname', 'block_stash'), ['maxlength' => 255, 'tabindex' => 0]);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
@@ -80,11 +80,21 @@ class item extends persistent {
         $mform->addHelpButton('image', 'itemimage', 'block_stash');
 
         // Detail.
-        $mform->addElement('editor', 'detail_editor', get_string('itemdetail', 'block_stash'), array('rows' => 10),
-            $this->_customdata['editoroptions']);
-        $mform->setType('detail_editor', PARAM_RAW);
-        $mform->addHelpButton('detail_editor', 'itemdetail', 'block_stash');
+        if (isset($this->_customdata['modal']) && $this->_customdata['modal']) {
+            $mform->addElement('textarea', 'detail_text', get_string('itemdetail', 'block_stash'));
+            $mform->setType('detail_text', PARAM_TEXT);
+            $mform->addHelpButton('detail_text', 'itemdetail', 'block_stash');
+        } else {
+            $mform->addElement('editor', 'detail_editor', get_string('itemdetail', 'block_stash'), array('rows' => 10),
+                $this->_customdata['editoroptions']);
+            $mform->setType('detail_editor', PARAM_RAW);
+            $mform->addHelpButton('detail_editor', 'itemdetail', 'block_stash');
+        }
 
+        // This form is being displayed in a modal and has it's own submit buttons and save system.
+        if (isset($this->_customdata['modal']) && $this->_customdata['modal']) {
+            return;
+        }
         // Buttons.
         $buttonarray = [];
         if (!$this->get_persistent()->get_id()) {

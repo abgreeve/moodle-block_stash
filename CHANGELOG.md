@@ -1,6 +1,11 @@
 Block Stash
 ===========
 
+Version 2.0.3 (TBA)
+-------------------
+
+* Added additional webservices to allow tiny_stash to create items, drops, and trades.
+
 Version 2.0.2 (12 June 2023)
 ----------------------------
 
