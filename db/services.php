@@ -125,4 +125,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_add_drop' => [
+        'classname'    => 'block_stash\\external\\add_drop',
+        'methodname'   => 'execute',
+        'description'  => 'Create a drop for an item',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];
