@@ -133,4 +133,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_add_item' => [
+        'classname'    => 'block_stash\\external\\add_item',
+        'methodname'   => 'execute',
+        'description'  => 'Create an item',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

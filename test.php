@@ -23,18 +23,27 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->libdir . '/editor/tiny/plugins/stash/lib.php');
 
 // echo 'hi';
 
 $user = core_user::get_user(3);
 
-$context = context_course::instance(2);
+$courseid = 2;
+$context = context_course::instance($courseid);
+
+$PAGE->set_context($context);
+$PAGE->set_url('/blocks/stash/test.php');
 // print_object($context);
 
-$contextlist = new \core_privacy\local\request\approved_contextlist($user, 'block_stash', [$context->id]);
-// print_object($contextlist);
+// $contextlist = new \core_privacy\local\request\approved_contextlist($user, 'block_stash', [$context->id]);
+// // print_object($contextlist);
 
-\block_stash\privacy\provider::_delete_data_for_user($contextlist);
-$contextid = required_param('contextid', PARAM_INT);
+// \block_stash\privacy\provider::_delete_data_for_user($contextlist);
+// $contextid = required_param('contextid', PARAM_INT);
 
-\block_stash\external\dropwidget_select_data::get_all_drop_data($contextid);
+// \block_stash\external\dropwidget_select_data::get_all_drop_data($contextid);
+
+$temp = (object) ['courseid' => $courseid];
+
+echo tiny_stash_output_fragment_add_item_form($temp);
