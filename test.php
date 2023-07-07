@@ -29,16 +29,23 @@ require_once($CFG->libdir . '/editor/tiny/plugins/stash/lib.php');
 
 $user = core_user::get_user(3);
 
+<<<<<<< HEAD
 $courseid = 6;
+=======
+$courseid = 2;
+>>>>>>> c4f1836 (added webservice to add items)
 $context = context_course::instance($courseid);
 
 $PAGE->set_context($context);
 $PAGE->set_url('/blocks/stash/test.php');
+<<<<<<< HEAD
 
 $manager = \block_stash\manager::get($courseid);
 print_object($manager->get_all_trade_data());
 
 // print_object($manager->get_trades());
+=======
+>>>>>>> c4f1836 (added webservice to add items)
 // print_object($context);
 
 // $contextlist = new \core_privacy\local\request\approved_contextlist($user, 'block_stash', [$context->id]);
@@ -49,6 +56,12 @@ print_object($manager->get_all_trade_data());
 
 // \block_stash\external\dropwidget_select_data::get_all_drop_data($contextid);
 
+<<<<<<< HEAD
 // $temp = (object) ['courseid' => $courseid];
 
 // echo tiny_stash_output_fragment_add_item_form($temp);
+=======
+$temp = (object) ['courseid' => $courseid];
+
+echo tiny_stash_output_fragment_add_item_form($temp);
+>>>>>>> c4f1836 (added webservice to add items)

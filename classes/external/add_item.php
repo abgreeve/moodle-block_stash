@@ -32,7 +32,6 @@ use external_value;
 use block_stash\manager;
 use block_stash\external\item_exporter;
 
-
 class add_item extends external_api {
 
     public static function execute_parameters() {
