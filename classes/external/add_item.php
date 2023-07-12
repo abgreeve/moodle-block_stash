@@ -30,6 +30,7 @@ use external_api;
 use external_function_parameters;
 use external_value;
 use block_stash\manager;
+use block_stash\external\item_exporter;
 
 
 class add_item extends external_api {
@@ -47,6 +48,8 @@ class add_item extends external_api {
 
 
     public static function execute($courseid, $itemname, $scarceitem, $amountlimit, $itemimage, $description) {
+        global $PAGE;
+
         $data = (object) self::validate_parameters(self::execute_parameters(),
             compact('courseid', 'itemname', 'scarceitem', 'amountlimit', 'itemimage', 'description'));
 
@@ -65,12 +68,19 @@ class add_item extends external_api {
             'amountlimit' => $data->amountlimit,
         ];
 
-        $manager->create_or_update_item($itemdata, $data->itemimage);
+        $item = $manager->create_or_update_item($itemdata, $data->itemimage);
 
-        return true;
+        $output = $PAGE->get_renderer('block_stash');
+        $exporter = new item_exporter($item, array('context' => $manager->get_context()));
+        $record = $exporter->export($output);
+        // TODO Formatting of the details should be done in the exporter.
+        $record->detail = file_rewrite_pluginfile_urls($record->detail, 'pluginfile.php', $manager->get_context()->id,
+                'block_stash', 'detail', $item->get_id());
+
+        return $record;
     }
 
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL);
+        return item_exporter::get_read_structure();
     }
 }

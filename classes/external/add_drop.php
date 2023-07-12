@@ -57,11 +57,11 @@ class add_drop extends external_api {
         $data->id = 0;
         unset($data->courseid);
 
-        $manager->create_or_update_drop($data);
-        return true;
+        $drop = $manager->create_or_update_drop($data);
+        return $drop->get_hashcode();
     }
 
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL);
+        return new external_value(PARAM_ALPHANUM);
     }
 }
