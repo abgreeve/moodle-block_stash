@@ -62,6 +62,6 @@ class add_drop extends external_api {
     }
 
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL);
+        return new external_value(PARAM_ALPHANUM);
     }
 }
