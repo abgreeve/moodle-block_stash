@@ -71,10 +71,12 @@ class swap_handler {
                   FROM {block_stash_swap} s
              LEFT JOIN {user} u ON s.initiator = u.id
              LEFT JOIN {user} ru ON s.receiver = ru.id
-                 WHERE (s.receiver = :ruserid OR s.initiator = :iuserid)
+                 WHERE s.id = :stashid
+                   AND (s.receiver = :ruserid OR s.initiator = :iuserid)
                    AND (s.status IS NULL OR s.status = :viewed OR s.status = :completed)";
 
         $params = [
+            'stashid' => $this->manager->get_stash()->get_id(),
             'ruserid' => $userid,
             'iuserid' => $userid,
             'viewed' => swap::BLOCK_STASH_SWAP_VIEWED,

@@ -61,6 +61,11 @@ This [filter plugin](https://github.com/branchup/moodle-filter_shortcodes) makes
 
 This [availability plugin](https://moodle.org/plugins/availability_stash) allows to restrict the access to activity modules and resources based on the objects collected by a student.
 
+### Tiny stash
+
+This [tinyMCE editor plugin](https://moodle.org/plugins/tiny_stash) allows the user to add the items and trades to your course content using the TinyMCE editor.
+
+
 License
 -------
 
