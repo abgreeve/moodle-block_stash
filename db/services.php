@@ -141,4 +141,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_create_trade' => [
+        'classname'    => 'block_stash\\external\\create_trade',
+        'methodname'   => 'execute',
+        'description'  => 'Create a trade',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

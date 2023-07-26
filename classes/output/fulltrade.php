@@ -31,7 +31,6 @@ use templatable;
 use help_icon;
 
 use block_stash\trade;
-use block_stash\tradeitems;
 
 /**
  * Full trade renderable class.
@@ -59,13 +58,18 @@ class fulltrade implements renderable, templatable {
 
     protected $titlehelp;
 
+    /** @var Removes the save and cancel buttons from the form. Used for dialogue forms. */
+    protected $removeformbuttons = false;
+
     /**
      * Full trade constructor.
      *
-     * @param trade      $trade      [description]
-     * @param tradeitems $tradeitems [description]
+     * @param int        $stashid    Stash ID
+     * @param trade      $trade      Trade details
+     * @param array      $tradeitems Items for the trade
+     * @param int        $courseid   Course ID
      */
-    public function __construct($stashid, $trade = null, $tradeitems = null, $courseid = null) {
+    public function __construct(int $stashid, trade $trade = null, array $tradeitems = null, int $courseid = null) {
         $this->stashid = $stashid;
         $this->trade = $trade;
         $this->tradeitems = $tradeitems;
@@ -73,6 +77,14 @@ class fulltrade implements renderable, templatable {
         $this->titlehelp = new help_icon('tradename', 'block_stash');
         $this->gainhelp = new help_icon('gaintitle', 'block_stash');
         $this->losshelp = new help_icon('losstitle', 'block_stash');
+    }
+
+    /**
+     * Remove the form cancel and save buttons.
+     * This is used for js dialogue forms.
+     */
+    public function remove_form_buttons(): void {
+        $this->removeformbuttons = true;
     }
 
     /**
@@ -122,7 +134,8 @@ class fulltrade implements renderable, templatable {
             'hashcode' => $hashcode,
             'sesskey' => sesskey(),
             'additems' => (isset($this->tradeitems['add'])) ? $this->tradeitems['add'] : [],
-            'lossitems' => (isset($this->tradeitems['loss'])) ? $this->tradeitems['loss'] : []
+            'lossitems' => (isset($this->tradeitems['loss'])) ? $this->tradeitems['loss'] : [],
+            'removeformbuttons' => $this->removeformbuttons,
         ];
     }
 
