@@ -65,7 +65,12 @@ class shortcodes {
             return '';
         }
 
-        $context = $env->context->get_course_context(false);
+        if ($env->context) {
+            $context = $env->context->get_course_context(false);
+        } else {
+            $context = $PAGE->context->get_course_context(false);
+        }
+
         if (!$context) {
             return '';
         }
