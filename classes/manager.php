@@ -964,6 +964,48 @@ class manager {
         return trade::get_records(['stashid' => $this->get_stash()->get_id()], 'name');
     }
 
+    public function get_all_trade_data() {
+        global $DB;
+
+        $this->require_enabled();
+        $this->require_manage();
+
+        $sql = "SELECT ti.id, t.id as tradeid, t.name, t.losstitle, t.gaintitle, t.hashcode, ti.itemid, ti.quantity, ti.gainloss
+                FROM {block_stash_trade} t
+                JOIN {block_stash_trade_items} ti ON ti.tradeid = t.id
+                WHERE t.stashid = :stashid";
+
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
+        // print_object($records);
+        $data = [];
+        foreach ($records as $record) {
+            if (!isset($data[$record->tradeid])) {
+                $data[$record->tradeid] = [
+                    'tradeid' => $record->tradeid,
+                    'name' => $record->name,
+                    'losstitle' => $record->losstitle,
+                    'gaintitle' => $record->gaintitle,
+                    'hashcode' => $record->hashcode,
+                    'additems' => [],
+                    'lossitems' => []
+                ];
+            }
+            if ($record->gainloss) {
+                $data[$record->tradeid]['additems'][$record->itemid] = [
+                    'itemid' => $record->itemid,
+                    'quantity' => $record->quantity
+                ];
+            } else {
+                $data[$record->tradeid]['lossitems'][$record->itemid] = [
+                    'itemid' => $record->itemid,
+                    'quantity' => $record->quantity
+                ];
+            }
+
+        }
+        return $data;
+    }
+
     /**
      * Create or update a trade based on the data passed.
      *

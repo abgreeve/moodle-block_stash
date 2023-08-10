@@ -29,11 +29,16 @@ require_once($CFG->libdir . '/editor/tiny/plugins/stash/lib.php');
 
 $user = core_user::get_user(3);
 
-$courseid = 2;
+$courseid = 6;
 $context = context_course::instance($courseid);
 
 $PAGE->set_context($context);
 $PAGE->set_url('/blocks/stash/test.php');
+
+$manager = \block_stash\manager::get($courseid);
+print_object($manager->get_all_trade_data());
+
+// print_object($manager->get_trades());
 // print_object($context);
 
 // $contextlist = new \core_privacy\local\request\approved_contextlist($user, 'block_stash', [$context->id]);
@@ -44,6 +49,6 @@ $PAGE->set_url('/blocks/stash/test.php');
 
 // \block_stash\external\dropwidget_select_data::get_all_drop_data($contextid);
 
-$temp = (object) ['courseid' => $courseid];
+// $temp = (object) ['courseid' => $courseid];
 
-echo tiny_stash_output_fragment_add_item_form($temp);
+// echo tiny_stash_output_fragment_add_item_form($temp);

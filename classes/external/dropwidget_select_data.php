@@ -84,13 +84,13 @@ class dropwidget_select_data extends external_api {
         self::validate_context($manager->get_context());
         $result = $manager->get_drops_for_items_and_trade();
 
-        $output = $PAGE->get_renderer('block_stash');
-        $records = [];
-        foreach ($result['trades'] as $trade) {
-            $exporter = new trade_exporter($trade, ['context' => $manager->get_context()]);
-            $records[] = $exporter->export($output);
-        }
-        return ['items' => array_values($result['items']), 'trades' => $records];
+        // $output = $PAGE->get_renderer('block_stash');
+        // $records = [];
+        // foreach ($result['trades'] as $trade) {
+        //     $exporter = new trade_exporter($trade, ['context' => $manager->get_context()]);
+        //     $records[] = $exporter->export($output);
+        // }
+        return ['items' => array_values($result['items']), 'trades' => $manager->get_all_trade_data()];
     }
 
     public static function get_all_drop_data_returns() {
@@ -107,14 +107,27 @@ class dropwidget_select_data extends external_api {
                 )),
                 'trades' => new external_multiple_structure(new external_single_structure(
                     [
-                        'stashid' => new external_value(PARAM_INT, 'The stash ID'),
+                        'tradeid' => new external_value(PARAM_INT, 'The trade ID'),
                         'name' => new external_value(PARAM_TEXT, 'The name of the trade'),
                         'losstitle' => new external_value(PARAM_TEXT, 'The title for losing items'),
                         'gaintitle' => new external_value(PARAM_TEXT, 'The title for gaining items'),
                         'hashcode' => new external_value(PARAM_ALPHANUM, 'The hashcode for the trade'),
-                        'id' => new external_value(PARAM_INT, 'The trade ID'),
-                        'timecreated' => new external_value(PARAM_INT, 'The time this trade was created'),
-                        'timemodified' => new external_value(PARAM_INT, 'The time this trade was modified')
+                        'additems' => new external_multiple_structure (
+                            new external_single_structure(
+                                [
+                                    'itemid' => new external_value(PARAM_INT),
+                                    'quantity' => new external_value(PARAM_INT)
+                                ]
+                            )
+                        ),
+                        'lossitems' => new external_multiple_structure (
+                            new external_single_structure(
+                                [
+                                    'itemid' => new external_value(PARAM_INT),
+                                    'quantity' => new external_value(PARAM_INT)
+                                ]
+                            )
+                        ),
                     ]
                 )),
             ]
