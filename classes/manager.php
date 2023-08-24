@@ -83,7 +83,7 @@ class manager {
      * to acquire the items.
      *
      * @param int $userid The user ID.
-     * @return void
+     * @return bool
      */
     public function can_acquire_items($userid = null) {
         return has_capability(self::CAN_ACQUIRE_ITEMS, $this->context, $userid, false);
@@ -93,7 +93,7 @@ class manager {
      * Whether the user can manage the plugin.
      *
      * @param int $userid The user ID.
-     * @return void
+     * @return bool
      */
     public function can_manage($userid = null) {
         return has_capability(self::CAN_MANAGE, $this->context, $userid);
@@ -103,7 +103,7 @@ class manager {
      * Whether the user can manage the plugin.
      *
      * @param int $userid The user ID.
-     * @return void
+     * @return bool
      */
     public function can_view($userid = null) {
         return has_capability(self::CAN_VIEW, $this->context, $userid) || $this->can_manage();
