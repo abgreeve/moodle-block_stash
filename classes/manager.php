@@ -1272,4 +1272,25 @@ class manager {
         $config = unserialize(base64_decode($record->configdata));
         return $config->leaderboard_groups ?? false;
     }
+
+    /**
+     * Get the IDs of all users that should be considered for the leaderboard. Depending on the config leaderboard_groups this is
+     * either all users of the course or all users that have at least one common group with the current user in the course.
+     *
+     * @return array the IDs of the users
+     */
+    public function get_userids_for_leaderboard(): array {
+        global $DB, $USER;
+
+        $courseid = $this->get_courseid();
+        $context = context_course::instance($courseid);
+        if ($this->leaderboard_groups_enabled()) {
+            $groupids = groups_get_user_groups($courseid, $USER->id)[0];
+            $userids = $DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context));
+        } else {
+            $userids = get_enrolled_users($context, '', 0, 'u.id');
+        }
+
+        return array_keys($userids);
+    }
 }

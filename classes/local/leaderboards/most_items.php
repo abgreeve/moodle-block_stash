@@ -17,7 +17,6 @@
 namespace block_stash\local\leaderboards;
 
 use block_stash\manager;
-use context_course;
 use renderable;
 use renderer_base;
 use templatable;
@@ -36,14 +35,7 @@ class most_items implements renderable, templatable {
     function export_for_template(renderer_base $output) {
         global $USER, $DB;
 
-        $courseid = $this->manager->get_courseid();
-        $context = context_course::instance($courseid);
-        if ($this->manager->leaderboard_groups_enabled()) {
-            $groupids = groups_get_user_groups($courseid, $USER->id)[0];
-            $userids = array_keys($DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context)));
-        } else {
-            $userids = array_keys(get_enrolled_users($context, '', 0, 'u.id'));
-        }
+        $userids = $this->manager->get_userids_for_leaderboard();
 
         $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
         $fields = implode(',', array_map(fn($f) => "u.$f", $fields));
