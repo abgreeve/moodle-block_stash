@@ -67,9 +67,11 @@
 </nav>
 {{/canswap}}
 </div>
-<hr>
-<h5>Leaderboard</h5>
-{{>block_stash/leaderboard}}
+{{#leaderboard}}
+    <hr>
+    <h5>Leaderboard</h5>
+    {{{leaderboard}}}
+{{/leaderboard}}
 
 {{#js}}
 require([
