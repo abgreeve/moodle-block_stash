@@ -31,6 +31,7 @@ use context_user;
 use moodle_exception;
 use required_capability_exception;
 use stdClass;
+use tool_brickfield\local\areas\core_course\fullname;
 
 /**
  * Stash manager.
@@ -1244,5 +1245,38 @@ class manager {
                 '*', MUST_EXIST);
         $config = unserialize(base64_decode($record->configdata));
         return isset($config->grouponly) ? $config->grouponly : false;
+    }
+
+    /**
+     * Check if groups are enabled for the leaderboard.
+     *
+     * @return bool True if groups are enabled for the leaderboard, false otherwise.
+     */
+    public function group_leaderboard_enabled(): bool {
+        global $DB;
+        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
+                '*', MUST_EXIST);
+        $config = unserialize(base64_decode($record->configdata));
+        return $config->grouponly_leaderboard ?? false;
+    }
+
+    public function get_data_for_leaderboard() {
+        global $USER, $DB;
+
+        $context = context_course::instance($this->get_courseid());
+        $groupids = groups_get_user_groups($this->get_courseid(), $USER->id)[0];
+
+        $userids = $DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context));
+        $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
+        $users = $DB->get_records_list('user', 'id', array_keys($userids), '', implode(',', $fields));
+
+        foreach($users as $user) {
+            $result[] = (object)[
+                    'name' => fullname($user),
+                    'num_items' => count($this->get_all_user_items_in_stash($user->id))
+            ];
+        }
+        usort($result, fn($a, $b) => $b->num_items <=> $a->num_items);
+        return $result;
     }
 }
