@@ -67,11 +67,14 @@
 </nav>
 {{/canswap}}
 </div>
-{{#leaderboard}}
+{{#leaderboards_enabled}}
     <hr>
-    <h5>Leaderboard</h5>
-    {{{leaderboard}}}
-{{/leaderboard}}
+    <h5>Leaderboards</h5>
+    {{#leaderboards}}
+        <h6>{{title}}</h6>
+        {{{html}}}
+    {{/leaderboards}}
+{{/leaderboards_enabled}}
 
 {{#js}}
 require([

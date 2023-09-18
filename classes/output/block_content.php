@@ -77,7 +77,17 @@ class block_content implements renderable, templatable {
         $data['offersurl'] = new moodle_url('/blocks/stash/swaprequests.php', array('courseid' => $this->manager->get_courseid()));
         $data['swapcount'] = $swapcount ?: false;
         if ($this->manager->leaderboard_enabled()) {
-            $data['leaderboard'] = $output->render_from_template('block_stash/leaderboard', $this->manager->get_data_for_leaderboard());
+            $data['leaderboards_enabled'] = true;
+            $boards = \core_component::get_component_classes_in_namespace('block_stash', 'local\leaderboards');
+            $d = [];
+            foreach (array_keys($boards) as $board) {
+                $b = new $board($this->manager);
+                $d[] = [
+                        'html' => $output->render($b),
+                        'title' => $b->get_title()
+                ];
+            }
+            $data['leaderboards'] = $d;
         }
         return $data;
     }
