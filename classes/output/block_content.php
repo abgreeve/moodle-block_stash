@@ -76,6 +76,17 @@ class block_content implements renderable, templatable {
         $data['tradecenterurl'] = new moodle_url('/blocks/stash/tradecenter.php', array('courseid' => $this->manager->get_courseid()));
         $data['offersurl'] = new moodle_url('/blocks/stash/swaprequests.php', array('courseid' => $this->manager->get_courseid()));
         $data['swapcount'] = $swapcount ?: false;
+        //$data['students'] = [
+        //        (object)[
+        //            'name' => 'Foo',
+        //            'num_items' => 12,
+        //        ],
+        //        (object)[
+        //                'name' => 'Bar',
+        //                'num_items' => 3,
+        //        ]
+        //];
+        $data['students'] = $this->manager->get_data_for_leaderboard();
         return $data;
     }
 

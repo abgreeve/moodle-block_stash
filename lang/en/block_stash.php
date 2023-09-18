@@ -82,6 +82,7 @@ $string['gainloss'] = "Gain or lose";
 $string['gaintitle'] = "Gain title";
 $string['gaintitle_help'] = "Title for the column of items the user will acquire in this trade.";
 $string['grouponly'] = 'Only allow trades between students in their groups.';
+$string['grouponly_leaderboard'] = 'Respect groups for the leaderboard.';
 $string['image'] = 'Image';
 $string['imageandbutton'] = 'Image and button';
 $string['item'] = 'Item';

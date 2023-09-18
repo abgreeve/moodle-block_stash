@@ -48,6 +48,10 @@ class block_stash_edit_form extends block_edit_form {
         $mform->setType('config_grouponly', PARAM_BOOL);
         $mform->setDefault('config_grouponly', 0);
         $mform->hideIf('config_grouponly', 'config_useritemswap', 'eq', 0);
+
+        $mform->addElement('advcheckbox', 'config_grouponly_leaderboard', get_string('grouponly_leaderboard', 'block_stash'));
+        $mform->setType('config_grouponly_leaderboard', PARAM_BOOL);
+        $mform->setDefault('config_grouponly_leaderboard', 0);
     }
 
     public function set_data($defaults) {
