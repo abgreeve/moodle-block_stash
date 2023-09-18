@@ -22,7 +22,7 @@ use renderable;
 use renderer_base;
 use templatable;
 
-class most_items implements renderable, templatable {
+class most_unique_items implements renderable, templatable {
     private manager $manager;
 
     public function __construct($manager) {
@@ -30,7 +30,7 @@ class most_items implements renderable, templatable {
     }
 
     public function get_title(): string {
-        return 'Most Items';
+        return 'Most Unique Items';
     }
 
     function export_for_template(renderer_base $output) {
@@ -50,7 +50,7 @@ class most_items implements renderable, templatable {
 
         [$idsql, $idparams] = $DB->get_in_or_equal($userids);
 
-        $sql = "SELECT $fields, ui.userid, SUM(ui.quantity) as num_items
+        $sql = "SELECT $fields, ui.userid, COUNT(*) as num_items
                   FROM {block_stash_user_items} ui
                   JOIN {user} u
                     ON u.id=ui.userid
