@@ -64,6 +64,9 @@ class manager {
     /** @var stash The stash object, do not refer to directly as it's lazy loaded. */
     protected $stash;
 
+    /** $var array The deserialized block configuration. */
+    private $config;
+
     /**
      * Constructor.
      *
@@ -1215,23 +1218,29 @@ class manager {
     }
 
     /**
+     * Get config values.
+     *
+     * @param string $key string The key.
+     * @param $default mixed The default value if there is no entry for the given key.
+     * @return mixed The config value for the given key.
+     */
+    public function get_config_entry(string $key, $default) {
+        if (!isset($this->config)) {
+            global $DB;
+            $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
+                    '*', MUST_EXIST);
+            $this->config = unserialize(base64_decode($record->configdata));
+        }
+        return $this->config->$key ?? $default;
+    }
+
+    /**
      * Check if user item swapping is enabled for the Stash block instance in the current context.
      *
      * @return bool True if user item swapping is enabled, false otherwise.
      */
     public function is_swapping_enabled(): bool {
-        global $DB;
-
-        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
-                '*', MUST_EXIST);
-        $config = unserialize(base64_decode($record->configdata));
-        // If nothing is set, then the default is true.
-        if (empty($config)) {
-            $config = (object) ['useritemswap' => true];
-        } else if (!isset($config->useritemswap)) {
-            $config->useritemswap = true;
-        }
-        return $config->useritemswap;
+        return $this->get_config_entry('useritemswap', true);
     }
 
     /**
@@ -1240,11 +1249,7 @@ class manager {
      * @return bool True if group trading is enabled, false otherwise.
      */
     public function group_trading_enabled(): bool {
-        global $DB;
-        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
-                '*', MUST_EXIST);
-        $config = unserialize(base64_decode($record->configdata));
-        return isset($config->grouponly) ? $config->grouponly : false;
+        return $this->get_config_entry('grouponly', false);
     }
 
     /**
@@ -1253,11 +1258,7 @@ class manager {
      * @return bool True if leaderboard is enabled, false otherwise.
      */
     public function leaderboard_enabled(): bool {
-        global $DB;
-        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
-                '*', MUST_EXIST);
-        $config = unserialize(base64_decode($record->configdata));
-        return $config->leaderboard ?? false;
+        return $this->get_config_entry('leaderboard', false);
     }
 
     /**
@@ -1266,11 +1267,7 @@ class manager {
      * @return bool True if groups are enabled for the leaderboard, false otherwise.
      */
     public function leaderboard_groups_enabled(): bool {
-        global $DB;
-        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
-                '*', MUST_EXIST);
-        $config = unserialize(base64_decode($record->configdata));
-        return $config->leaderboard_groups ?? false;
+        return $this->get_config_entry('leaderboard_groups', false);
     }
 
     /**
