@@ -1272,27 +1272,4 @@ class manager {
         $config = unserialize(base64_decode($record->configdata));
         return $config->leaderboard_groups ?? false;
     }
-
-    public function get_data_for_leaderboard() {
-        global $USER, $DB;
-
-        $context = context_course::instance($this->get_courseid());
-        if ($this->leaderboard_groups_enabled()) {
-            $groupids = groups_get_user_groups($this->get_courseid(), $USER->id)[0];
-            $userids = $DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context));
-            $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
-            $users = $DB->get_records_list('user', 'id', array_keys($userids), '', implode(',', $fields));
-        } else {
-            $users = get_enrolled_users($context);
-        }
-
-        foreach($users as $user) {
-            $students[] = (object)[
-                    'name' => fullname($user),
-                    'num_items' => count($this->get_all_user_items_in_stash($user->id))
-            ];
-        }
-        usort($students, fn($a, $b) => $b->num_items <=> $a->num_items);
-        return ['students' => $students];
-    }
 }
