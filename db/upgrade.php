@@ -466,5 +466,30 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2022042103, 'stash');
     }
 
+    if ($oldversion < 2023100901) {
+
+        // Define table block_stash_lb_settings to be created.
+        $table = new xmldb_table('block_stash_lb_settings');
+
+        // Adding fields to table block_stash_lb_settings.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('stashid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('boardname', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('options', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('rowlimit', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '5');
+
+        // Adding keys to table block_stash_lb_settings.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for block_stash_lb_settings.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Stash savepoint reached.
+        upgrade_block_savepoint(true, 2023100901, 'stash');
+    }
+
     return true;
 }
