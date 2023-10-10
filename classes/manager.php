@@ -1290,4 +1290,27 @@ class manager {
 
         return array_keys($userids);
     }
+
+    public function get_leaderboards(): array {
+        if (!$this->leaderboard_enabled()) {
+            return [];
+        }
+        $boards = \core_component::get_component_classes_in_namespace('block_stash', 'local\leaderboards');
+        $d = [];
+        foreach (array_keys($boards) as $board) {
+            $b = new $board($this);
+            $d[$board] = $b->get_title();
+        }
+        return $d;
+    }
+
+    public function set_leaderboard_stuff() {
+        // Set stuff up.
+    }
+
+    public function get_leaderboard_settings() {
+        global $DB;
+
+        $records = $DB->get_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);
+    }
 }

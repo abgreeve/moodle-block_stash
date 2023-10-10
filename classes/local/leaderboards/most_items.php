@@ -41,16 +41,21 @@ class most_items implements renderable, templatable {
         $fields = implode(',', array_map(fn($f) => "u.$f", $fields));
 
         [$idsql, $idparams] = $DB->get_in_or_equal($userids);
+        $idparams[] = $this->manager->get_stash()->get_id();
 
         $sql = "SELECT $fields, ui.userid, SUM(ui.quantity) as num_items
                   FROM {block_stash_user_items} ui
-                  JOIN {user} u
-                    ON u.id=ui.userid
+                  JOIN {block_stash_items} i ON i.id = ui.itemid
+                  JOIN {user} u ON u.id = ui.userid
                  WHERE u.id $idsql
+                   AND i.stashid = ?
               GROUP BY ui.userid, $fields
               ORDER BY num_items DESC";
         $result = $DB->get_records_sql($sql, $idparams);
 
+        if (!$result) {
+            return ['students'];
+        }
         foreach($result as $user) {
             $students[] = (object)[
                     'name' => fullname($user),

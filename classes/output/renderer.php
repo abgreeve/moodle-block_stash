@@ -166,6 +166,12 @@ class renderer extends plugin_renderer_base {
                 new moodle_url('/blocks/stash/report.php', ['courseid' => $courseid]),
                 get_string('navreport', 'block_stash')
             );
+
+            $tabs[] = new tabobject(
+                'leaderboards',
+                new moodle_url('/blocks/stash/lbsettings.php', ['courseid' => $courseid]),
+                get_string('navleaderboadsettings', 'block_stash')
+            );
         }
 
         // If there is only one page, then that is the page we are on.

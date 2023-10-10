@@ -112,6 +112,7 @@ $string['myrequests'] = 'My requests to others';
 $string['navdrops'] = 'Locations';
 $string['navinventory'] = 'Stash items';
 $string['navitems'] = 'Items';
+$string['navleaderboadsettings'] = 'Leader board settings';
 $string['navreport'] = 'Report';
 $string['navtrade'] = 'Trade';
 $string['new'] = 'New';
