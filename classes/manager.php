@@ -1329,6 +1329,15 @@ class manager {
 
     public function set_leaderboard_stuff($data) {
         global $DB;
+
+        $existing = $this->get_leaderboard_settings();
+        foreach ($existing as $result) {
+            if ($result->boardname == $data->boardname) {
+                $data->id = $result->id;
+                $DB->update_record('block_stash_lb_settings', $data);
+                return;
+            }
+        }
         $DB->insert_record('block_stash_lb_settings', $data);
     }
 

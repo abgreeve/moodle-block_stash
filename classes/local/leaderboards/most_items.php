@@ -32,7 +32,7 @@ class most_items implements renderable, templatable {
         return get_string('mostitems', 'block_stash');
     }
 
-    private function get_leaderboard_data() {
+    private function get_leaderboard_data($limit) {
         global $DB;
 
         $userids = $this->manager->get_userids_for_leaderboard();
@@ -51,7 +51,7 @@ class most_items implements renderable, templatable {
                    AND i.stashid = ?
               GROUP BY ui.userid, $fields
               ORDER BY num_items DESC";
-        return $DB->get_records_sql($sql, $idparams);
+        return $DB->get_records_sql($sql, $idparams, 0, $limit);
 
     }
 
@@ -71,7 +71,7 @@ class most_items implements renderable, templatable {
             return [];
         }
 
-        $result = $this->get_leaderboard_data();
+        $result = $this->get_leaderboard_data($settings['rowlimit']);
 
         if (!$result) {
             return [];
