@@ -182,6 +182,7 @@ $string['selectanitem'] = 'Select an item';
 $string['selectauser'] = 'Select a user';
 $string['sendtraderequest'] = 'Send trade request';
 $string['sent'] = 'Sent';
+$string['settingupdated'] = 'Setting updated';
 $string['settings'] = 'Settings';
 $string['setup'] = 'Setup';
 $string['shortcode:stashdrop'] = 'Displays an item for a user to pick up';
