@@ -1234,6 +1234,22 @@ class manager {
         return $this->config->$key ?? $default;
     }
 
+    public function set_config_entry(string $key, $value) {
+        global $DB;
+        if (!isset($this->config)) {
+            $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
+                        '*', MUST_EXIST);
+            $this->config = unserialize(base64_decode($record->configdata));
+        }
+        if (!isset($this->config->$key)) {
+            return false;
+        }
+        $this->config->$key = $value;
+        $record->configdata = base64_encode(serialize($this->config));
+        $DB->update_record('block_instances', $record);
+        return true;
+    }
+
     /**
      * Check if user item swapping is enabled for the Stash block instance in the current context.
      *
@@ -1304,13 +1320,21 @@ class manager {
         return $d;
     }
 
-    public function set_leaderboard_stuff() {
-        // Set stuff up.
+    public function delete_leaderboard_settings($boardname) {
+        global $DB;
+        $thing = $DB->sql_compare_text('boardname');
+        $where = "$thing = :boardname";
+        $DB->delete_records_select('block_stash_lb_settings', $where, ['boardname' => $boardname]);
+    }
+
+    public function set_leaderboard_stuff($data) {
+        global $DB;
+        $DB->insert_record('block_stash_lb_settings', $data);
     }
 
     public function get_leaderboard_settings() {
         global $DB;
 
-        $records = $DB->get_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);
+        return $DB->get_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);
     }
 }

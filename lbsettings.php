@@ -37,6 +37,7 @@ list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_lbsett
 
 
 $renderer = $PAGE->get_renderer('block_stash');
+$PAGE->requires->js_call_amd('block_stash/local/leaderboard/settings', 'init');
 
 echo $OUTPUT->header();
 
@@ -47,9 +48,36 @@ if (!empty($subtitle)) {
     echo $OUTPUT->heading($subtitle, 3);
 }
 
-$boards = $manager->get_leaderboards();
-print_object($boards);
+// $manager->delete_leaderboard_settings('block_stash\local\leaderboards\most_items');
 
-echo $OUTPUT->render_from_template('block_stash/local/leaderboard_settings/mainsettings', []);
+$settingsenabled = $manager->leaderboard_enabled();
+$lbgroups = $manager->leaderboard_groups_enabled();
+
+$boards = $manager->get_leaderboards();
+$boardsettings = $manager->get_leaderboard_settings();
+// print_object($boards);
+// print_object($boardsettings);
+
+$data = (object) ['courseid' => $courseid, 'lbenabled' => $settingsenabled, 'lbgroups' => $lbgroups, 'boards' => []];
+foreach($boards as $key => $value) {
+    $active = false;
+    $rowlimit = 5;
+    foreach($boardsettings as $boardvalues) {
+        if ($boardvalues->boardname == $key) {
+            $active = true;
+            $rowlimit = $boardvalues->rowlimit;
+        }
+    }
+    $data->boards[] = [
+        'id' => html_writer::random_id(),
+        'location' => $key,
+        'title' => $value,
+        'active' => $active,
+        'rowlimit' => $rowlimit
+    ];
+}
+// print_object($data);
+
+echo $OUTPUT->render_from_template('block_stash/local/leaderboard_settings/mainsettings', $data);
 
 echo $OUTPUT->footer();

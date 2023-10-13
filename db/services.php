@@ -149,4 +149,20 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_leaderboard_settings' => [
+        'classname'    => 'block_stash\\external\\leaderboard_settings',
+        'methodname'   => 'update_block_setting',
+        'description'  => 'Update leaderboard settings',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_leaderboard_update' => [
+        'classname'    => 'block_stash\\external\\leaderboard_settings',
+        'methodname'   => 'update_leaderboard_setting',
+        'description'  => 'Update leaderboard board settings',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

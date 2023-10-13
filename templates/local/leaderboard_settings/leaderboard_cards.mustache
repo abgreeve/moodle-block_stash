@@ -1,0 +1,41 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    Individual cards for leader boards
+
+    block_stash/local/leaderboard_settings/leaderboard_cards
+}}
+<div class="card mb-1">
+    <div class="card-body">
+        <h4 class="card-title">{{title}}</h4>
+        <div>
+            <div class="row custom-control custom-switch">
+                <input type="checkbox" class="block_stash-leaderboard custom-control-input"
+                    id="cS-leaderboard-{{id}}" data-courseid="{{courseid}}" data-location="{{location}}"
+                    {{#active}}checked="true"{{/active}}
+                >
+                <label class="custom-control-label" for="cS-leaderboard-{{id}}">Enable</label>
+            </div>
+            <div class="row">
+                <label class="form-label">Results limit</label>
+                <div class="col-sm-1">
+                    <input type="number" class="block_stash-leaderboard-limit form-control" min="1" value="{{rowlimit}}" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

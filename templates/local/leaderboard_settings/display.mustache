@@ -15,26 +15,15 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_stash/leaderboard
+    Leader boards display
 
-    The boady of the leaderboard shown in the block.
-
-    Example context (json):
-    {
-      "students": [
-        {
-          "name": "Foo",
-          "num_items": 12
-        },
-        {
-          "name": "Bar",
-          "num_items": 3
-        }
-      ]
-    }
+    block_stash/local/leaderboard_settings/display
 }}
-<ol>
+<div>
+    <h6 class="h5">{{title}}</h6>
+    <ol>
     {{#students}}
         <li>{{name}} ({{num_items}})</li>
     {{/students}}
-</ol>
+    </ol>
+</div>

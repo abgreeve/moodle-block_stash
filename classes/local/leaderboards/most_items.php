@@ -29,11 +29,11 @@ class most_items implements renderable, templatable {
     }
 
     public function get_title(): string {
-        return 'Most Items';
+        return get_string('mostitems', 'block_stash');
     }
 
-    function export_for_template(renderer_base $output) {
-        global $USER, $DB;
+    private function get_leaderboard_data() {
+        global $DB;
 
         $userids = $this->manager->get_userids_for_leaderboard();
 
@@ -51,18 +51,41 @@ class most_items implements renderable, templatable {
                    AND i.stashid = ?
               GROUP BY ui.userid, $fields
               ORDER BY num_items DESC";
-        $result = $DB->get_records_sql($sql, $idparams);
+        return $DB->get_records_sql($sql, $idparams);
+
+    }
+
+    private function get_settings() {
+        $allsettings = $this->manager->get_leaderboard_settings();
+        foreach ($allsettings as $value) {
+            if ($value->boardname == 'block_stash\local\leaderboards\most_items') {
+                return (array) $value;
+            }
+        }
+        return [];
+    }
+
+    public function export_for_template(renderer_base $output) {
+        $settings = $this->get_settings();
+        if (empty($settings)) {
+            return [];
+        }
+
+        $result = $this->get_leaderboard_data();
 
         if (!$result) {
-            return ['students'];
+            return [];
         }
+
+        $data = ['title' => $this->get_title()];
         foreach($result as $user) {
             $students[] = (object)[
                     'name' => fullname($user),
                     'num_items' => $user->num_items
             ];
         }
+        $data['students'] = $students;
 
-        return ['students' => $students];
+        return $data;
     }
 }
