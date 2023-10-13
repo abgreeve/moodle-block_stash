@@ -19,25 +19,31 @@
 
     block_stash/local/leaderboard_settings/mainsettings
 }}
-<!--// Display setting for turning leader boards on and off //-->
-<!--// Setting for group mode for leader boards //-->
-<!--// List of leader boards to enable / disable //-->
 <div class="container-fluid">
 
-    <div class="card">
+    <div class="card mb-5">
         <div class="card-body">
-            <h4 class="card-title">General settings</h4>
+            <h4 class="card-title">{{#str}}generalsettings, block_stash{{/str}}</h4>
             <div>
                 <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input" id="cS-leaderboard" checked="true">
-                  <label class="custom-control-label" for="cS-leaderboard">Show leaderboard</label>
+                    <input type="checkbox" class="block-stash-lbsetting custom-control-input" id="cS-leaderboard"
+                        data-courseid="{{courseid}}" {{#lbenabled}}checked="true"{{/lbenabled}}
+                    >
+                    <label class="custom-control-label" for="cS-leaderboard">{{#str}}leaderboard, block_stash{{/str}}</label>
                 </div>
                 <div class="custom-control custom-switch mt-2">
-                  <input type="checkbox" class="custom-control-input" id="cS-leaderboard-groups" checked="false">
-                  <label class="custom-control-label" for="cS-leaderboard-groups">Show only users from my groups in the leaderboard</label>
+                    <input type="checkbox" class="block-stash-lbgroups custom-control-input" id="cS-leaderboard-groups"
+                        data-courseid="{{courseid}}" {{#lbgroups}}checked="true"{{/lbgroups}}
+                    >
+                    <label class="custom-control-label" for="cS-leaderboard-groups">{{#str}}leaderboard_groups, block_stash{{/str}}
+                    </label>
                 </div>
             </div>
         </div>
     </div>
+
+    {{#boards}}
+        {{> block_stash/local/leaderboard_settings/leaderboard_cards}}
+    {{/boards}}
 
 </div>

@@ -69,10 +69,9 @@
 </div>
 {{#leaderboards_enabled}}
     <hr>
-    <h5>Leaderboards</h5>
+    <h5>{{#str}}leaderboards, block_stash{{/str}}</h5>
     {{#leaderboards}}
-        <h6>{{title}}</h6>
-        {{{html}}}
+        {{> block_stash/local/leaderboard_settings/display}}
     {{/leaderboards}}
 {{/leaderboards_enabled}}
 

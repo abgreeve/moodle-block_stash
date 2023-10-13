@@ -82,10 +82,7 @@ class block_content implements renderable, templatable {
             $d = [];
             foreach (array_keys($boards) as $board) {
                 $b = new $board($this->manager);
-                $d[] = [
-                        'html' => $output->render($b),
-                        'title' => $b->get_title()
-                ];
+                $d[] = $b->export_for_template($output);
             }
             $data['leaderboards'] = $d;
         }
