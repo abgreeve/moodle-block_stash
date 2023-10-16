@@ -1307,10 +1307,12 @@ class manager {
         return array_keys($userids);
     }
 
+    /**
+     * Get the board name and string for all of the leader boards.
+     *
+     * @return array The board name in the key and the string in the value.
+     */
     public function get_leaderboards(): array {
-        if (!$this->leaderboard_enabled()) {
-            return [];
-        }
         $boards = \core_component::get_component_classes_in_namespace('block_stash', 'local\leaderboards');
         $d = [];
         foreach (array_keys($boards) as $board) {
@@ -1320,14 +1322,24 @@ class manager {
         return $d;
     }
 
-    public function delete_leaderboard_settings($boardname) {
+    /**
+     * Delete the leader board setting using the boardname as a comparison.
+     *
+     * @param string $boardname The name of the board to delete.
+     */
+    public function delete_leaderboard_settings(string $boardname): void {
         global $DB;
         $thing = $DB->sql_compare_text('boardname');
         $where = "$thing = :boardname";
         $DB->delete_records_select('block_stash_lb_settings', $where, ['boardname' => $boardname]);
     }
 
-    public function set_leaderboard_stuff($data) {
+    /**
+     * Set the settings for a specified board.
+     *
+     * @param stdClass $data The data to set.
+     */
+    public function set_leaderboard_settings(stdClass $data): void {
         global $DB;
 
         $existing = $this->get_leaderboard_settings();
@@ -1341,7 +1353,12 @@ class manager {
         $DB->insert_record('block_stash_lb_settings', $data);
     }
 
-    public function get_leaderboard_settings() {
+    /**
+     * Get all leaderboard settings.
+     *
+     * @return array All of the leaderboard settings.
+     */
+    public function get_leaderboard_settings(): array {
         global $DB;
 
         return $DB->get_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);

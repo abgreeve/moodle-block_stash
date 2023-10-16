@@ -88,7 +88,7 @@ class leaderboard_settings extends external_api {
             'rowlimit' => $data->rowlimit
         ];
 
-        $manager->set_leaderboard_stuff($data);
+        $manager->set_leaderboard_settings($data);
 
         return true;
     }

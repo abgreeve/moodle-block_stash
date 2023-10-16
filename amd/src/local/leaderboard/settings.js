@@ -25,9 +25,8 @@ import Ajax from 'core/ajax';
 import {get_string as getString} from 'core/str';
 
 export const init = () => {
-    // window.console.log('hi from settings');
-    let temp = document.querySelector('.block-stash-lbsetting');
-    temp.addEventListener('change', (e) => {
+    let lbsetting = document.querySelector('.block-stash-lbsetting');
+    lbsetting.addEventListener('change', (e) => {
 
         let currenttarget = e.currentTarget;
         updateSetting(currenttarget.dataset.courseid, 'leaderboard', currenttarget.checked).then((result) => {
@@ -39,6 +38,14 @@ export const init = () => {
                 });
             }
         });
+
+        let mainboards = document.querySelector('.block_stash_lb_cards');
+        window.console.log(mainboards);
+        if (currenttarget.checked) {
+            mainboards.classList.remove('invisible');
+        } else {
+            mainboards.classList.add('invisible');
+        }
     });
 
     let lbgroupswitch = document.querySelector('.block-stash-lbgroups');
@@ -61,14 +68,14 @@ export const init = () => {
             let otherboardelement = e.currentTarget;
             let enabled = otherboardelement.checked;
 
-            let tmep = otherboardelement.parentNode.parentNode.querySelector('.block_stash-leaderboard-limit');
+            let boardlimit = otherboardelement.parentNode.parentNode.querySelector('.block_stash-leaderboard-limit');
             if (!enabled) {
-                tmep.setAttribute('disabled', true);
+                boardlimit.setAttribute('disabled', true);
             } else {
-                tmep.removeAttribute('disabled');
+                boardlimit.removeAttribute('disabled');
             }
 
-            updateLeaderboard(otherboardelement.dataset.courseid, otherboardelement.dataset.location, '', 'DESC', tmep.value,
+            updateLeaderboard(otherboardelement.dataset.courseid, otherboardelement.dataset.location, '', 'DESC', boardlimit.value,
                     enabled)
             .then((result) => {
                 if (result) {
@@ -88,9 +95,7 @@ export const init = () => {
             let currenttarget = e.currentTarget;
             let rowlimit = currenttarget.value;
             let otherthing = currenttarget.parentNode.parentNode.parentNode.querySelector('.block_stash-leaderboard');
-            window.console.log(otherthing);
-            window.console.log(rowlimit);
-            updateLeaderboard(otherthing.dataset.courseid, otherthing.dataset.location, '', 'DESC', rowlimit, true)
+             updateLeaderboard(otherthing.dataset.courseid, otherthing.dataset.location, '', 'DESC', rowlimit, true)
             .then((result) => {
                 if (result) {
                     addToast(getString('settingupdated', 'block_stash'), {
