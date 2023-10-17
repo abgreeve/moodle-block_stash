@@ -1241,10 +1241,11 @@ class manager {
                         '*', MUST_EXIST);
             $this->config = unserialize(base64_decode($record->configdata));
         }
-        if (!isset($this->config->$key)) {
-            return false;
+        if (!$this->config) {
+            $this->config = new stdClass();
         }
-        $this->config->$key = $value;
+
+        $this->config->{$key} = $value;
         $record->configdata = base64_encode(serialize($this->config));
         $DB->update_record('block_instances', $record);
         return true;
