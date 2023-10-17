@@ -5,6 +5,7 @@ Version 2.0.3 (TBA)
 -------------------
 
 * Added additional webservices to allow tiny_stash to create items, drops, and trades.
+* Fixed offers from other instances (different stash in a different course) being displayed. Now only offers for this course are shown.
 
 Version 2.0.2 (12 June 2023)
 ----------------------------
