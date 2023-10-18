@@ -1,4 +1,4 @@
-Block Stash ![GitHub tag](https://img.shields.io/github/tag/branchup/moodle-filter_shortcodesblock_stash.svg) ![Travis branch](https://img.shields.io/travis/branchup/moodle-block_stash/master.svg)
+Block Stash
 ===========
 
 Engage your students! Gamify your courses by hiding objects for your students to find.
@@ -10,7 +10,7 @@ Features
 - Hide objects throughout your course in any possible location
 - Set objects to automatically re-appear after a delay to boost engagement
 - Unlock access to activities based on the objects found (requires plugin [availability_stash](https://moodle.org/plugins/availability_stash))
-- Trade by exchanging items for different items (requires plugin [filter plugin](https://moodle.org/plugins/filter_stash))
+- Trade by exchanging items for different items (requires plugin [filter plugin](https://github.com/branchup/moodle-filter_shortcodes))
 - Allow students to trade items with each other in the trade center.
 
 Requirements
@@ -61,7 +61,7 @@ This [filter plugin](https://github.com/branchup/moodle-filter_shortcodes) makes
 
 This [availability plugin](https://moodle.org/plugins/availability_stash) allows to restrict the access to activity modules and resources based on the objects collected by a student.
 
-### Tiny stash
+### Tiny stash (Awaiting approval)
 
 This [tinyMCE editor plugin](https://moodle.org/plugins/tiny_stash) allows the user to add the items and trades to your course content using the TinyMCE editor.
 
