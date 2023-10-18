@@ -79,6 +79,7 @@ class leaderboard_settings extends external_api {
         $data = (object) [
             'stashid' => $manager->get_stash()->get_id(),
             'boardname' => $data->boardname,
+            'options' => $data->options,
             'sortorder' => $data->sortorder,
             'rowlimit' => $data->rowlimit
         ];

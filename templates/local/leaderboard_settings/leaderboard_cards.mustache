@@ -30,10 +30,12 @@
                 >
                 <label class="custom-control-label" for="cS-leaderboard-{{id}}">Enable</label>
             </div>
+            {{{optionshtml}}}
+            <input type="hidden" name="leaderboard-options-{{id}}" data-options="">
             <div class="row">
                 <label class="form-label">Results limit</label>
                 <div class="col-sm-1">
-                    <input type="number" class="block_stash-leaderboard-limit form-control" min="1" value="{{rowlimit}}"
+                    <input type="number" class="block_stash_change_element block_stash-leaderboard-limit form-control" min="1" value="{{rowlimit}}"
                         {{^active}}disabled{{/active}}
                     />
                 </div>

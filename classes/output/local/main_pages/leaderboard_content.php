@@ -46,7 +46,7 @@ class leaderboard_content implements renderable, templatable {
         $courseid = $this->manager->get_courseid();
 
         $data = (object) ['courseid' => $courseid, 'lbenabled' => $settingsenabled, 'lbgroups' => $lbgroups, 'boards' => []];
-        foreach($boards as $key => $value) {
+        foreach($boards as $key => $board) {
             $active = false;
             $rowlimit = 5;
             foreach($boardsettings as $boardvalues) {
@@ -55,10 +55,12 @@ class leaderboard_content implements renderable, templatable {
                     $rowlimit = $boardvalues->rowlimit;
                 }
             }
+            $id = html_writer::random_id();
             $data->boards[] = [
-                'id' => html_writer::random_id(),
+                'id' => $id,
                 'location' => $key,
-                'title' => $value,
+                'title' => $board->get_title(),
+                'optionshtml' => method_exists($board, 'options_html') ? $board->options_html($id) : '',
                 'active' => $active,
                 'rowlimit' => $rowlimit
             ];

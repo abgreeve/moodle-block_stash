@@ -40,7 +40,6 @@ export const init = () => {
         });
 
         let mainboards = document.querySelector('.block_stash_lb_cards');
-        window.console.log(mainboards);
         if (currenttarget.checked) {
             mainboards.classList.remove('invisible');
         } else {
@@ -74,9 +73,11 @@ export const init = () => {
             } else {
                 boardlimit.removeAttribute('disabled');
             }
+            const hiddenthing = otherboardelement.parentNode.parentNode.querySelector('input[type="hidden"]');
+            const options = hiddenthing.dataset.options;
 
-            updateLeaderboard(otherboardelement.dataset.courseid, otherboardelement.dataset.location, '', 'DESC', boardlimit.value,
-                    enabled)
+            updateLeaderboard(otherboardelement.dataset.courseid, otherboardelement.dataset.location, options, 'DESC',
+                boardlimit.value, enabled)
             .then((result) => {
                 if (result) {
                     addToast(getString('settingupdated', 'block_stash'), {
@@ -89,13 +90,15 @@ export const init = () => {
         });
     });
 
-    let rowlimits = document.querySelectorAll('.block_stash-leaderboard-limit');
+    let rowlimits = document.querySelectorAll('.block_stash_change_element');
     rowlimits.forEach((limit) => {
         limit.addEventListener('change', (e) => {
             let currenttarget = e.currentTarget;
-            let rowlimit = currenttarget.value;
             let otherthing = currenttarget.parentNode.parentNode.parentNode.querySelector('.block_stash-leaderboard');
-             updateLeaderboard(otherthing.dataset.courseid, otherthing.dataset.location, '', 'DESC', rowlimit, true)
+            let rowlimit = otherthing.parentNode.parentNode.querySelector('.block_stash-leaderboard-limit');
+            const hiddenthing = otherthing.parentNode.parentNode.querySelector('input[type="hidden"]');
+            const options = hiddenthing.dataset.options;
+            updateLeaderboard(otherthing.dataset.courseid, otherthing.dataset.location, options, 'DESC', rowlimit.value, true)
             .then((result) => {
                 if (result) {
                     addToast(getString('settingupdated', 'block_stash'), {
