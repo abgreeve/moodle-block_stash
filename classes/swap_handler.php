@@ -71,7 +71,7 @@ class swap_handler {
                   FROM {block_stash_swap} s
              LEFT JOIN {user} u ON s.initiator = u.id
              LEFT JOIN {user} ru ON s.receiver = ru.id
-                 WHERE s.id = :stashid
+                 WHERE s.stashid = :stashid
                    AND (s.receiver = :ruserid OR s.initiator = :iuserid)
                    AND (s.status IS NULL OR s.status = :viewed OR s.status = :completed)";
 
