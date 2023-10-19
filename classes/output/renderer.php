@@ -245,4 +245,10 @@ class renderer extends plugin_renderer_base {
         return parent::render_from_template('block_stash/local/swap/swap_requests', $data);
     }
 
+    public function render_leaderboard_settings(renderable $page) {
+        $data = $page->export_for_template($this);
+        $this->page->requires->js_call_amd('block_stash/local/leaderboard/settings', 'init');
+        return parent::render_from_template('block_stash/local/leaderboard_settings/mainsettings', $data);
+    }
+
 }

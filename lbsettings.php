@@ -18,7 +18,7 @@
  * Leader board settings page.
  *
  * @package    block_stash
- * @copyright  2016 Adrian Greeve <adriangreeve.com>
+ * @copyright  2023 Adrian Greeve <adriangreeve.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,12 +35,9 @@ $manager->require_manage();
 $url = new moodle_url('/blocks/stash/lbsettings.php', ['courseid' => $courseid]);
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_lbsettings($url, $manager);
 
-
 $renderer = $PAGE->get_renderer('block_stash');
-$PAGE->requires->js_call_amd('block_stash/local/leaderboard/settings', 'init');
 
 echo $OUTPUT->header();
-
 echo $OUTPUT->heading($title);
 echo $renderer->navigation($manager, 'leaderboards');
 
@@ -48,36 +45,6 @@ if (!empty($subtitle)) {
     echo $OUTPUT->heading($subtitle, 3);
 }
 
-// $manager->delete_leaderboard_settings('block_stash\local\leaderboards\most_items');
-
-$settingsenabled = $manager->leaderboard_enabled();
-$lbgroups = $manager->leaderboard_groups_enabled();
-
-$boards = $manager->get_leaderboards();
-$boardsettings = $manager->get_leaderboard_settings();
-// print_object($boards);
-// print_object($boardsettings);
-
-$data = (object) ['courseid' => $courseid, 'lbenabled' => $settingsenabled, 'lbgroups' => $lbgroups, 'boards' => []];
-foreach($boards as $key => $value) {
-    $active = false;
-    $rowlimit = 5;
-    foreach($boardsettings as $boardvalues) {
-        if ($boardvalues->boardname == $key) {
-            $active = true;
-            $rowlimit = $boardvalues->rowlimit;
-        }
-    }
-    $data->boards[] = [
-        'id' => html_writer::random_id(),
-        'location' => $key,
-        'title' => $value,
-        'active' => $active,
-        'rowlimit' => $rowlimit
-    ];
-}
-// print_object($data);
-
-echo $OUTPUT->render_from_template('block_stash/local/leaderboard_settings/mainsettings', $data);
-
+$lbsettingsdata = new \block_stash\output\local\main_pages\leaderboard_content($manager);
+echo $renderer->render_leaderboard_settings($lbsettingsdata);
 echo $OUTPUT->footer();
