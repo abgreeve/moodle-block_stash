@@ -49,6 +49,7 @@ class most_unique_items implements renderable, templatable {
                   JOIN {user} u ON u.id = ui.userid
                  WHERE u.id $idsql
                    AND i.stashid = ?
+                   AND ui.quantity <> 0
               GROUP BY ui.userid, $fields
               ORDER BY num_items DESC";
         return $DB->get_records_sql($sql, $idparams, 0, $limit);
