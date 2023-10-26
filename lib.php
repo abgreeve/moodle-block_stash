@@ -97,3 +97,21 @@ function block_stash_myprofile_navigation(\core_user\output\myprofile\tree $tree
     $tree->add_node($localnode);
 
 }
+
+function block_stash_before_footer() {
+    global $PAGE;
+    // redirect('http://www.google.com');
+    print_object('');
+    print_object('');
+    $tmep = $_SERVER['REQUEST_URI'];
+    print_object($tmep);
+    // print_object($PAGE->url->get_path(false));
+    // print_object($PAGE->url->params());
+
+    // check the cache that we have a match for this url.
+    // If so then fire the function to remove the quantity of the item.
+    // Fire off a JS modal to inform the student that they have lost items.
+
+    // db fields for item removal
+    // id, stashid, itemid, quantity, url, detail
+}
