@@ -101,10 +101,10 @@ function block_stash_myprofile_navigation(\core_user\output\myprofile\tree $tree
 function block_stash_before_footer() {
     global $PAGE;
     // redirect('http://www.google.com');
-    print_object('');
-    print_object('');
-    $tmep = $_SERVER['REQUEST_URI'];
-    print_object($tmep);
+    // print_object('');
+    // print_object('');
+    // $tmep = $_SERVER['REQUEST_URI'];
+    // print_object($tmep);
     // print_object($PAGE->url->get_path(false));
     // print_object($PAGE->url->params());
 

@@ -119,6 +119,12 @@ class items_table extends table_sql {
             get_string('addnewdrop', 'block_stash', $row->name)));
         $actions[] = $actionlink;
 
+        $url = new moodle_url('/blocks/stash/remove.php');
+        $url->params(['itemid' => $row->id, 'courseid' => $this->manager->get_courseid()]);
+        $actionlink = $OUTPUT->action_link($url, '', null, null, new pix_icon('t/less',
+            get_string('itemremoval', 'block_stash', $row->name)));
+        $actions[] = $actionlink;
+
         $action = new confirm_action(get_string('reallydeleteitem', 'block_stash'));
         $url = new moodle_url($this->baseurl);
         $url->params(['itemid' => $row->id, 'action' => 'delete', 'sesskey' => sesskey()]);

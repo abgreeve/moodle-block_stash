@@ -100,6 +100,7 @@ $string['itemimage'] = 'Image';
 $string['itemimage_help'] = 'This image will be used to display the item. The recommended size is 100x100 pixels.';
 $string['itemname'] = 'Item name';
 $string['itemname_help'] = 'The name of the item, this will be displayed to the students.';
+$string['itemremoval'] = 'Item removal';
 $string['items'] = 'Items';
 $string['itemslist'] = 'List of items';
 $string['locations'] = 'Locations';
