@@ -34,7 +34,26 @@ $manager = \block_stash\manager::get($courseid);
 $manager->require_enabled();
 $manager->require_manage();
 
-$url = new moodle_url('/blocks/stash/remove.php', ['courseid' => $manager->get_courseid(), 'removalid' => $removalid]);
+$url = new moodle_url('/blocks/stash/remove.php', ['courseid' => $manager->get_courseid(), 'itemid' => $itemid]);
+
+$item = $manager->get_item($itemid);
+
+$fileareaoptions = ['maxfiles' => 1];
+$editoroptions = ['noclean' => true, 'maxfiles' => -1, 'maxbytes' => $CFG->maxbytes, 'context' => $manager->get_context()];
+
+$customdata = [
+    'fileareaoptions' => $fileareaoptions,
+    'editoroptions' => $editoroptions,
+    'manager' => $manager,
+    'item' => $item,
+];
+
+$form = new \block_stash\form\removal($url, $customdata);
+
+if ($data = $form->get_data()) {
+    $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
+    $removalhelper->handle_form_data($data);
+}
 
 $pagetitle = 'Removal thing'; // Todo get_string()
 
@@ -47,5 +66,6 @@ echo $OUTPUT->heading($title, 2);
 echo $renderer->navigation($manager, 'items');
 echo $OUTPUT->heading($subtitle . $OUTPUT->help_icon('drops', 'block_stash'), 3); //  TODO Help is good. Update this to help with item removals.
 
+echo $form->display();
 
 echo $OUTPUT->footer();

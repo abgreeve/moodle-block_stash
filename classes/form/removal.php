@@ -32,20 +32,19 @@ use MoodleQuickForm;
 MoodleQuickForm::registerElementType('block_stash_integer', __DIR__ . '/integer.php', 'block_stash_form_integer');
 
 /**
- * Item drop form class.
+ * Item removal form.
  *
  * @package    block_stash
- * @copyright  2016 Frédéric Massart - FMCorz.net
+ * @copyright  2023 Adrian Greeve
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class removal extends \moodleform {
 
 
-    protected static $fieldstoremove = array('save', 'submitbutton');
-    protected static $foreignfields = array('saveandnext');
+    protected static $fieldstoremove = ['save', 'submitbutton'];
+    protected static $foreignfields = ['saveandnext'];
 
     public function definition() {
-        global $PAGE, $OUTPUT;
 
         $mform = $this->_form;
         $manager = $this->_customdata['manager'];
@@ -77,37 +76,31 @@ class removal extends \moodleform {
 
         // URL
         $mform->addElement('text', 'url', 'URL to match');
-        $mform->setType('url', PARAM_TEXT);
+        $mform->setType('url', PARAM_URL);
 
         // Detail.
-        if (isset($this->_customdata['modal']) && $this->_customdata['modal']) {
-            $mform->addElement('textarea', 'detail_text', get_string('itemdetail', 'block_stash'));
-            $mform->setType('detail_text', PARAM_TEXT);
-            $mform->addHelpButton('detail_text', 'itemdetail', 'block_stash');
-        } else {
-            $mform->addElement('editor', 'detail_editor', get_string('itemdetail', 'block_stash'), array('rows' => 10),
-                $this->_customdata['editoroptions']);
-            $mform->setType('detail_editor', PARAM_RAW);
-            $mform->addHelpButton('detail_editor', 'itemdetail', 'block_stash');
-        }
+        $mform->addElement('editor', 'detail_editor', get_string('itemdetail', 'block_stash'), ['rows' => 10],
+            $this->_customdata['editoroptions']);
+        $mform->setType('detail_editor', PARAM_RAW);
+        $mform->addHelpButton('detail_editor', 'itemdetail', 'block_stash');
 
         // This form is being displayed in a modal and has it's own submit buttons and save system.
-        if (isset($this->_customdata['modal']) && $this->_customdata['modal']) {
-            return;
-        }
+        // if (isset($this->_customdata['modal']) && $this->_customdata['modal']) {
+        //     return;
+        // }
 
         // Buttons.
         $buttonarray = [];
-        if (!$this->get_persistent()->get_id()) {
+        // if (!$this->get_persistent()->get_id()) {
             // Only for new items.
-            $buttonarray[] = &$mform->createElement('submit', 'saveandnext', get_string('saveandnext', 'block_stash'),
-                ['class' => 'form-submit']);
-            $buttonarray[] = &$mform->createElement('submit', 'save', get_string('savechanges', 'block_stash'));
-        } else {
-            $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges', 'block_stash'));
-        }
+            // $buttonarray[] = &$mform->createElement('submit', 'saveandnext', get_string('saveandnext', 'block_stash'),
+            //     ['class' => 'form-submit']);
+            // $buttonarray[] = &$mform->createElement('submit', 'save', get_string('savechanges', 'block_stash'));
+        // } else {
+            $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('savechanges', 'block_stash'));
+        // }
 
-        $buttonarray[] = &$mform->createElement('cancel');
+        $buttonarray[] = $mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }
