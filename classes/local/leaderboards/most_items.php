@@ -43,7 +43,7 @@ class most_items implements renderable, templatable {
         [$idsql, $idparams] = $DB->get_in_or_equal($userids);
         $idparams[] = $this->manager->get_stash()->get_id();
 
-        $sql = "SELECT $fields, ui.userid, SUM(ui.quantity) as num_items
+        $sql = "SELECT $fields, ui.userid, COALESCE(SUM(ui.quantity),0) as num_items
                   FROM {block_stash_user_items} ui
                   JOIN {block_stash_items} i ON i.id = ui.itemid
                   JOIN {user} u ON u.id = ui.userid
