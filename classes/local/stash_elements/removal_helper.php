@@ -24,6 +24,8 @@
 
 namespace block_stash\local\stash_elements;
 
+use block_stash\drop_pickup;
+
 class removal_helper {
 
     private $manager;
@@ -64,36 +66,47 @@ class removal_helper {
 
         // Is the item a scarce resource? If so it needs to be made available to everyone again.
         $item = $this->manager->get_item($removal->itemid);
+        $useritem = $this->manager->get_user_item($userid, $removal->itemid);
+        $removalquantity = $useritem->get_quantity();
         $itemlimit = $item->get_amountlimit();
         if ($itemlimit) {
             $currentamount = $item->get_currentamount();
             $maxamount = $itemlimit - $currentamount;
-            if ($removal->quantity > $maxamount) {
+            if ($maxamount == 0) {
+                // The item is already at the max amount, so we can't add any more.
+            } else  if ($removalquantity > $maxamount) {
                 $item->set_currentamount($maxamount);
             } else {
-                $item->set_currentamount($currentamount + $removal->quantity);
+                $item->set_currentamount($currentamount + $removalquantity);
             }
             $item->update();
-            // The user needs the ability to pick the scarce item back up again.
-            // For this the drop pickups need to have their pickup count updated, even though the item could have been acquired in
-            // a different way (such as a trade, or the teacher manually giving them one).
-            // Not that the drop pickup entry updates the pickup count and lastpickup (not a new entry)
-            $sql = "SELECT p.*
-                      FROM {block_stash_drop_pickups} p
-                      JOIN {block_stash_drops} d ON p.dropid = d.id
-                      JOIN {block_stash_items} i ON d.itemid = i.id
-                     WHERE i.id = :itemid AND p.userid = :userid";
-            $params = ['itemid' => $removal->itemid, 'userid' => $userid];
-            $records = $DB->get_records_sql($sql, $params);
-            $workingquantity = $removal->quantity;
-            foreach ($records as $record) {
-                $dp = drop_pickup::get_relation($record->dropid, $userid); // This is dumb. It's another DB query for the same info.
-                $pickupcount = $dp->get_pickupcount();
-
+        }
+        // The user needs the ability to pick the scarce item back up again.
+        // For this the drop pickups need to have their pickup count updated, even though the item could have been acquired in
+        // a different way (such as a trade, or the teacher manually giving them one).
+        // Not that the drop pickup entry updates the pickup count and lastpickup (not a new entry)
+        $sql = "SELECT p.*
+                  FROM {block_stash_drop_pickups} p
+                  JOIN {block_stash_drops} d ON p.dropid = d.id
+                  JOIN {block_stash_items} i ON d.itemid = i.id
+                 WHERE i.id = :itemid AND p.userid = :userid";
+        $params = ['itemid' => $removal->itemid, 'userid' => $userid];
+        $records = $DB->get_records_sql($sql, $params);
+        $workingquantity = $removal->quantity;
+        foreach ($records as $record) {
+            $dp = new drop_pickup($record->id, $record);
+            $pickupcount = $dp->get_pickupcount();
+            if ($workingquantity <= $pickupcount) {
+                $dp->set_pickupcount($pickupcount - $workingquantity);
+                $dp->update();
+                break;
+            } else {
+                $workingquantity = $workingquantity - $pickupcount;
+                $dp->set_pickupcount(0);
+                $dp->update();
             }
         }
 
-        $useritem = $this->manager->get_user_item($userid, $removal->itemid);
         if ($useritem->get_quantity() <= $removal->quantity) {
             // Remove this entry.
             $useritem->delete();

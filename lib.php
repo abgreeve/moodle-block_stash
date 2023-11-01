@@ -156,6 +156,7 @@ function block_stash_before_footer() {
         // print_object($action);
         // print_object($action->detail);
         $removalhelper->remove_user_item($action, $USER->id);
+        print_object('stuff will be removed');
     }
 
     // print_object($items);
