@@ -46,9 +46,25 @@ switch ($action) {
         break;
 }
 
+// Do some checks for plugins and provide a notification about new products.
+$filterplugins = core_component::get_plugin_list('filter');
+$nofilter = (!isset($filterplugins['shortcodes']));
+$tinyplugins = core_component::get_plugin_list('tiny');
+$notiny = (!isset($tinyplugins['stash']));
+
+$notiny = true;
+
+$notification = '';
+if ($nofilter && $notiny) {
+    $notification = $OUTPUT->notification(get_string('nofilterandnotiny', 'block_stash'), 'info');
+} else if ($notiny) {
+    $notification = $OUTPUT->notification(get_string('notiny', 'block_stash'), 'info');
+}
+
 $renderer = $PAGE->get_renderer('block_stash');
 echo $OUTPUT->header();
 
+echo $notification;
 echo $OUTPUT->heading($title);
 echo $renderer->navigation($manager, 'items');
 
