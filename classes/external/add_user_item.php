@@ -24,12 +24,6 @@
 
 namespace block_stash\external;
 
-require_once("$CFG->libdir/externallib.php");
-
-use external_api;
-use external_function_parameters;
-use external_value;
-
 class add_user_item extends external_api {
 
     /**

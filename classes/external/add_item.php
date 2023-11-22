@@ -24,11 +24,6 @@
 
 namespace block_stash\external;
 
-require_once("$CFG->libdir/externallib.php");
-
-use external_api;
-use external_function_parameters;
-use external_value;
 use block_stash\manager;
 use block_stash\external\item_exporter;
 

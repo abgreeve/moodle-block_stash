@@ -17,20 +17,8 @@
 namespace block_stash\external;
 
 use context_course;
-// use context_user;
-use external_api;
-use external_function_parameters;
-use external_value;
-use external_warnings;
-// use external_format_value;
-use external_single_structure;
-use external_multiple_structure;
 use stdClass;
 use moodle_url;
-
-defined('MOODLE_INTERNAL') || die;
-
-require_once("$CFG->libdir/externallib.php");
 
 /**
  * External swap item list
