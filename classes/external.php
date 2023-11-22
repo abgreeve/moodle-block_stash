@@ -25,18 +25,17 @@
 namespace block_stash;
 defined('MOODLE_INTERNAL') || die();
 
-require_once("$CFG->libdir/externallib.php");
 require_once("$CFG->libdir/grade/grade_scale.php");
 
 use context_course;
 use context_user;
 use coding_exception;
-use external_api;
-use external_function_parameters;
-use external_value;
-use external_format_value;
-use external_single_structure;
-use external_multiple_structure;
+use block_stash\external\external_api;
+use block_stash\external\external_function_parameters;
+use block_stash\external\external_value;
+use block_stash\external\external_format_value;
+use block_stash\external\external_single_structure;
+use block_stash\external\external_multiple_structure;
 use stdClass;
 
 use block_stash\external\item_exporter;
