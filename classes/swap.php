@@ -43,7 +43,7 @@ class swap {
 
     private $id;
     private $stashid;
-    private $intiator;
+    private $initiator;
     private $receiver;
     /** @var array $initatoritems an array of items */
     private $initiatoritems;
