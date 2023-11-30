@@ -71,11 +71,11 @@ class most_singular_item extends base {
         $html .= html_writer::start_tag('select', ['name' => 'msi_options', 'class' => 'block_stash_change_element form-control']);
 
         foreach ($options as $option) {
+            $attributes = ['value' => $option->get_id()];
             if ($option->get_id() == $selecteditemid) {
-                $html .= html_writer::tag('option', $option->get_name(), ['value' => $option->get_id(), 'selected' => true]);
-            } else {
-                $html .= html_writer::tag('option', $option->get_name(), ['value' => $option->get_id()]);
+                $attributes['selected'] = true;
             }
+            $html .= html_writer::tag('option', $option->get_name(), $attributes);
         }
         $html .= html_writer::end_tag('select');
         $html .= html_writer::end_div();
@@ -92,31 +92,11 @@ class most_singular_item extends base {
      */
     public function export_for_template(renderer_base $output): array {
         $settings = $this->get_settings();
-        if (empty($settings)) {
+        if (empty($settings) || empty($settings['options'])) {
             return [];
         }
-
-        if (empty($settings['options'])) {
-            return [];
-        }
-
         $this->set_itemid($settings['options']);
 
-        $result = $this->get_leaderboard_data($settings['rowlimit']);
-
-        if (!$result) {
-            return [];
-        }
-
-        $data = ['title' => $this->get_title()];
-        foreach($result as $user) {
-            $students[] = (object)[
-                    'name' => fullname($user),
-                    'num_items' => $user->num_items
-            ];
-        }
-        $data['students'] = $students;
-
-        return $data;
+        return parent::export_for_template($output);
     }
 }
