@@ -35,13 +35,8 @@ class most_singular_item extends base {
             return get_string('mostsingularitem', 'block_stash');
         }
         // Get item name
-        $items = $this->manager->get_items();
-        foreach ($items as $item) {
-            if ($item->get_id() == $this->itemid) {
-                return get_string('mostsingularitemname', 'block_stash', $item->get_name());
-            }
-        }
-        return get_string('mostsingularitem', 'block_stash');
+        $item = $this->manager->get_item($this->itemid);
+        return get_string('mostsingularitemname', 'block_stash', $item->get_name());
     }
 
     protected function get_leaderboard_data(int $limit): array {
