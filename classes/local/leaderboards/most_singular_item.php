@@ -17,18 +17,14 @@
 namespace block_stash\local\leaderboards;
 
 use block_stash\manager;
+use block_stash\local\leaderboard_base as base;
 use renderable;
 use renderer_base;
 use templatable;
 use html_writer;
 
-class most_singular_item implements renderable, templatable {
-    private manager $manager;
+class most_singular_item extends base {
     private int $itemid;
-
-    public function __construct($manager) {
-        $this->manager = $manager;
-    }
 
     public function set_itemid(int $itemid): void {
         $this->itemid = $itemid;
@@ -39,7 +35,7 @@ class most_singular_item implements renderable, templatable {
             return get_string('mostsingularitem', 'block_stash');
         }
         // Get item name
-        $items = $this->get_options_data();
+        $items = $this->manager->get_items();
         foreach ($items as $item) {
             if ($item->get_id() == $this->itemid) {
                 return get_string('mostsingularitemname', 'block_stash', $item->get_name());
@@ -48,50 +44,28 @@ class most_singular_item implements renderable, templatable {
         return get_string('mostsingularitem', 'block_stash');
     }
 
-    private function get_leaderboard_data($limit) {
+    protected function get_leaderboard_data(int $limit): array {
         global $DB;
 
-        $userids = $this->manager->get_userids_for_leaderboard();
-
-        $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
-        $fields = implode(',', array_map(fn($f) => "u.$f", $fields));
-
-        [$idsql, $idparams] = $DB->get_in_or_equal($userids);
-        $idparams[] = $this->manager->get_stash()->get_id();
-        $idparams[] = $this->itemid;
+        [$fields, $idsql, $idparams] = $this->get_base_leaderboard_sql_fields_and_params();
+        $idparams['itemid'] = $this->itemid;
 
         $sql = "SELECT $fields, ui.userid, ui.quantity as num_items
                   FROM {block_stash_user_items} ui
                   JOIN {block_stash_items} i ON i.id = ui.itemid
                   JOIN {user} u ON u.id = ui.userid
                  WHERE u.id $idsql
-                   AND i.stashid = ?
-                   AND i.id = ?
+                   AND i.stashid = :stashid
+                   AND i.id = :itemid
                    AND ui.quantity > 0
               ORDER BY num_items DESC";
         return $DB->get_records_sql($sql, $idparams, 0, $limit);
-
-    }
-
-    private function get_settings() {
-        $allsettings = $this->manager->get_leaderboard_settings();
-        foreach ($allsettings as $value) {
-            if ($value->boardname == 'block_stash\local\leaderboards\most_singular_item') {
-                return (array) $value;
-            }
-        }
-        return [];
-    }
-
-    public function get_options_data() {
-        // Return a list of all items for this stash.
-        return $this->manager->get_items();
     }
 
     public function options_html($id) {
         global $PAGE;
 
-        $options = $this->get_options_data();
+        $options = $this->manager->get_items();
         $selecteditemid = $this->get_settings()['options'] ?? $options[0]->get_id();
 
         $params = ['id' => $id, 'itemid' => $selecteditemid];
@@ -115,7 +89,13 @@ class most_singular_item implements renderable, templatable {
         return $html;
     }
 
-    public function export_for_template(renderer_base $output) {
+    /**
+     * Export for template.
+     *
+     * @param renderer_base $output Renderer.
+     * @return array context data for template.
+     */
+    public function export_for_template(renderer_base $output): array {
         $settings = $this->get_settings();
         if (empty($settings)) {
             return [];

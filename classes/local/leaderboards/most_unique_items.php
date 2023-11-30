@@ -17,77 +17,32 @@
 namespace block_stash\local\leaderboards;
 
 use block_stash\manager;
+use block_stash\local\leaderboard_base as base;
 use renderable;
 use renderer_base;
 use templatable;
 
-class most_unique_items implements renderable, templatable {
-    private manager $manager;
-
-    public function __construct($manager) {
-        $this->manager = $manager;
-    }
+class most_unique_items extends base {
 
     public function get_title(): string {
         return get_string('mostuniqueitems', 'block_stash');
     }
 
-    private function get_leaderboard_data($limit) {
+    protected function get_leaderboard_data(int $limit): array {
         global $DB;
 
-        $userids = $this->manager->get_userids_for_leaderboard();
-
-        $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
-        $fields = implode(',', array_map(fn($f) => "u.$f", $fields));
-
-        [$idsql, $idparams] = $DB->get_in_or_equal($userids);
-        $idparams[] = $this->manager->get_stash()->get_id();
+        [$fields, $idsql, $idparams] = $this->get_base_leaderboard_sql_fields_and_params();
 
         $sql = "SELECT $fields, ui.userid, COUNT(*) as num_items
                   FROM {block_stash_user_items} ui
                   JOIN {block_stash_items} i ON i.id = ui.itemid
                   JOIN {user} u ON u.id = ui.userid
                  WHERE u.id $idsql
-                   AND i.stashid = ?
+                   AND i.stashid = :stashid
                    AND ui.quantity <> 0
               GROUP BY ui.userid, $fields
               ORDER BY num_items DESC";
         return $DB->get_records_sql($sql, $idparams, 0, $limit);
 
-    }
-
-    private function get_settings() {
-        $allsettings = $this->manager->get_leaderboard_settings();
-        foreach ($allsettings as $value) {
-            if ($value->boardname == 'block_stash\local\leaderboards\most_unique_items') {
-                return (array) $value;
-            }
-        }
-        return [];
-    }
-
-    function export_for_template(renderer_base $output) {
-        $settings = $this->get_settings();
-        if (empty($settings)) {
-            return [];
-        }
-
-        $result = $this->get_leaderboard_data($settings['rowlimit']);
-
-        if (!$result) {
-            return [];
-        }
-
-        $data = ['title' => $this->get_title()];
-
-        foreach($result as $user) {
-            $students[] = (object)[
-                    'name' => fullname($user),
-                    'num_items' => $user->num_items
-            ];
-        }
-        $data['students'] = $students;
-
-        return $data;
     }
 }
