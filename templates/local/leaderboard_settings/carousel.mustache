@@ -1,0 +1,18 @@
+<div id="leaderBoardCarousel" class="carousel carousel-dark slide" data-interval="false" data-ride="carousel">
+    <div class="carousel-inner">
+        {{#leaderboards}}
+            {{> block_stash/local/leaderboard_settings/display}}
+        {{/leaderboards}}
+    </div>
+
+    {{#boardcontrols}}
+    <a class="block_stash-controls carousel-control-prev" href="#leaderBoardCarousel" role="button" data-slide="prev">
+        <span>{{#pix}}i/previous, core, {{#str}}previous, block_stash{{/str}}{{/pix}}</span>
+        <span class="sr-only">{{#str}}previous, block_stash{{/str}}</span>
+    </a>
+    <a class="block_stash-controls carousel-control-next" href="#leaderBoardCarousel" role="button" data-slide="next">
+        <span>{{#pix}}i/next, core, {{#str}}next, block_stash{{/str}}{{/pix}}</span>
+        <span class="sr-only">{{#str}}next, block_stash{{/str}}</span>
+    </a>
+    {{/boardcontrols}}
+</div>

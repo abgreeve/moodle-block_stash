@@ -70,9 +70,7 @@
 {{#leaderboards_enabled}}
     <hr>
     <h5>{{#str}}leaderboards, block_stash{{/str}}</h5>
-    {{#leaderboards}}
-        {{> block_stash/local/leaderboard_settings/display}}
-    {{/leaderboards}}
+    {{> block_stash/local/leaderboard_settings/carousel}}
 {{/leaderboards_enabled}}
 
 {{#js}}

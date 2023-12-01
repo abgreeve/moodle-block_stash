@@ -1317,7 +1317,7 @@ class manager {
         $boards = \core_component::get_component_classes_in_namespace('block_stash', 'local\leaderboards');
         $d = [];
         foreach (array_keys($boards) as $board) {
-            $d[$board] = new $board($this);
+            $d[$board] = new $board($this, false);
         }
         return $d;
     }

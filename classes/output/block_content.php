@@ -80,11 +80,18 @@ class block_content implements renderable, templatable {
             $data['leaderboards_enabled'] = true;
             $boards = \core_component::get_component_classes_in_namespace('block_stash', 'local\leaderboards');
             $d = [];
+            $active = true;
             foreach (array_keys($boards) as $board) {
-                $b = new $board($this->manager);
-                $d[] = $b->export_for_template($output);
+                $b = new $board($this->manager, $active);
+                $boarddata = $b->export_for_template($output);
+                if (empty($boarddata)) {
+                    continue;
+                }
+                $d[] = $boarddata;
+                $active = false;
             }
             $data['leaderboards'] = $d;
+            $data['boardcontrols'] = (count($data['leaderboards']) > 1);
         }
         return $data;
     }

@@ -247,3 +247,8 @@
 .block-stash-title-text {
     padding-right: 15px;
 }
+
+.block_stash-controls {
+    color: black !important;
+    top: unset !important;
+}

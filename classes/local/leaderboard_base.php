@@ -24,9 +24,11 @@ use templatable;
 abstract class leaderboard_base implements renderable, templatable {
 
     protected manager $manager;
+    protected bool $active;
 
-    public function __construct($manager) {
+    public function __construct($manager, $active) {
         $this->manager = $manager;
+        $this->active = $active;
     }
 
     /**
@@ -101,6 +103,7 @@ abstract class leaderboard_base implements renderable, templatable {
             ];
         }
         $data['students'] = $students;
+        $data['active'] = $this->active;
 
         return $data;
     }
