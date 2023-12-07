@@ -114,7 +114,9 @@ class swap_handler {
         global $DB;
 
         // Maybe cache this?
-        $result = $DB->count_records_select('block_stash_swap', 'status IS NULL AND receiver = :userid', ['userid' => $userid]);
+        $params = ['userid' => $userid, 'stashid' => $this->manager->get_stash()->get_id()];
+        $sql = 'status IS NULL AND receiver = :userid AND stashid = :stashid';
+        $result = $DB->count_records_select('block_stash_swap', $sql, $params);
         return $result;
     }
 
