@@ -52,8 +52,6 @@ $nofilter = (!isset($filterplugins['shortcodes']));
 $tinyplugins = core_component::get_plugin_list('tiny');
 $notiny = (!isset($tinyplugins['stash']));
 
-$notiny = true;
-
 $notification = '';
 if ($nofilter && $notiny) {
     $notification = $OUTPUT->notification(get_string('nofilterandnotiny', 'block_stash'), 'info');
