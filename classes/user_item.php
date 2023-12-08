@@ -204,4 +204,20 @@ class user_item extends persistent {
         return true;
     }
 
+    public function update_user_items($quantity, $version, $newversion) {
+        global $DB;
+
+        $sql = "UPDATE {" . self::TABLE . "}
+                   SET quantity = :quantity, version = :newversion
+                 WHERE id = :id AND version = :version";
+
+        $params = [
+            'quantity' => $quantity,
+            'id' => $this->get('id'),
+            'version' => $version,
+            'newversion' => $newversion
+        ];
+        $DB->execute($sql, $params);
+    }
+
 }

@@ -25,6 +25,7 @@
 namespace block_stash;
 
 use moodle_exception;
+use block_stash\user_item;
 
 class swap_handler {
 
@@ -203,20 +204,11 @@ class swap_handler {
             }
             // Add first then remove.
             // Step one check if we are going to be updating or inserting.
-            $itemdetails = ['itemid' => $item['useritem']->get_itemid(), 'userid' => $swap->get_receiver_id()];
-            $useritem = $DB->get_record('block_stash_user_items', $itemdetails);
+            $useritem = user_item::get_record(['itemid' => $item['useritem']->get_itemid(), 'userid' => $swap->get_receiver_id()]);
             if ($useritem) {
                 // Update.
-                $sql = "UPDATE {block_stash_user_items}
-                           SET quantity = :quantity, version = :newversion
-                         WHERE id = :id AND version = :version";
-                $params = [
-                    'quantity' => $useritem->quantity + $item['quantity'],
-                    'id' => $useritem->id,
-                    'version' => $useritem->version,
-                    'newversion' => $transactionhash
-                ];
-                $DB->execute($sql, $params);
+                $useritem->update_user_items($useritem->get_quantity() + $item['quantity'], $useritem->get_version(),
+                    $transactionhash);
             } else {
                 // Insert.
                 $data = (object) [
@@ -230,16 +222,8 @@ class swap_handler {
                 $DB->insert_record('block_stash_user_items', $data);
             }
             // Now remove.
-            $sql = "UPDATE {block_stash_user_items}
-                       SET quantity = :quantity, version = :newversion
-                     WHERE id = :id AND version = :version";
-            $params = [
-                'quantity' => $item['useritem']->get_quantity() - $item['quantity'],
-                'id' => $item['useritem']->get_id(),
-                'version' => $item['useritem']->get_version(),
-                'newversion' => $transactionhash
-            ];
-            $DB->execute($sql, $params);
+            $item['useritem']->update_user_items($item['useritem']->get_quantity() - $item['quantity'],
+                    $item['useritem']->get_version(), $transactionhash);
         }
         foreach ($receiveritems as $item) {
             // Check that the quantity is still fine.
@@ -250,20 +234,11 @@ class swap_handler {
             }
             // Add first then remove.
             // Step one check if we are going to be updating or inserting.
-            $useritemdetails = ['itemid' => $item['useritem']->get_itemid(), 'userid' => $swap->get_initiator_id()];
-            $useritem = $DB->get_record('block_stash_user_items', $useritemdetails);
+            $useritem = user_item::get_record(['itemid' => $item['useritem']->get_itemid(), 'userid' => $swap->get_initiator_id()]);
             if ($useritem) {
                 // Update.
-                $sql = "UPDATE {block_stash_user_items}
-                           SET quantity = :quantity, version = :newversion
-                         WHERE id = :id AND version = :version";
-                $params = [
-                    'quantity' => $useritem->quantity + $item['quantity'],
-                    'id' => $useritem->id,
-                    'version' => $useritem->version,
-                    'newversion' => $transactionhash
-                ];
-                $DB->execute($sql, $params);
+                $useritem->update_user_items($useritem->get_quantity() + $item['quantity'], $useritem->get_version(),
+                    $transactionhash);
             } else {
                 // Insert.
                 $data = (object) [
@@ -277,16 +252,8 @@ class swap_handler {
                 $DB->insert_record('block_stash_user_items', $data);
             }
             // Now remove.
-            $sql = "UPDATE {block_stash_user_items}
-                       SET quantity = :quantity, version = :newversion
-                     WHERE id = :id AND version = :version";
-            $params = [
-                'quantity' => $item['useritem']->get_quantity() - $item['quantity'],
-                'id' => $item['useritem']->get_id(),
-                'version' => $item['useritem']->get_version(),
-                'newversion' => $transactionhash
-            ];
-            $DB->execute($sql, $params);
+            $item['useritem']->update_user_items($item['useritem']->get_quantity() - $item['quantity'],
+                $item['useritem']->get_version(), $transactionhash);
         }
 
         // Do final query and then allow the commit.
