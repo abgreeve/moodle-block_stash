@@ -153,10 +153,19 @@ class swap_handler {
         $params = ['swapid' => $swapid];
 
         $records = $DB->get_records_sql($sql, $params);
+        $swapcount = $DB->count_records_select('block_stash_swap_detail', 'swapid = :swapid', $params);
 
         $myitems = [];
         $otheritems = [];
         $requestpossible = true;
+        if ($swapcount != count($records)) {
+            // TODO - could try to see if the user has aquired this item later with a different entry in the user item table.
+            // The teacher may have reset / deleted / returned the items which would result in a new entry with these items.
+            // Note that currently the only way for an item to disappear instead of having a quantity of zero is due to the teacher
+            // manually removing it from the report. Not a high impact piece to work on.
+            $requestpossible = false;
+        }
+
         foreach ($records as $record) {
             if ($record->quantity > $record->actualquantity) {
                 $requestpossible = false;
@@ -167,9 +176,6 @@ class swap_handler {
                 if (empty($record->userid)) {
                     // This request can no longer be fulfilled.
                     $requestpossible = false;
-
-                    // TODO - could try to see if the user has aquired this item later with a different entry in the user item table.
-                    // The teacher may have reset / deleted / returned the items which would result in a new entry with these items.
                 }
                 $otheritems[] = $record;
             }

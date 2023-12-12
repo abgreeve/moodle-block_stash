@@ -1,12 +1,13 @@
 Block Stash
 ===========
 
-Version 2.0.4 (TBA)
+Version 2.0.4 (TBD)
 -------------------
 
 * Add another leaderboard which shows a list of students with a specified item.
 * Fixed a bug that was showing all trade requests for a user over the whole site instead of just the course.
 * Leaderboard results are now shown in a carousel on the main stash block.
+* Fixed a bug where a trade would continue with one of the swap items deleted.
 
 Version 2.0.3 (20 October 2023)
 -------------------
