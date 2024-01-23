@@ -50,8 +50,8 @@ $customdata = [
 
 $form = new \block_stash\form\removal($url, $customdata);
 
+$removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
 if ($data = $form->get_data()) {
-    $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
     $removalhelper->handle_form_data($data);
 }
 

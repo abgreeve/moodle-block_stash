@@ -69,14 +69,15 @@ class removal extends \moodleform {
             $mform->addElement('select', 'itemid', get_string('item', 'block_stash'), $options);
         }
 
+        // Quiz
+        $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
+        $mform->addElement('select', 'quizcmid', 'Quiz', $removalhelper->get_quizzes_for_course());
+        $mform->setType('quizcmid', PARAM_INT);
+
         // Quantity
         $mform->addElement('block_stash_integer', 'quantity', get_string('quantity', 'block_stash'), ['style' => 'width: 4em;']);
         $mform->setType('quantity', PARAM_INT);
         $mform->addHelpButton('quantity', 'quantity', 'block_stash');
-
-        // URL
-        $mform->addElement('text', 'url', 'URL to match');
-        $mform->setType('url', PARAM_URL);
 
         // Detail.
         $mform->addElement('editor', 'detail_editor', get_string('itemdetail', 'block_stash'), ['rows' => 10],

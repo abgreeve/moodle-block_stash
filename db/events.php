@@ -15,17 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Forum event handler definition.
  *
- * @package    block_stash
- * @copyright  2016 Adrian Greeve <adrian@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package block_stash
+ * @category event
+ * @copyright 2024 Adrian Greeve
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2024019003;
-$plugin->requires  = 2022112802; // Moodle 4.1.2.
-$plugin->component = 'block_stash';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '2.0.3';
+// List of observers.
+$observers = [
+    [
+        'eventname' => '\mod_quiz\event\attempt_submitted',
+        'callback' => '\block_stash\observer::quiz_attempt_submitted'
+    ]
+];

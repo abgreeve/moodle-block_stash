@@ -491,19 +491,35 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2023100901, 'stash');
     }
 
-    if ($oldversion < 2023102001) {
+    if ($oldversion < 2024019002) {
+
+        // Define table block_stash_removal to be created.
+        $table = new xmldb_table('block_stash_removal');
+
+        // Adding fields to table block_stash_removal.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('stashid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('modulename', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('detail', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('detailformat', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+
+        // Adding keys to table block_stash_removal.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for block_stash_removal.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
 
         // Define table block_stash_remove_items to be created.
         $table = new xmldb_table('block_stash_remove_items');
 
         // Adding fields to table block_stash_remove_items.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('stashid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('removalid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('quantity', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-        $table->add_field('url', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('detail', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('detailformat', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+        $table->add_field('quantity', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
 
         // Adding keys to table block_stash_remove_items.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
@@ -514,7 +530,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         }
 
         // Stash savepoint reached.
-        upgrade_block_savepoint(true, 2023102001, 'stash');
+        upgrade_block_savepoint(true, 2024019002, 'stash');
     }
 
     return true;

@@ -102,6 +102,7 @@ function block_stash_before_footer() {
     global $PAGE, $USER;
 
     $context = $PAGE->context;
+    return;
 
     if ($context->contextlevel == CONTEXT_SYSTEM || $context->contextlevel == CONTEXT_COURSECAT || $context->contextlevel == CONTEXT_USER) {
         // Higher than course, return immediately.

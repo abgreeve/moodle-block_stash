@@ -34,23 +34,21 @@ class removal_helper {
         $this->manager = $manager;
     }
 
-    private function format_url($url): string {
-        // TODO check that it is a local url.
-        $murl = new \moodle_url($url);
-        return $murl->out_as_local_url(false);
-    }
-
     public function handle_form_data($data) {
         global $DB;
 
-        $url = $this->format_url($data->url);
         $dbdata = [
             'stashid' => $this->manager->get_stash()->get_id(),
-            'itemid' => $data->itemid,
-            'quantity' => $data->quantity,
-            'url' => $url,
+            'modulename' => 'quiz', // Need to update for other modules.
+            'cmid' => $data->quizcmid,
             'detail' => $data->detail_editor['text'],
             'detailformat' => $data->detail_editor['format']
+        ];
+        $removalid = $DB->insert_record('block_stash_removal', $dbdata);
+        $dbdata = [
+            'removalid' => $removalid,
+            'itemid' => $data->itemid,
+            'quantity' => $data->quantity
         ];
         $DB->insert_record('block_stash_remove_items', $dbdata);
     }
@@ -58,7 +56,18 @@ class removal_helper {
     public function get_all_removals() {
         global $DB;
 
-        return $DB->get_records('block_stash_remove_items', ['stashid' => $this->manager->get_stash()->get_id()]);
+        return $DB->get_records('block_stash_removal', ['stashid' => $this->manager->get_stash()->get_id()]);
+    }
+
+    public function get_removal_details($cmid) {
+        global $DB;
+
+        $sql = "SELECT ri.id, r.stashid, r.cmid, r.id as removalid, ri.itemid, ri.quantity
+                  FROM {block_stash_remove_items} ri
+                  JOIN {block_stash_removal} r ON r.id = ri.removalid
+                 WHERE r.cmid = :cmid";
+
+        return $DB->get_records_sql($sql, ['cmid' => $cmid]);
     }
 
     public function remove_user_item($removal, $userid) {
@@ -114,5 +123,17 @@ class removal_helper {
             $useritem->set_quantity($useritem->get_quantity() - $removal->quantity);
             $useritem->update();
         }
+    }
+
+    public function get_quizzes_for_course() {
+        $courseid = $this->manager->get_courseid();
+        $course = get_course($courseid);
+        $courseinstances = get_all_instances_in_course("quiz", $course);
+        $tmep = [];
+        foreach($courseinstances as $instance) {
+            $tmep[$instance->coursemodule] = $instance->name;
+        }
+        print_object($courseinstances);
+        return $tmep;
     }
 }
