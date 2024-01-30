@@ -26,7 +26,7 @@
 // List of observers.
 $observers = [
     [
-        'eventname' => '\mod_quiz\event\attempt_submitted',
-        'callback' => '\block_stash\observer::quiz_attempt_submitted'
+        'eventname' => '\mod_quiz\event\attempt_started',
+        'callback' => '\block_stash\observer::quiz_attempt_started'
     ]
 ];

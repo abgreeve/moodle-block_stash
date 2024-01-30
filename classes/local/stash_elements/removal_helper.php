@@ -70,6 +70,15 @@ class removal_helper {
         return $DB->get_records_sql($sql, ['cmid' => $cmid]);
     }
 
+    public function can_user_lose_removal_items($removals, $userid) {
+        foreach ($removals as $removal) {
+            if (!$this->manager->user_has_item_to_trade($removal->itemid, $removal->quantity, $userid)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function remove_user_item($removal, $userid) {
         global $DB;
 

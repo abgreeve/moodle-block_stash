@@ -170,6 +170,7 @@ $string['reallydeletedrop'] = 'Are you sure you want to delete this location?';
 $string['reallydeleteitem'] = 'Are you sure you want to delete this item?';
 $string['reallyresetstashof'] = 'Are you sure you want to completely reset the stash of {$a}?';
 $string['received'] = 'Received';
+$string['removals'] = 'Removals';
 $string['removeswapdetails'] = 'Do you want to remove the details of this trade?';
 $string['report'] = 'Report';
 $string['reportadditional'] = 'Advanced user item management';

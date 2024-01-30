@@ -24,6 +24,8 @@
 
 namespace block_stash;
 
+use core\notification;
+
 /**
  * Event observer for block_stash.
  */
@@ -34,10 +36,7 @@ class observer {
      *
      * @param \core\event\user_enrolment_deleted $event
      */
-    public static function quiz_attempt_submitted(\mod_quiz\event\attempt_submitted $event) {
-        global $DB;
-
-        // print_object($event);
+    public static function quiz_attempt_started(\mod_quiz\event\attempt_started $event) {
 
         // Is stash enabled in this course?
         $courseid = $event->courseid;
@@ -52,12 +51,16 @@ class observer {
         if (!$details) {
             return;
         }
-        // print_object($details);
+
+        // Check if removal is possible. If not then clean up attempt and redirect back to view.
+        if (!$removalhelper->can_user_lose_removal_items($details, $event->userid)) {
+            redirect(new \moodle_url('/mod/quiz/view.php', ['id' => $event->contextinstanceid]), 'You do not have enough stash items to take this quiz.');
+        }
+
         foreach ($details as $detail) {
             $removalhelper->remove_user_item($detail, $event->userid);
         }
 
+        notification::warning('Stash items removed');
     }
-
-
 }
