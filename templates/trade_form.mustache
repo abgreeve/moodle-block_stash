@@ -44,7 +44,8 @@
                         <input type="text" class="form-control" name="gain" value="{{#gain}}{{gain}}{{/gain}}" {{^gain}}placeholder="{{#str}}gain, block_stash{{/str}}"{{/gain}} style="width: 100%;" />
                         </div>
                     </div>
-                    <div class="row">
+                        {{>block_stash/local/trade/item_adder}}
+<!--                     <div class="row">
                         <div class="span2 col-sm-2">
                             <label >{{#str}}items, block_stash{{/str}}</label>
                         </div>
@@ -63,7 +64,7 @@
                         <div class="span12 col-sm-12" style="text-align: right;">
                             <div class='additem btn btn-secondary' data-type="gain" title="{{#str}}addnewtradeitem, block_stash{{/str}}" role="button" tabindex="0">{{#pix}}t/add, core{{/pix}}</div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <div class="span6 col-md-6">

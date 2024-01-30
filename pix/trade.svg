@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32.993973mm"
+   height="25.035072mm"
+   viewBox="0 0 32.993973 25.035072"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="trade.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient803"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop801" />
+    </linearGradient>
+    <marker
+       style="overflow:visible"
+       id="Arrow3-6"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Arrow3"
+       markerWidth="4.2071066"
+       markerHeight="7"
+       viewBox="0 0 4.2071068 7"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         id="arrow3-7"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient803"
+       id="linearGradient1694"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-0.29461094,0,0,-1,113.69813,152.16351)"
+       x1="27.408476"
+       y1="83.450851"
+       x2="123.88748"
+       y2="83.450851" />
+    <marker
+       style="overflow:visible"
+       id="Arrow3-6-5"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Arrow3"
+       markerWidth="4.2071066"
+       markerHeight="7"
+       viewBox="0 0 4.2071068 7"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         id="arrow3-7-6"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient803"
+       id="linearGradient2185"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.29461094,0,0,1,64.554479,-4.3051527)"
+       x1="27.408476"
+       y1="83.450851"
+       x2="123.88748"
+       y2="83.450851" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-72.629319,-61.411645)">
+    <path
+       style="fill:none;stroke:url(#linearGradient1694);stroke-width:2.086;stroke-dasharray:none;marker-end:url(#Arrow3-6)"
+       d="M 105.62329,68.712645 H 77.199527"
+       id="path799-5" />
+    <path
+       style="fill:none;stroke:url(#linearGradient2185);stroke-width:2.086;stroke-dasharray:none;marker-end:url(#Arrow3-6-5)"
+       d="M 72.629319,79.145717 H 101.05308"
+       id="path799-5-2" />
+  </g>
+</svg>

@@ -162,6 +162,12 @@ class renderer extends plugin_renderer_base {
             );
 
             $tabs[] = new tabobject(
+                'removals',
+                new moodle_url('/blocks/stash/removals.php', ['courseid' => $courseid]),
+                get_string('removals', 'block_stash')
+            );
+
+            $tabs[] = new tabobject(
                 'report',
                 new moodle_url('/blocks/stash/report.php', ['courseid' => $courseid]),
                 get_string('navreport', 'block_stash')
