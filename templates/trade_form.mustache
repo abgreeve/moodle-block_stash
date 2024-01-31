@@ -44,27 +44,7 @@
                         <input type="text" class="form-control" name="gain" value="{{#gain}}{{gain}}{{/gain}}" {{^gain}}placeholder="{{#str}}gain, block_stash{{/str}}"{{/gain}} style="width: 100%;" />
                         </div>
                     </div>
-                        {{>block_stash/local/trade/item_adder}}
-<!--                     <div class="row">
-                        <div class="span2 col-sm-2">
-                            <label >{{#str}}items, block_stash{{/str}}</label>
-                        </div>
-                    </div>
-
-                    <div class="block-stash-will-do-for-now">
-                        <table class="block_stash_item_box table table-hover" data-type="gain">
-                            <tbody>
-                            {{#additems}}
-                                {{>block_stash/trade_add_item_detail}}
-                            {{/additems}}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="row">
-                        <div class="span12 col-sm-12" style="text-align: right;">
-                            <div class='additem btn btn-secondary' data-type="gain" title="{{#str}}addnewtradeitem, block_stash{{/str}}" role="button" tabindex="0">{{#pix}}t/add, core{{/pix}}</div>
-                        </div>
-                    </div> -->
+                    {{>block_stash/local/trade/item_adder_gain}}
                 </div>
             </div>
             <div class="span6 col-md-6">
@@ -80,7 +60,8 @@
                         <input type="text" class="form-control" name="loss" value="{{#loss}}{{loss}}{{/loss}}" {{^loss}}placeholder="{{#str}}loss, block_stash{{/str}}"{{/loss}} style="width: 100%;" />
                         </div>
                     </div>
-                    <div class="row">
+                    {{>block_stash/local/trade/item_adder_loss}}
+                    <!-- <div class="row">
                         <div class="span2 col-sm-2">
                             <label >{{#str}}items, block_stash{{/str}}</label>
                         </div>
@@ -98,7 +79,7 @@
                         <div class="span12 col-sm-12" style="text-align: right;">
                             <div class='additem btn btn-secondary' data-type="loss" title="{{#str}}addnewtradeitem, block_stash{{/str}}" role="button" tabindex="0">{{#pix}}t/add, core{{/pix}}</div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -117,3 +98,8 @@
     </div>
     </form>
 </div>
+{{#js}}
+require(["block_stash/local/trade_adder/main"], function(TradeAdder) {
+    TradeAdder.init();
+});
+{{/js}}

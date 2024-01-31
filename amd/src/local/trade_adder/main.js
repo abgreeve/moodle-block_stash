@@ -1,3 +1,25 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Code to make the item selector work.
+ *
+ * @copyright  2024 Adrian Greeve
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 import Ajax from 'core/ajax';
 import Templates from 'core/templates';
 
@@ -8,39 +30,88 @@ export const init = async () => {
     let itemdata = await fetchItemData(courseid);
 
     // populate the list
-    let listnode = maindiv.querySelector('.dropdown-list ul');
+    let listelements = document.querySelectorAll('.dropdown-list');
+    listelements.forEach((listelement) => {
+        let listnode = listelement.querySelector('ul');
+        for (let item of itemdata.items) {
 
-    for (let item of itemdata.items) {
-        // window.console.log(item);
-        let listitem = document.createElement('li');
-        listitem.innerHTML = item.name;
-        listitem.dataset.itemid = item.id;
-        listitem.dataset.imgurl = item.imageurl;
-        listitem.addEventListener('click', addItemToTable);
-        listnode.appendChild(listitem);
-    }
+            let type = listelement.closest('.block_stash_item_box').dataset.type;
 
-    // window.console.log(listnode);
-    // window.console.log(itemdata);
+            let listitem = document.createElement('li');
+            listitem.innerHTML = item.name;
+            listitem.classList.add('dropdown-item');
+            listitem.setAttribute('tabindex', '0');
+            listitem.dataset.itemid = item.id;
+            listitem.dataset.imgurl = item.imageurl;
+            listitem.addEventListener('click', (e) => addItemToTable(e, type));
+            listitem.addEventListener('keyup', (e) => {
+                if (e.keyCode === 13) {
+                    addItemToTable(e, type);
+                }
+            });
+            listnode.appendChild(listitem);
+        }
+    });
 
-    let selector = document.querySelector('.item-adder-add');
-    selector.addEventListener('click', (e) => {
+    /**
+     * @param {Event} e
+     */
+    function toggleMenu(e) {
         let currentbutton = e.currentTarget;
         let dropdownlist = currentbutton.parentNode.querySelector('.dropdown-list');
         dropdownlist.style.display = (dropdownlist.style.display == 'none') ? 'block' : 'none';
+    }
+
+    let selectors = document.querySelectorAll('.item-adder-add');
+    selectors.forEach((selector) => {
+        selector.addEventListener('click', toggleMenu);
+        selector.addEventListener('keyup', (e) => {
+            if (e.keyCode === 13 || e.keyCode === 32) {
+                toggleMenu(e);
+            }
+        });
+    });
+
+    let searchboxes = document.querySelectorAll('.dropdown-search');
+    searchboxes.forEach((searchbox) => {
+        searchbox.addEventListener('keyup', (e) => {
+            let currentelement = e.currentTarget;
+            let dropdowncontainer = currentelement.closest('.dropdown-container');
+            let dropdownlist = dropdowncontainer.querySelector('.dropdown-list');
+            let searchterm = currentelement.value.toLowerCase();
+            let listitems = dropdownlist.querySelectorAll('.dropdown-item');
+            for (let item of listitems) {
+                let itemtext = item.innerText.toLowerCase();
+                if (itemtext.indexOf(searchterm) === -1) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'block';
+                }
+            }
+        });
     });
 
     document.addEventListener('mouseup', (e) => {
-        let dropdowncontainer = document.querySelector('.dropdown-container');
+        let searchboxes = document.querySelectorAll('.dropdown-search');
+        searchboxes.forEach((searchbox) => {
+            searchbox.value = '';
+        });
+        let dropdowncontainers = document.querySelectorAll('.dropdown-container');
         let currentelement = e.target;
-        let dropdownlist = dropdowncontainer.querySelector('.dropdown-list');
-        if (!dropdowncontainer.contains(currentelement)) {
-            dropdownlist.style.display = 'none';
-        }
+        dropdowncontainers.forEach((dropdowncontainer) => {
+            let dropdownlist = dropdowncontainer.querySelector('.dropdown-list');
+            if (!dropdowncontainer.contains(currentelement)) {
+                dropdownlist.style.display = 'none';
+                let listitems = dropdownlist.querySelectorAll('.dropdown-item');
+                for (let item of listitems) {
+                    item.style.display = 'block';
+                }
+            }
+        });
     });
 };
 
-const addItemToTable = (e) => {
+const addItemToTable = (e, typeinfo) => {
     let itemnode = e.currentTarget;
     let data = {
         itemid: itemnode.dataset.itemid,
@@ -49,7 +120,7 @@ const addItemToTable = (e) => {
         quantity: 1
     };
 
-    let type = 'gain';
+    let type = typeinfo;
 
     let templatename = (type === 'gain') ? 'block_stash/trade_add_item_detail' : 'block_stash/trade_loss_item_detail';
     Templates.render(templatename, data).done((html, js) => {
