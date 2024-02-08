@@ -1,0 +1,17 @@
+<div>
+    <div class="form-group">
+        <!-- Item selector -->
+        {{>block_stash/local/trade/item_adder_gain}}
+    </div>
+    <div class="form-group">
+        <!-- Quiz selector -->
+        <label for="quiz_selector">{{#str}}selectquiz, block_stash{{/str}}</label>
+        <select class="form-control block-stash-quiz-select" id="quiz_selector">
+            <option value="0">Select a quiz</option>
+            {{#quizzes}}
+                <option value="{{id}}">{{name}}</option>
+            {{/quizzes}}
+        </select>
+    </div>
+    <!-- Anything else? -->
+</div>

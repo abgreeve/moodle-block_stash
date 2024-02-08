@@ -165,4 +165,20 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_get_removal_activities' => [
+        'classname'    => 'block_stash\\external\\removal_activities',
+        'methodname'   => 'execute',
+        'description'  => 'Get activities to remove items for access',
+        'type'         => 'read',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_save_removal' => [
+        'classname'    => 'block_stash\\external\\save_removal',
+        'methodname'   => 'execute',
+        'description'  => 'Save an removal entry',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

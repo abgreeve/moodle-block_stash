@@ -1,0 +1,25 @@
+<p>Removals are currently limited to attempting the quiz activity. I think this needs more explanation</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Quiz name</th>
+            <th>Items removed</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#removals}}
+        <tr>
+            <td>{{cmname}}</td>
+            <td>
+                <ul>
+                    {{#items}}
+                    <li>{{name}} ({{quantity}})</li>
+                    {{/items}}
+                </ul>
+            </td>
+            <td><button class="btn btn-secondary" data-courseid="{{courseid}}" data-id="{{removalid}}">Edit</button></td>
+        </tr>
+        {{/removals}}
+    </tbody>
+</table>

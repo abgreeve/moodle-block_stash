@@ -45,12 +45,14 @@ class removal_helper {
             'detailformat' => $data->detail_editor['format']
         ];
         $removalid = $DB->insert_record('block_stash_removal', $dbdata);
-        $dbdata = [
-            'removalid' => $removalid,
-            'itemid' => $data->itemid,
-            'quantity' => $data->quantity
-        ];
-        $DB->insert_record('block_stash_remove_items', $dbdata);
+        foreach ($data->items as $item) {
+            $dbdata = [
+                'removalid' => $removalid,
+                'itemid' => $item['itemid'],
+                'quantity' => $item['quantity']
+            ];
+            $DB->insert_record('block_stash_remove_items', $dbdata);
+        }
     }
 
     public function get_all_removals() {
@@ -59,15 +61,28 @@ class removal_helper {
         return $DB->get_records('block_stash_removal', ['stashid' => $this->manager->get_stash()->get_id()]);
     }
 
+    public function get_the_full_whammy() {
+        global $DB;
+
+        $sql = "SELECT ri.id, r.stashid, r.cmid, r.id as removalid, ri.itemid, i.name, ri.quantity
+                  FROM {block_stash_remove_items} ri
+                  JOIN {block_stash_removal} r ON r.id = ri.removalid
+                  JOIN {block_stash_items} i ON i.id = ri.itemid
+                 WHERE r.stashid = :stashid";
+        return $DB->get_records_sql($sql, ['stashid' => $this->manager->get_stash()->get_id()]);
+
+    }
+
     public function get_removal_details($cmid) {
         global $DB;
 
         $sql = "SELECT ri.id, r.stashid, r.cmid, r.id as removalid, ri.itemid, ri.quantity
                   FROM {block_stash_remove_items} ri
                   JOIN {block_stash_removal} r ON r.id = ri.removalid
-                 WHERE r.cmid = :cmid";
+                 WHERE r.cmid = :cmid
+                   AND r.stashid = :stashid";
 
-        return $DB->get_records_sql($sql, ['cmid' => $cmid]);
+        return $DB->get_records_sql($sql, ['cmid' => $cmid, 'stashid' => $this->manager->get_stash()->get_id()]);
     }
 
     public function can_user_lose_removal_items($removals, $userid) {
@@ -142,7 +157,7 @@ class removal_helper {
         foreach($courseinstances as $instance) {
             $tmep[$instance->coursemodule] = $instance->name;
         }
-        print_object($courseinstances);
+        // print_object($courseinstances);
         return $tmep;
     }
 }
