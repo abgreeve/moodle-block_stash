@@ -25,6 +25,8 @@
 namespace block_stash\local\stash_elements;
 
 use block_stash\drop_pickup;
+use cache;
+use cache_store;
 
 class removal_helper {
 
@@ -36,6 +38,9 @@ class removal_helper {
 
     public function handle_form_data($data) {
         global $DB;
+
+        $cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'block_stash', 'removal_details');
+        $cache->delete($data->quizcmid);
 
         $dbdata = [
             'stashid' => $this->manager->get_stash()->get_id(),
@@ -78,13 +83,25 @@ class removal_helper {
     public function get_removal_details($cmid) {
         global $DB;
 
-        $sql = "SELECT ri.id, r.stashid, r.cmid, r.id as removalid, ri.itemid, ri.quantity
-                  FROM {block_stash_remove_items} ri
-                  JOIN {block_stash_removal} r ON r.id = ri.removalid
-                 WHERE r.cmid = :cmid
-                   AND r.stashid = :stashid";
+        $cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'block_stash', 'removal_details');
+        $data = $cache->get($cmid);
+        if ($data === false) {
+            $sql = "SELECT ri.id, ri.itemid, ri.quantity, i.name
+                      FROM {block_stash_remove_items} ri
+                      JOIN {block_stash_removal} r ON r.id = ri.removalid
+                      JOIN {block_stash_items} i ON ri.itemid = i.id
+                     WHERE r.cmid = :cmid
+                       AND r.stashid = :stashid";
 
-        return $DB->get_records_sql($sql, ['cmid' => $cmid, 'stashid' => $this->manager->get_stash()->get_id()]);
+            $removaldata = $DB->get_records_sql($sql, ['cmid' => $cmid, 'stashid' => $this->manager->get_stash()->get_id()]);
+            if (!$removaldata) {
+                $removaldata = [];
+            }
+            $cache->set($cmid, $removaldata);
+            $data = $removaldata;
+        }
+
+        return $data;
     }
 
     public function can_user_lose_removal_items($removals, $userid) {
@@ -165,6 +182,10 @@ class removal_helper {
 
     public function delete_removal_configuration($removalid) {
         global $DB;
+
+        $cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'block_stash', 'removal_details');
+        $cache->purge();
+
         // items
         $DB->delete_records('block_stash_remove_items', ['removalid' => $removalid]);
         // entry

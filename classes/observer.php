@@ -52,16 +52,31 @@ class observer {
             return;
         }
 
+        $tmep = array_map(function($detail) {
+            return \html_writer::tag('li', $detail->name . ' (' . $detail->quantity . ')');
+        }, $details);
+        // Horrible string that breaks rules:
+        $badstring = get_string('quiznotenoughitems', 'block_stash');
+        $badsubstring = \html_writer::start_tag('ul');
+        foreach ($tmep as $item) {
+            $badsubstring .= $item;
+        }
+        $badsubstring .= \html_writer::end_tag('ul');
+        $badstring .= $badsubstring;
+
         // Check if removal is possible. If not then clean up attempt and redirect back to view.
         if (!$removalhelper->can_user_lose_removal_items($details, $event->userid)) {
-            redirect(new \moodle_url('/mod/quiz/view.php', ['id' => $event->contextinstanceid]), 'You do not have enough stash items to take this quiz.');
+            redirect(new \moodle_url('/mod/quiz/view.php', ['id' => $event->contextinstanceid]), $badstring);
         }
 
         foreach ($details as $detail) {
             $removalhelper->remove_user_item($detail, $event->userid);
         }
 
-        notification::warning('Stash items removed');
+        $anotherbadstring = get_string('quizitemsremoved', 'block_stash');
+        $anotherbadstring .= $badsubstring;
+
+        notification::warning($anotherbadstring);
     }
 
     public static function quiz_module_viewed(\core\event\course_module_viewed $event) {
@@ -77,7 +92,12 @@ class observer {
         if (!$details) {
             return;
         }
+
+        if (!$manager->can_manage()) {
+            return;
+        }
+
         $url = new \moodle_url('/blocks/stash/removals.php', ['courseid' => $courseid]);
-        notification::info('This quiz is <a href="' . $url->out(false) . '">configured</a> to remove stash items');
+        notification::info(get_string('quizremovalconfigured', 'block_stash', $url->out(false)));
     }
 }
