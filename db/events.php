@@ -28,5 +28,9 @@ $observers = [
     [
         'eventname' => '\mod_quiz\event\attempt_started',
         'callback' => '\block_stash\observer::quiz_attempt_started'
+    ],
+    [
+        'eventname' => '\core\event\course_module_viewed',
+        'callback' => '\block_stash\observer::quiz_module_viewed'
     ]
 ];

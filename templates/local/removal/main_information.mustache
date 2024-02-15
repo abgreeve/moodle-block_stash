@@ -7,19 +7,9 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="block-stash-removal-body">
         {{#removals}}
-        <tr>
-            <td>{{cmname}}</td>
-            <td>
-                <ul>
-                    {{#items}}
-                    <li>{{name}} ({{quantity}})</li>
-                    {{/items}}
-                </ul>
-            </td>
-            <td><button class="btn btn-secondary" data-courseid="{{courseid}}" data-id="{{removalid}}">Edit</button></td>
-        </tr>
+            {{>block_stash/local/removal/table_row}}
         {{/removals}}
     </tbody>
 </table>

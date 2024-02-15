@@ -63,4 +63,21 @@ class observer {
 
         notification::warning('Stash items removed');
     }
+
+    public static function quiz_module_viewed(\core\event\course_module_viewed $event) {
+        $courseid = $event->courseid;
+        $manager = \block_stash\manager::get($courseid);
+        if (!$manager->is_enabled()) {
+            return;
+        }
+        // Do I have an entry for this quiz?
+        $removalhelper = new local\stash_elements\removal_helper($manager);
+        $details = $removalhelper->get_removal_details($event->contextinstanceid);
+
+        if (!$details) {
+            return;
+        }
+        $url = new \moodle_url('/blocks/stash/removals.php', ['courseid' => $courseid]);
+        notification::info('This quiz is <a href="' . $url->out(false) . '">configured</a> to remove stash items');
+    }
 }

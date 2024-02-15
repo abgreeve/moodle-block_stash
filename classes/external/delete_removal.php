@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External service for saving a removal entry.
+ * External service for deleting a removal entry.
  *
  * @package    block_stash\external
  * @copyright  2024 Adrian Greeve <adriangreeve.com>
@@ -27,23 +27,17 @@ namespace block_stash\external;
 use block_stash\manager;
 use block_stash\local\stash_elements\removal_helper;
 
-class save_removal extends external_api {
+class delete_removal extends external_api {
 
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT),
-            'cmid' => new external_value(PARAM_INT),
-            'items' => new external_multiple_structure(
-                new external_single_structure([
-                    'itemid' => new external_value(PARAM_INT),
-                    'quantity' => new external_value(PARAM_INT),
-                ])
-            ),
+            'removalid' => new external_value(PARAM_INT),
         ]);
     }
 
-    public static function execute($courseid, $cmid, $items) {
-        $data = (object) self::validate_parameters(self::execute_parameters(), compact('courseid', 'cmid', 'items'));
+    public static function execute($courseid, $removalid) {
+        $data = (object) self::validate_parameters(self::execute_parameters(), compact('courseid', 'removalid'));
 
         $manager = manager::get($data->courseid);
         self::validate_context($manager->get_context());
@@ -53,18 +47,12 @@ class save_removal extends external_api {
 
         $removalhelper = new removal_helper($manager);
 
-        $formdata = (object) [
-            'quizcmid' => $data->cmid,
-            'detail_editor' => ['text' => 'Placeholder for possible text', 'format' => 1],
-            'items' => $data->items
-        ];
+        $removalhelper->delete_removal_configuration($data->removalid);
 
-        $removalid = $removalhelper->handle_form_data($formdata);
-        return $removalid;
-
+        return true;
     }
 
     public static function execute_returns() {
-        return new external_value(PARAM_INT);
+        return new external_value(PARAM_BOOL);
     }
 }

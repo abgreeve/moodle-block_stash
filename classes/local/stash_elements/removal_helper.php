@@ -53,6 +53,7 @@ class removal_helper {
             ];
             $DB->insert_record('block_stash_remove_items', $dbdata);
         }
+        return $removalid;
     }
 
     public function get_all_removals() {
@@ -73,6 +74,7 @@ class removal_helper {
 
     }
 
+    // Cache this so that we don't have to constantly do DB calls.
     public function get_removal_details($cmid) {
         global $DB;
 
@@ -159,5 +161,13 @@ class removal_helper {
         }
         // print_object($courseinstances);
         return $tmep;
+    }
+
+    public function delete_removal_configuration($removalid) {
+        global $DB;
+        // items
+        $DB->delete_records('block_stash_remove_items', ['removalid' => $removalid]);
+        // entry
+        $DB->delete_records('block_stash_removal', ['id' => $removalid]);
     }
 }

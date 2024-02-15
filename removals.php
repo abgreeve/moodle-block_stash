@@ -25,6 +25,7 @@
 require_once(__DIR__ . '/../../config.php');
 
 $courseid = required_param('courseid', PARAM_INT);
+$removalid = optional_param('removalid', null, PARAM_INT);
 
 require_login($courseid);
 
@@ -32,7 +33,11 @@ $manager = \block_stash\manager::get($courseid);
 $manager->require_enabled();
 $manager->require_manage();
 
-// $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
+if (isset($removalid)) {
+    $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
+    $removalhelper->delete_removal_configuration($removalid);
+}
+
 // $quizzes = $removalhelper->get_quizzes_for_course();
 // print_object('');
 // print_object('');

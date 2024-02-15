@@ -259,8 +259,7 @@ class renderer extends plugin_renderer_base {
 
     public function render_removals(renderable $page) {
         $data = $page->export_for_template($this);
-        // print_object($data['removals'][0]['courseid']);
-        $this->page->requires->js_call_amd('block_stash/local/removals/main', 'init', [$data['removals'][0]['courseid']]);
+        $this->page->requires->js_call_amd('block_stash/local/removals/main', 'init', [$data['courseid']]);
         return parent::render_from_template('block_stash/local/removal/main_information', $data);
     }
 

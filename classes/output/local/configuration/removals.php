@@ -27,6 +27,10 @@ namespace block_stash\output\local\configuration;
 use renderable;
 use renderer_base;
 use templatable;
+use confirm_action;
+use moodle_url;
+use action_link;
+use pix_icon;
 
 class removals implements renderable, templatable {
 
@@ -45,13 +49,20 @@ class removals implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $data = [];
         $data['removals'] = [];
+        $data['courseid'] = $this->manager->get_courseid();
         $removalhelper = new \block_stash\local\stash_elements\removal_helper($this->manager);
         $tmepper = $removalhelper->get_the_full_whammy();
         $newsuperdata = [];
         foreach ($tmepper as $tmepp) {
+
+
+
             // print_object($tmepp);
             if (!isset($newsuperdata[$tmepp->removalid])) {
                 [$course, $cm] = get_course_and_cm_from_cmid($tmepp->cmid, 'quiz');
+                $action = new confirm_action(get_string('reallydeleteitem', 'block_stash'));
+                $url = new moodle_url('removals.php', ['courseid' => $course->id, 'removalid' => $tmepp->removalid]);
+                $actionlink = new action_link($url, '',$action, [], new pix_icon('t/delete', 'delete thing'));
                 $thestuff = [
                     'removalid' => $tmepp->removalid,
                     'cmid' => $tmepp->cmid,
@@ -63,7 +74,8 @@ class removals implements renderable, templatable {
                             'name' => $tmepp->name,
                             'quantity' => $tmepp->quantity
                         ]
-                    ]
+                    ],
+                    'deleteaction' => $actionlink->export_for_template($output)
                 ];
                 $newsuperdata[$tmepp->removalid] = $thestuff;
             } else {
@@ -73,6 +85,7 @@ class removals implements renderable, templatable {
                     'quantity' => $tmepp->quantity
                 ];
             }
+
         }
         $data['removals'] = array_values($newsuperdata);
         // print_object(array_values($newsuperdata));

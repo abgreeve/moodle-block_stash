@@ -181,4 +181,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_delete_removal' => [
+        'classname'    => 'block_stash\\external\\delete_removal',
+        'methodname'   => 'execute',
+        'description'  => 'Delete an removal entry',
+        'type'         => 'delete',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];
