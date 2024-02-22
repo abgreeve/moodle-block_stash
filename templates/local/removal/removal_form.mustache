@@ -9,9 +9,12 @@
         <select class="form-control block-stash-quiz-select" id="quiz_selector">
             <option value="0">Select a quiz</option>
             {{#quizzes}}
-                <option value="{{id}}">{{name}}</option>
+                <option value="{{id}}" {{#selected}}selected="{{selected}}"{{/selected}}>{{name}}</option>
             {{/quizzes}}
         </select>
+        {{#removalid}}
+        <input type="hidden" name="removal" id="block_stash_removal_id" data-id="{{removalid}}" />
+        {{/removalid}}
     </div>
     <!-- Anything else? -->
 </div>

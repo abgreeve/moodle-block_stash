@@ -3,20 +3,45 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import * as tradeAdder from 'block_stash/local/trade_adder/main';
 import Ajax from 'core/ajax';
+import * as getItems from 'block_stash/local/datasources/items-getter';
 
-const showModal = async(courseid) => {
-    const modal = await buildModal(courseid);
+const showModal = async(courseid, editdetails = []) => {
+    const modal = await buildModal(courseid, editdetails);
     displayModal(modal, courseid);
 };
 
-const buildModal = async(courseid) => {
+const buildModal = async(courseid, editdetails) => {
 
     // Fetch quizzes.
-    let quizzes = await fetchItemData(courseid);
+    let quizzes = await fetchQuizData(courseid);
 
-    // let items = await Item.getItem(itemId);
-    // let context = items.getData();
+    quizzes.activities.forEach((quiz) => {
+        quiz['selected'] = false;
+        if (editdetails.length !== 0) {
+            if (quiz.id == editdetails.quizid) {
+                quiz['selected'] = true;
+            }
+        }
+    });
+
     let context = {'courseid': courseid, 'quizzes': quizzes.activities};
+    if (editdetails.length !== 0) {
+        let allitems = await getItems.getIndexedItems(courseid);
+        let additemsdata = [];
+        editdetails.items.forEach((item) => {
+            additemsdata.push(
+                {
+                    'itemid': item.itemid,
+                    'name': allitems[item.itemid].name,
+                    'quantity': item.quantity,
+                    'imageurl': allitems[item.itemid].imageurl
+                }
+            );
+        });
+        context['additems'] = additemsdata;
+        context['removalid'] = editdetails.removalid;
+    }
+    window.console.log(context);
 
     return ModalFactory.create({
         title: context.name,
@@ -29,6 +54,7 @@ const displayModal = async(modal, courseid) => {
 
     modal.getRoot().on(ModalEvents.bodyRendered, () => {
         tradeAdder.init();
+        tradeAdder.registerActions();
     });
 
     modal.getRoot().on(ModalEvents.save, () => {
@@ -64,16 +90,19 @@ const saveData = async (courseid) => {
     let cmid = quizselect.value;
     let removalid = await saveRemovalEntry(courseid, parseInt(cmid), items);
     let context = {
+        'cmid': cmid,
         'cmname': quizselect.item(quizselect.selectedIndex).text,
         'courseid': courseid,
         'removalid': removalid,
-        'items': returnitemdata
+        'items': returnitemdata,
+        'editinfo': JSON.stringify(items)
     };
     // window.console.log(context);
     Templates.render('block_stash/local/removal/table_row', context).then((html, js) => {
         let tableobject = document.querySelector('.block-stash-removal-body');
         let things = Templates.appendNodeContents(tableobject, html, js);
         registerDeleteEvent(courseid, things[0].querySelector('.block-stash-removal-icon'));
+        registerEditEvent(courseid, things[0].querySelector('.block-stash-removal-edit'));
     });
 };
 
@@ -91,6 +120,15 @@ const registerDeleteEvent = (courseid, deleteobject) => {
     });
 };
 
+const registerEditEvent = (courseid, editobject) => {
+    editobject.addEventListener('click', (e) => {
+        e.preventDefault();
+        let jsondata = JSON.parse(editobject.dataset.json);
+        let details = {'removalid': editobject.dataset.id, 'quizid': editobject.dataset.quiz, 'items': jsondata};
+        showModal(courseid, details);
+    });
+};
+
 export const init = (courseid) => {
 
     let configbutton = document.querySelector('.block-config-removal');
@@ -103,9 +141,20 @@ export const init = (courseid) => {
     deletebutton.forEach((deleteobject) => {
         registerDeleteEvent(courseid, deleteobject);
     });
+
+    let editbutton = document.querySelectorAll('.block-stash-removal-edit');
+    editbutton.forEach((editobject) => {
+        registerEditEvent(courseid, editobject);
+        // editobject.addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     let jsondata = JSON.parse(editobject.dataset.json);
+        //     let details = {'removalid': editobject.dataset.id, 'quizid': editobject.dataset.quiz, 'items': jsondata};
+        //     showModal(courseid, details);
+        // });
+    });
 };
 
-const fetchItemData = (courseid) => Ajax.call([{
+const fetchQuizData = (courseid) => Ajax.call([{
     methodname: 'block_stash_get_removal_activities',
     args: {courseid: courseid}
 }])[0];

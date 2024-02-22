@@ -1,0 +1,24 @@
+<thead class="thead-light">
+    <tr>
+        <th style="width: 70%;">{{#str}}items, block_stash{{/str}}</th>
+        <th colspan="2" class="">
+
+            <div class="dropdown-container d-flex">
+                <div class="btn btn-secondary dropdown-button noselect item-adder-add" tabindex="0" role="button">
+                    <!-- <div class="dropdown-label">Items</div> -->
+                    <i class="fa fa-plus"></i>
+                </div>
+                <div class="dropdown-list dropdown-menu p-2 wide show" style="display: none; position: absolute; transform: translate3d(0px, 35px, 0px); top: auto; left: auto; will-change: transform;">
+                    <input type="search" placeholder="{{#str}}searchitems, block_stash{{/str}}" class="form-control withclear rounded dropdown-search"/>
+                    <ul class="list-group">
+                    </ul>
+                </div>
+            </div>
+        </th>
+    </tr>
+</thead>
+<tbody>
+{{#lossitems}}
+    {{>block_stash/trade_add_item_detail}}
+{{/lossitems}}
+</tbody>

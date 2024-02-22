@@ -20,14 +20,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import Ajax from 'core/ajax';
 import Templates from 'core/templates';
+import * as getItems from 'block_stash/local/datasources/items-getter';
 
 export const init = async () => {
     // Fetch items to populate the select box.
     let maindiv = document.querySelector('.block-stash-item-adder');
     let courseid = maindiv.dataset.courseId;
-    let itemdata = await fetchItemData(courseid);
+    let itemdata = await getItems.getItems(courseid);
 
     // populate the list
     let listelements = document.querySelectorAll('.dropdown-list');
@@ -130,7 +130,7 @@ const addItemToTable = (e, typeinfo) => {
     });
 };
 
-const registerActions = () => {
+export const registerActions = () => {
     let deleteelements = document.getElementsByClassName('block-stash-delete-item');
     for (let delement of deleteelements) {
         delement.addEventListener('click', deleteItem);
@@ -143,8 +143,3 @@ const deleteItem = (element) => {
     parent.remove();
     element.preventDefault();
 };
-
-const fetchItemData = (courseid) => Ajax.call([{
-    methodname: 'block_stash_get_items',
-    args: {courseid: courseid}
-}])[0];

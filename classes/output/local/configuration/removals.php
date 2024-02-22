@@ -40,6 +40,12 @@ class removals implements renderable, templatable {
         $this->manager = $manager;
     }
 
+    private function add_to_jsondata($item, $quantity, $jsondata) {
+        $data = json_decode($jsondata);
+        $data[] = ['itemid' => $item, 'quantity' => $quantity];
+        return json_encode($data);
+    }
+
     /**
      * Export for template.
      *
@@ -53,9 +59,8 @@ class removals implements renderable, templatable {
         $removalhelper = new \block_stash\local\stash_elements\removal_helper($this->manager);
         $tmepper = $removalhelper->get_the_full_whammy();
         $newsuperdata = [];
+        $jsondata = [];
         foreach ($tmepper as $tmepp) {
-
-
 
             // print_object($tmepp);
             if (!isset($newsuperdata[$tmepp->removalid])) {
@@ -63,6 +68,11 @@ class removals implements renderable, templatable {
                 $action = new confirm_action(get_string('reallydeleteitem', 'block_stash'));
                 $url = new moodle_url('removals.php', ['courseid' => $course->id, 'removalid' => $tmepp->removalid]);
                 $actionlink = new action_link($url, '',$action, [], new pix_icon('t/delete', 'delete thing'));
+                if (isset($jsondata[$tmepp->removalid])) {
+                    $jsondata[$tmepp->removalid] = $this->add_to_jsondata($tmepp->itemid, $tmepp->quantity, $jsondata[$tmepp->removalid]);
+                } else {
+                    $jsondata[$tmepp->removalid] = $this->add_to_jsondata($tmepp->itemid, $tmepp->quantity, json_encode([]));
+                }
                 $thestuff = [
                     'removalid' => $tmepp->removalid,
                     'cmid' => $tmepp->cmid,
@@ -75,15 +85,22 @@ class removals implements renderable, templatable {
                             'quantity' => $tmepp->quantity
                         ]
                     ],
+                    'editinfo' => $jsondata[$tmepp->removalid],
                     'deleteaction' => $actionlink->export_for_template($output)
                 ];
                 $newsuperdata[$tmepp->removalid] = $thestuff;
             } else {
+                if (isset($jsondata[$tmepp->removalid])) {
+                    $jsondata[$tmepp->removalid] = $this->add_to_jsondata($tmepp->itemid, $tmepp->quantity, $jsondata[$tmepp->removalid]);
+                } else {
+                    $jsondata[$tmepp->removalid] = $this->add_to_jsondata($tmepp->itemid, $tmepp->quantity, []);
+                }
                 $newsuperdata[$tmepp->removalid]['items'][] = [
                     'itemid' => $tmepp->itemid,
                     'name' => $tmepp->name,
                     'quantity' => $tmepp->quantity
                 ];
+                $newsuperdata[$tmepp->removalid]['editinfo'] = $jsondata[$tmepp->removalid];
             }
 
         }
