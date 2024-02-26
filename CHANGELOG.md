@@ -12,6 +12,7 @@ Version 2.1.0 (TBD)
 * Added the ability to remove stash items for attempting a quiz. This is currently for quiz only.
 * Added backup and restore of removal configurations.
 * When deleting a course, stash tables are now correctly purged.
+* Fixed error on leaderboard settings page when no items have been created.
 
 Version 2.0.3 (20 October 2023)
 -------------------

@@ -131,6 +131,7 @@ $string['nofilterandnotiny'] = '📢 Did you know there is a new plugin for the 
 $string['noitems'] = 'No items selected';
 $string['noitemstotrade'] = 'You have no items to trade';
 $string['nomorescarceitems'] = 'The maximum number of this item has already been allocated. Consider upping the scarcity amount of this item.';
+$string['nosingularitem'] = 'Please add at least one item to use this leaderboard';
 $string['notiny'] = '📢 Did you know there is a new plugin for the TinyMCE editor that makes creating items and trades much easier? Download and install the <a href="https://moodle.org/plugins/tiny_stash">TinyMCE plugin tiny stash</a> to vastly improve your stash creation experience. A preview video is available via the previous link.';
 $string['notrecorded'] = 'Not recorded';
 $string['number'] = 'Number';

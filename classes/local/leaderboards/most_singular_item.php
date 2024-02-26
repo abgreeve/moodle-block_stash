@@ -61,6 +61,10 @@ class most_singular_item extends base {
         global $PAGE;
 
         $options = $this->manager->get_items();
+        if (empty($options)) {
+            return get_string('nosingularitem', 'block_stash');
+        }
+
         $selecteditemid = $this->get_settings()['options'] ?? $options[0]->get_id();
 
         $params = ['id' => $id, 'itemid' => $selecteditemid];
