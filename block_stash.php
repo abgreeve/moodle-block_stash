@@ -91,4 +91,28 @@ class block_stash extends block_base {
         return true;
     }
 
+    public function instance_delete() {
+        $context = context::instance_by_id($this->instance->parentcontextid);
+        $manager = \block_stash\manager::get($context->instanceid, true);
+        // block_stash_removal
+        // block_stash_remove_items
+        $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
+        $removalhelper->delete_all_instance_data();
+        // block_stash_swap
+        // block_stash_swap_detail
+        $swaphandler = new \block_stash\swap_handler($manager);
+        $swaphandler->delete_all_instance_data();
+        // block_stash_trade
+        // block_stash_trade_items
+        // block_stash_lb_settings
+        // block_stash_drop_pickups
+        // block_stash_drops
+        // block_stash_user_items
+        // block_stash_items
+        // block_stash
+        $manager->delete_all_instance_data();
+
+        return true;
+    }
+
 }

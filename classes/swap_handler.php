@@ -613,4 +613,12 @@ class swap_handler {
 
         return $DB->get_records_sql($sql, ['courseid' => $this->courseid]);
     }
+
+    public function delete_all_instance_data() {
+        global $DB;
+
+        $swaps = $DB->get_records('block_stash_swap', ['stashid' => $this->manager->get_stash()->get_id()]);
+        $DB->delete_records_list('block_stash_swap_detail', 'swapid', array_keys($swaps));
+        $DB->delete_records('block_stash_swap', ['stashid' => $this->manager->get_stash()->get_id()]);
+    }
 }

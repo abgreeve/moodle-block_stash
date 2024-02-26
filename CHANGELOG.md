@@ -9,6 +9,9 @@ Version 2.1.0 (TBD)
 * Leaderboard results are now shown in a carousel on the main stash block.
 * Fixed a bug where a trade would continue with one of the swap items deleted.
 * Updated the trade creation form item selector to improve the flow by exchanging the modal selector for a new dropdown element.
+* Added the ability to remove stash items for attempting a quiz. This is currently for quiz only.
+* Added backup and restore of removal configurations.
+* When deleting a course, stash tables are now correctly purged.
 
 Version 2.0.3 (20 October 2023)
 -------------------

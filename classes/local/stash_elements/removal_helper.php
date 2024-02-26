@@ -201,4 +201,12 @@ class removal_helper {
         // entry
         $DB->delete_records('block_stash_removal', ['id' => $removalid]);
     }
+
+    public function delete_all_instance_data() {
+        global $DB;
+        // Get all removal entries
+        $removals = $this->get_all_removals();
+        $DB->delete_records_list('block_stash_remove_items', 'removalid', array_keys($removals));
+        $DB->delete_records('block_stash_removal', ['stashid' => $this->manager->get_stash()->get_id()]);
+    }
 }

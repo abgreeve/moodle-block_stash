@@ -1363,4 +1363,39 @@ class manager {
 
         return $DB->get_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);
     }
+
+    public function delete_all_instance_data() {
+        global $DB;
+        // block_stash_trade
+        // block_stash_trade_items
+        $trades = $this->get_trades();
+        $DB->delete_records_list('block_stash_trade_items', 'tradeid', array_keys($trades));
+        $DB->delete_records('block_stash_trade', ['stashid' => $this->get_stash()->get_id()]);
+        // block_stash_lb_settings
+        $DB->delete_records('block_stash_lb_settings', ['stashid' => $this->get_stash()->get_id()]);
+
+        // block_stash_drop_pickups
+        // block_stash_drops
+        $sql = "SELECT d.id
+                  FROM {block_stash_drops} d
+             LEFT JOIN {block_stash_items} i ON i.id = d.itemid
+                 WHERE i.stashid = :stashid";
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
+        $DB->delete_records_list('block_stash_drop_pickups', 'dropid', array_keys($records));
+        $DB->delete_records_list('block_stash_drops', 'id', array_keys($records));
+
+        // block_stash_user_items
+        $sql = "SELECT ui.id
+                  FROM {block_stash_user_items} ui
+             LEFT JOIN {block_stash_items} i ON i.id = ui.itemid
+                 WHERE i.stashid = :stashid";
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
+        $DB->delete_records_list('block_stash_user_items', 'id', array_keys($records));
+
+        // block_stash_items
+        // TODO remove file information as well. I think this gets cleaned up in a task, but better to remove it here.
+        $DB->delete_records('block_stash_items', ['stashid' => $this->get_stash()->get_id()]);
+        // block_stash
+        $DB->delete_records('block_stash', ['id' => $this->get_stash()->get_id()]);
+    }
 }
