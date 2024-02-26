@@ -39,11 +39,12 @@ class save_removal extends external_api {
                     'quantity' => new external_value(PARAM_INT),
                 ])
             ),
+            'removalid' => new external_value(PARAM_INT, '', VALUE_OPTIONAL)
         ]);
     }
 
-    public static function execute($courseid, $cmid, $items) {
-        $data = (object) self::validate_parameters(self::execute_parameters(), compact('courseid', 'cmid', 'items'));
+    public static function execute($courseid, $cmid, $items, $removalid = null) {
+        $data = (object) self::validate_parameters(self::execute_parameters(), compact('courseid', 'cmid', 'items', 'removalid'));
 
         $manager = manager::get($data->courseid);
         self::validate_context($manager->get_context());
@@ -58,6 +59,9 @@ class save_removal extends external_api {
             'detail_editor' => ['text' => 'Placeholder for possible text', 'format' => 1],
             'items' => $data->items
         ];
+        if (isset($data->removalid)) {
+            $formdata->removalid = $data->removalid;
+        }
 
         $removalid = $removalhelper->handle_form_data($formdata);
         return $removalid;

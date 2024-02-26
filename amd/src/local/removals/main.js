@@ -4,6 +4,7 @@ import Templates from 'core/templates';
 import * as tradeAdder from 'block_stash/local/trade_adder/main';
 import Ajax from 'core/ajax';
 import * as getItems from 'block_stash/local/datasources/items-getter';
+import {get_string as getString} from 'core/str';
 
 const showModal = async(courseid, editdetails = []) => {
     const modal = await buildModal(courseid, editdetails);
@@ -44,7 +45,7 @@ const buildModal = async(courseid, editdetails) => {
     window.console.log(context);
 
     return ModalFactory.create({
-        title: context.name,
+        title: getString('configureremoval', 'block_stash'),
         body: Templates.render('block_stash/local/removal/removal_form', context),
         type: ModalFactory.types.SAVE_CANCEL
     });
@@ -88,7 +89,14 @@ const saveData = async (courseid) => {
     });
     let quizselect = document.querySelector('.block-stash-quiz-select');
     let cmid = quizselect.value;
-    let removalid = await saveRemovalEntry(courseid, parseInt(cmid), items);
+    let removalid = 0;
+    let removalelement = document.getElementById('block_stash_removal_id');
+    if (removalelement) {
+        removalid = await updateRemovalEntry(courseid, parseInt(cmid), items, removalelement.dataset.id);
+    } else {
+        removalid = await saveRemovalEntry(courseid, parseInt(cmid), items);
+    }
+
     let context = {
         'cmid': cmid,
         'cmname': quizselect.item(quizselect.selectedIndex).text,
@@ -99,10 +107,18 @@ const saveData = async (courseid) => {
     };
     // window.console.log(context);
     Templates.render('block_stash/local/removal/table_row', context).then((html, js) => {
-        let tableobject = document.querySelector('.block-stash-removal-body');
-        let things = Templates.appendNodeContents(tableobject, html, js);
-        registerDeleteEvent(courseid, things[0].querySelector('.block-stash-removal-icon'));
-        registerEditEvent(courseid, things[0].querySelector('.block-stash-removal-edit'));
+        if (!removalelement) {
+            let tableobject = document.querySelector('.block-stash-removal-body');
+            let things = Templates.appendNodeContents(tableobject, html, js);
+            registerDeleteEvent(courseid, things[0].querySelector('.block-stash-removal-icon'));
+            registerEditEvent(courseid, things[0].querySelector('.block-stash-removal-edit'));
+        } else {
+            let rowelement = document.querySelector('.block-stash-removal-edit[data-id="' + removalid + '"');
+            let tmpe = rowelement.closest('tr');
+            let things = Templates.replaceNode(tmpe, html, js);
+            registerDeleteEvent(courseid, things[0].querySelector('.block-stash-removal-icon'));
+            registerEditEvent(courseid, things[0].querySelector('.block-stash-removal-edit'));
+        }
     });
 };
 
@@ -145,12 +161,6 @@ export const init = (courseid) => {
     let editbutton = document.querySelectorAll('.block-stash-removal-edit');
     editbutton.forEach((editobject) => {
         registerEditEvent(courseid, editobject);
-        // editobject.addEventListener('click', (e) => {
-        //     e.preventDefault();
-        //     let jsondata = JSON.parse(editobject.dataset.json);
-        //     let details = {'removalid': editobject.dataset.id, 'quizid': editobject.dataset.quiz, 'items': jsondata};
-        //     showModal(courseid, details);
-        // });
     });
 };
 
@@ -162,6 +172,11 @@ const fetchQuizData = (courseid) => Ajax.call([{
 const saveRemovalEntry = (courseid, cmid, items) => Ajax.call([{
     methodname: 'block_stash_save_removal',
     args: {'courseid': courseid, 'cmid': cmid, 'items': items}
+}])[0];
+
+const updateRemovalEntry = (courseid, cmid, items, removalid) => Ajax.call([{
+    methodname: 'block_stash_save_removal',
+    args: {'courseid': courseid, 'cmid': cmid, 'items': items, 'removalid': removalid}
 }])[0];
 
 const deleteRemovalEntry = (courseid, removalid) => Ajax.call([{

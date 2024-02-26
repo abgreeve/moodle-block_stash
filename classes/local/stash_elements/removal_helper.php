@@ -49,7 +49,16 @@ class removal_helper {
             'detail' => $data->detail_editor['text'],
             'detailformat' => $data->detail_editor['format']
         ];
-        $removalid = $DB->insert_record('block_stash_removal', $dbdata);
+        if (!isset($data->removalid)) {
+            $removalid = $DB->insert_record('block_stash_removal', $dbdata);
+        } else {
+            // Update!
+            $dbdata['id'] = $data->removalid;
+            // Actually, delete detail entries and add new ones. This data isn't so important that losing it is a problem.
+            $DB->delete_records('block_stash_remove_items', ['removalid' => $data->removalid]);
+            $DB->update_record('block_stash_removal', $dbdata);
+            $removalid = $data->removalid;
+        }
         foreach ($data->items as $item) {
             $dbdata = [
                 'removalid' => $removalid,
@@ -58,6 +67,7 @@ class removal_helper {
             ];
             $DB->insert_record('block_stash_remove_items', $dbdata);
         }
+
         return $removalid;
     }
 

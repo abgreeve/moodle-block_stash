@@ -74,6 +74,9 @@ class restore_stash_block_structure_step extends restore_structure_step {
         $paths[] = new restore_path_element('block_stash_trade', '/block/stash/trades/trade');
         $paths[] = new restore_path_element('block_stash_tradeitems', '/block/stash/trades/trade/tradeitems/tradeitem');
 
+        $paths[] = new restore_path_element('block_stash_removal', '/block/stash/removals/removal');
+        $paths[] = new restore_path_element('block_stash_remove_items', '/block/stash/removals/removal/removaldetails/removaldetail');
+
         if ($userinfo) {
             $paths[] = new restore_path_element('pickup', '/block/stash/items/item/drops/drop/pickups/pickup');
             $paths[] = new restore_path_element('useritem', '/block/stash/items/item/useritems/useritem');
@@ -195,6 +198,28 @@ class restore_stash_block_structure_step extends restore_structure_step {
         $tradeitem->create();
     }
 
+    protected function process_block_stash_removal($data) {
+        global $DB;
+        $data = (object) $data;
+        $data->stashid = $this->get_new_parentid('block_stash');
+        // Setting the cmid to negative to identify what to change in the after restore process.
+        $data->cmid = intval('-' . $data->cmid);
+        $oldid = $data->id;
+        unset($data->id);
+        $removalid = $DB->insert_record('block_stash_removal', $data);
+        $this->set_mapping('block_stash_removal', $oldid, $removalid);
+    }
+
+    protected function process_block_stash_remove_items($data) {
+        global $DB;
+        $data = (object) $data;
+        $data->removalid = $this->get_new_parentid('block_stash_removal');
+        $data->itemid = $this->get_mappingid('block_stash_item', $data->itemid);
+        $oldid = $data->id;
+        unset($data->id);
+        $DB->insert_record('block_stash_remove_items', $data);
+    }
+
     /**
      * After execute.
      */
@@ -203,4 +228,26 @@ class restore_stash_block_structure_step extends restore_structure_step {
         $this->add_related_files('block_stash', 'detail', 'block_stash_item', $this->task->get_old_course_contextid());
     }
 
+    protected function after_restore() {
+        global $DB;
+
+        $sql = "SELECT r.id, r.stashid, r.modulename, r.cmid, r.detail, r.detailformat
+                  FROM {block_stash_removal} r
+                  JOIN {block_stash} s ON s.id = r.stashid
+                 WHERE s.courseid = :courseid AND r.cmid < 0";
+
+        $courseid = $this->get_courseid();
+        $records = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+
+        foreach ($records as $record) {
+            $record->cmid = $this->get_mappingid('course_module', abs($record->cmid));
+            if ($record->cmid !== false) {
+                $DB->update_record('block_stash_removal', $record);
+            } else {
+                $DB->delete_records('block_stash_remove_items', ['removalid' => $record->id]);
+                // entry
+                $DB->delete_records('block_stash_removal', ['id' => $record->id]);
+            }
+        }
+    }
 }

@@ -38,14 +38,9 @@ if (isset($removalid)) {
     $removalhelper->delete_removal_configuration($removalid);
 }
 
-// $quizzes = $removalhelper->get_quizzes_for_course();
-// print_object('');
-// print_object('');
-// print_object($quizzes);
-
 $url = new moodle_url('/blocks/stash/removals.php', ['courseid' => $courseid]);
 
-$pagetitle = 'Removal thing'; // Todo get_string()
+$pagetitle = get_string('removalconfigurations', 'block_stash');
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_removal($url, $manager, $pagetitle);
 
 $renderer = $PAGE->get_renderer('block_stash');
@@ -54,10 +49,9 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 echo $renderer->navigation($manager, 'removals');
 
-// $removeurl = new moodle_url('/blocks/stash/remove.php', ['courseid' => $courseid]);
 $dummyurl = new moodle_url('#');
-$removebtn = $OUTPUT->single_button($dummyurl, get_string('configureremoval', 'block_stash'), 'get', ['class' => 'singlebutton heading-button block-config-removal']);
-
+$removebtn = $OUTPUT->single_button($dummyurl, get_string('configureremoval', 'block_stash'), 'get',
+    ['class' => 'singlebutton heading-button block-config-removal']);
 
 $subtitle .= $removebtn;
 
@@ -66,5 +60,4 @@ if (!empty($subtitle)) {
 }
 
 echo $renderer->render(new \block_stash\output\local\configuration\removals($manager));
-
 echo $OUTPUT->footer();

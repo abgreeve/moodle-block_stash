@@ -66,6 +66,12 @@ class backup_stash_block_structure_step extends backup_block_structure_step {
         $tradeitems = new backup_nested_element('tradeitems');
         $tradeitem = new backup_nested_element('tradeitem', ['id'], ['itemid', 'quantity', 'gainloss']);
 
+        // Removals.
+        $removals = new backup_nested_element('removals');
+        $removal = new backup_nested_element('removal', ['id'], ['shashid', 'modulename', 'cmid', 'detail', 'detailformat']);
+        $removaldetails = new backup_nested_element('removaldetails');
+        $removaldetail = new backup_nested_element('removaldetail', ['id'], ['removalid', 'itemid', 'quantity']);
+
         // Prepare the structure.
         $wrapper = $this->prepare_block_structure($stash);
 
@@ -80,12 +86,19 @@ class backup_stash_block_structure_step extends backup_block_structure_step {
         $trade->add_child($tradeitems);
         $tradeitems->add_child($tradeitem);
 
+        $stash->add_child($removals);
+        $removals->add_child($removal);
+        $removal->add_child($removaldetails);
+        $removaldetails->add_child($removaldetail);
+
         // Define sources.
         $stash->set_source_table(stash::TABLE, array('courseid' => backup::VAR_COURSEID));
         $item->set_source_table(item::TABLE, array('stashid' => backup::VAR_PARENTID));
         $drop->set_source_table(drop::TABLE, array('itemid' => backup::VAR_PARENTID));
         $trade->set_source_table(trade::TABLE, array('stashid' => backup::VAR_PARENTID));
         $tradeitem->set_source_table(tradeitems::TABLE, array('tradeid' => backup::VAR_PARENTID));
+        $removal->set_source_table('block_stash_removal', ['stashid' => backup::VAR_PARENTID]);
+        $removaldetail->set_source_table('block_stash_remove_items', ['removalid' => backup::VAR_PARENTID]);
 
         // Define user data.
         if ($userinfo) {
