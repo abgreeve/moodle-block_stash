@@ -371,6 +371,10 @@ class manager {
             $this->delete_drop($drop);
         }
 
+        // Delete items from removals.
+        $removalhelper = new \block_stash\local\stash_elements\removal_helper($this);
+        $removalhelper->remove_item($item);
+
         // Delete items from trades.
         $DB->delete_records(\block_stash\tradeitems::TABLE, ['itemid' => $item->get_id()]);
 

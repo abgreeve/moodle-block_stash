@@ -77,7 +77,7 @@ class removal_helper {
         return $DB->get_records('block_stash_removal', ['stashid' => $this->manager->get_stash()->get_id()]);
     }
 
-    public function get_the_full_whammy() {
+    public function get_full_removal_details() {
         global $DB;
 
         $sql = "SELECT ri.id, r.stashid, r.cmid, r.id as removalid, ri.itemid, i.name, ri.quantity
@@ -146,7 +146,7 @@ class removal_helper {
         // The user needs the ability to pick the scarce item back up again.
         // For this the drop pickups need to have their pickup count updated, even though the item could have been acquired in
         // a different way (such as a trade, or the teacher manually giving them one).
-        // Not that the drop pickup entry updates the pickup count and lastpickup (not a new entry)
+        // Note that the drop pickup entry updates the pickup count and lastpickup (not a new entry)
         $sql = "SELECT p.*
                   FROM {block_stash_drop_pickups} p
                   JOIN {block_stash_drops} d ON p.dropid = d.id
@@ -186,11 +186,32 @@ class removal_helper {
         foreach($courseinstances as $instance) {
             $tmep[$instance->coursemodule] = $instance->name;
         }
-        // print_object($courseinstances);
         return $tmep;
     }
 
-    public function delete_removal_configuration($removalid) {
+    /**
+     * Remove items from all removal configurations prior to the item being deleted.
+     *
+     * @param object $item
+     */
+    public function remove_item(\block_stash\item $item): void {
+        global $DB;
+        // Get all removals that use this item.
+        $DB->delete_records('block_stash_remove_items', ['itemid' => $item->get_id()]);
+        // Delete empty removal configurations.
+        $sql = "SELECT r.id
+                  FROM {block_stash_removal} r
+             LEFT JOIN {block_stash_remove_items} ri ON r.id = ri.removalid
+                 WHERE r.stashid = :stashid
+              GROUP BY r.id
+                HAVING COUNT(ri.id) = 0";
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->manager->get_stash()->get_id()]);
+        if (!empty($records)) {
+            $DB->delete_records_list('block_stash_removal', 'id', array_keys($records));
+        }
+    }
+
+    public function delete_removal_configuration(int $removalid): void {
         global $DB;
 
         $cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'block_stash', 'removal_details');
@@ -202,7 +223,7 @@ class removal_helper {
         $DB->delete_records('block_stash_removal', ['id' => $removalid]);
     }
 
-    public function delete_all_instance_data() {
+    public function delete_all_instance_data(): void {
         global $DB;
         // Get all removal entries
         $removals = $this->get_all_removals();

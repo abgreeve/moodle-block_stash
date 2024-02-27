@@ -57,7 +57,7 @@ class removals implements renderable, templatable {
         $data['removals'] = [];
         $data['courseid'] = $this->manager->get_courseid();
         $removalhelper = new \block_stash\local\stash_elements\removal_helper($this->manager);
-        $tmepper = $removalhelper->get_the_full_whammy();
+        $tmepper = $removalhelper->get_full_removal_details();
         $newsuperdata = [];
         $jsondata = [];
         foreach ($tmepper as $tmepp) {
