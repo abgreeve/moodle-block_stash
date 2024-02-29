@@ -1,7 +1,7 @@
 Block Stash
 ===========
 
-Version 2.1.0 (TBD)
+Version 2.1.0 (29th February 2024)
 -------------------
 
 * Add another leaderboard which shows a list of students with a specified item.

@@ -102,7 +102,13 @@ const saveData = async (courseid) => {
     let removalid = 0;
     let removalelement = document.getElementById('block_stash_removal_id');
     if (removalelement) {
-        removalid = await updateRemovalEntry(courseid, parseInt(cmid), items, removalelement.dataset.id);
+        removalid = updateRemovalEntry(courseid, parseInt(cmid), items, removalelement.dataset.id).then(() => {
+            Toast.add(getString('configupdated', 'block_stash'), {
+                type: 'info',
+                autohide: true,
+                closeButton: true,
+            });
+        });
     } else {
         removalid = await saveRemovalEntry(courseid, parseInt(cmid), items);
     }
@@ -142,6 +148,11 @@ const registerDeleteEvent = (courseid, deleteobject) => {
             // If the request was okay then remove the table row.
             let row = deletionelement.closest('tr');
             row.remove();
+            Toast.add(getString('configdeleted', 'block_stash'), {
+                type: 'info',
+                autohide: true,
+                closeButton: true,
+            });
         });
     });
 };

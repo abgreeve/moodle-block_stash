@@ -12,7 +12,7 @@ Features
 - Unlock access to activities based on the objects found (requires plugin [availability_stash](https://moodle.org/plugins/availability_stash))
 - Trade by exchanging items for different items (requires plugin [filter plugin](https://github.com/branchup/moodle-filter_shortcodes))
 - Allow students to trade items with each other in the trade center.
-- *New* Configure stash to remove items to allow quiz attempts.
+- **New** Configure stash to remove items to allow quiz attempts.
 
 Requirements
 ------------
@@ -55,7 +55,7 @@ Note that teachers cannot pick up the objects, for them they will always re-appe
 4. Click the 'Configure removal' button
 5. Select at least one item to remove (+ symbol)
 6. Select a quiz and click save
-7. You're quiz will no remove the configured items from students attempting that quiz. It is recommended that you inform you students about the cost of the quiz in the description of the quiz
+7. Your quiz will now remove the configured items from students attempting that quiz. It is recommended that you inform your students about the item removal in the quiz description
 
 ### Important!
 
