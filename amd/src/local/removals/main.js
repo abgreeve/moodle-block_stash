@@ -5,6 +5,7 @@ import * as tradeAdder from 'block_stash/local/trade_adder/main';
 import Ajax from 'core/ajax';
 import * as getItems from 'block_stash/local/datasources/items-getter';
 import {get_string as getString} from 'core/str';
+import * as Toast from 'core/toast';
 
 const showModal = async(courseid, editdetails = []) => {
     const modal = await buildModal(courseid, editdetails);
@@ -89,6 +90,15 @@ const saveData = async (courseid) => {
     });
     let quizselect = document.querySelector('.block-stash-quiz-select');
     let cmid = quizselect.value;
+    if (cmid === '0') {
+        await Toast.addToastRegion(document.querySelector('.modal-body'));
+        Toast.add(getString('selectquizcheck', 'block_stash'), {
+            type: 'danger',
+            autohide: true,
+            closeButton: true,
+        });
+        return false;
+    }
     let removalid = 0;
     let removalelement = document.getElementById('block_stash_removal_id');
     if (removalelement) {

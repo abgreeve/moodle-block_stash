@@ -127,7 +127,7 @@ $string['navtrade'] = 'Trade';
 $string['new'] = 'New';
 $string['next'] = 'Next';
 $string['none'] = 'None';
-$string['nofilterandnotiny'] = '📢 Did you know there is a new plugin for the TinyMCE editor that makes creating items and trades much easier? Download and install both the <a href="https://moodle.org/plugins/filter_shortcodes">filter plug shortcodes</a> and the <a href="https://moodle.org/plugins/tiny_stash">TinyMCE editor plugin tiny stash</a> to vastly improve your stash creation experience. A preview video is available via the previous tiny stash link.';
+$string['nofilterandnotiny'] = '📢 Did you know there is a new plugin for the TinyMCE editor that makes creating items and trades much easier? Download and install both the <a href="https://moodle.org/plugins/filter_shortcodes">filter plugin shortcodes</a> and the <a href="https://moodle.org/plugins/tiny_stash">TinyMCE editor plugin tiny stash</a> to vastly improve your stash creation experience. A preview video is available via the previous tiny stash link.';
 $string['noitems'] = 'No items selected';
 $string['noitemstotrade'] = 'You have no items to trade';
 $string['nomorescarceitems'] = 'The maximum number of this item has already been allocated. Consider upping the scarcity amount of this item.';
@@ -197,6 +197,7 @@ $string['scarceitem_help'] = 'Only a limited amount of this item is available. I
 $string['searchitems'] = 'Search items';
 $string['selectanitem'] = 'Select an item';
 $string['selectauser'] = 'Select a user';
+$string['selectquizcheck'] = 'Please select a quiz';
 $string['selectquiz'] = 'Quiz';
 $string['sendtraderequest'] = 'Send trade request';
 $string['sent'] = 'Sent';
