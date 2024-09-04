@@ -39,7 +39,7 @@ class save_removal extends external_api {
                     'quantity' => new external_value(PARAM_INT),
                 ])
             ),
-            'removalid' => new external_value(PARAM_INT, '', VALUE_OPTIONAL)
+            'removalid' => new external_value(PARAM_INT, '', VALUE_DEFAULT)
         ]);
     }
 
