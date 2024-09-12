@@ -39,10 +39,13 @@ class most_singular_item extends base {
         return get_string('mostsingularitemname', 'block_stash', $item->get_name());
     }
 
-    protected function get_leaderboard_data(int $limit): array {
+    protected function get_leaderboard_data(int $limit): ?array {
         global $DB;
 
         [$fields, $idsql, $idparams] = $this->get_base_leaderboard_sql_fields_and_params();
+        if (empty($idparams)) {
+            return null;
+        }
         $idparams['itemid'] = $this->itemid;
 
         $sql = "SELECT $fields, ui.userid, ui.quantity as num_items

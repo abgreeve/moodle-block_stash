@@ -57,7 +57,7 @@ abstract class leaderboard_base implements renderable, templatable {
      * @param int $rowlimit A limit for the number of rows to be returned.
      * @return array of records
      */
-    abstract protected function get_leaderboard_data(int $rowlimit): array;
+    abstract protected function get_leaderboard_data(int $rowlimit): ?array;
 
     /**
      * A method which helpfully retrieves fields, sql, and base params for a leaderboard sql query.
@@ -68,6 +68,10 @@ abstract class leaderboard_base implements renderable, templatable {
         global $DB;
 
         $userids = $this->manager->get_userids_for_leaderboard();
+
+        if (empty($userids)) {
+            return ['','',[]];
+        }
 
         $fields = ['id', ...\core_user\fields::for_name()->get_required_fields()];
         $fields = implode(',', array_map(fn($f) => "u.$f", $fields));

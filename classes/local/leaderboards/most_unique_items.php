@@ -28,10 +28,13 @@ class most_unique_items extends base {
         return get_string('mostuniqueitems', 'block_stash');
     }
 
-    protected function get_leaderboard_data(int $limit): array {
+    protected function get_leaderboard_data(int $limit): ?array {
         global $DB;
 
         [$fields, $idsql, $idparams] = $this->get_base_leaderboard_sql_fields_and_params();
+        if (empty($idparams)) {
+            return null;
+        }
 
         $sql = "SELECT $fields, ui.userid, COUNT(*) as num_items
                   FROM {block_stash_user_items} ui

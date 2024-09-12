@@ -1,6 +1,11 @@
 Block Stash
 ===========
 
+Version 2.1.1 (12th September 2024)
+-----------------------------------
+
+* Minor fix to leaderboard error with no users for a group.
+
 Version 2.1.0 (29th February 2024)
 -------------------
 
