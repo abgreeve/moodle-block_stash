@@ -533,5 +533,61 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024019002, 'stash');
     }
 
+    if ($oldversion < 2024101700) {
+
+        // Define table block_stash_collections to be created.
+        $table = new xmldb_table('block_stash_collections');
+
+        // Adding fields to table block_stash_collections.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('stashid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('name', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('showtostudent', XMLDB_TYPE_CHAR, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('removeoncompletion', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table block_stash_collections.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for block_stash_collections.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table block_stash_collection_items to be created.
+        $table = new xmldb_table('block_stash_collection_items');
+
+        // Adding fields to table block_stash_collection_items.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('collectionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table block_stash_collection_items.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for block_stash_collection_items.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table block_stash_collection_prizes to be created.
+        $table = new xmldb_table('block_stash_collection_prizes');
+
+        // Adding fields to table block_stash_collection_prizes.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('collectionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table block_stash_collection_prizes.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for block_stash_collection_prizes.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Stash savepoint reached.
+        upgrade_block_savepoint(true, 2024101700, 'stash');
+    }
+
     return true;
 }
