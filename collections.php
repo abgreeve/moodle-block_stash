@@ -49,23 +49,19 @@ list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_collec
 
 $renderer = $PAGE->get_renderer('block_stash');
 echo $OUTPUT->header();
-
 echo $OUTPUT->heading($title);
 echo $renderer->navigation($manager, 'collections');
 
-// $addurl = new moodle_url('/blocks/stash/item_edit.php', ['courseid' => $courseid]);
-// $addbtn = $OUTPUT->single_button($addurl, get_string('additem', 'block_stash'), 'get', ['class' => 'singlebutton heading-button']);
-// $heading = get_string('itemslist', 'block_stash') . $addbtn;
-echo $OUTPUT->heading($subtitle, 3);
+$addurl = new moodle_url('/blocks/stash/collection_edit.php', ['courseid' => $courseid]);
+$addbtn = $OUTPUT->single_button($addurl, get_string('addcollection', 'block_stash'), 'get', ['class' => 'singlebutton heading-button']);
+$heading = get_string('collectionslist', 'block_stash') . $addbtn;
+
+// TODO handle this more like removals
+echo $OUTPUT->heading($heading, 3);
 
 // $table = new \block_stash\output\items_table('itemstable', $manager, $renderer);
 // $table->define_baseurl($url);
 // echo $table->out(50, false);
 
-// list($altsnippetmaker, $warning) = \block_stash\helper::get_alternate_amd_snippet_maker($manager->get_context());
-// $altsnippetmaker = $altsnippetmaker->drop;
-// $warnings = $warning ? [$warning] : null;
-
-// $PAGE->requires->js_call_amd('block_stash/items', 'init', [$altsnippetmaker, $warnings]);
 
 echo $OUTPUT->footer();

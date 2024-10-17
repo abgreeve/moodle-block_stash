@@ -24,7 +24,7 @@
 
 namespace block_stash\local\repositories;
 
-use block_stash\local\models\collection;
+use block_stash\local\models\collection as collection_model;
 use block_stash\local\models\collection_item;
 use block_stash\local\models\collection_prize;
 
@@ -33,7 +33,7 @@ class collection {
 
 
 
-    public function save(collection $collection) {
+    public function save(collection_model $collection) {
         global $DB;
 
         return $DB->insert_record('block_stash_collections', $collection->to_array());
@@ -53,7 +53,7 @@ class collection {
 
     // public function save_collection_item()
 
-    public function load(int $id): collection {
+    public function load(int $id): collection_model {
 
     }
 

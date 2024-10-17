@@ -40,30 +40,36 @@ class collection_manager {
 
     public function create_collection($collectiondata) {
         $collectionrepository = new collection_repository();
-
+        $removal = isset($collectiondata->removeoncompletion) ? 1 : 0;
         $collection = new collection(
             $this->manager->get_stash()->get_id(),
-            $collectiondata['name'],
-            $collectiondata['showtostudent'],
-            $collectiondata['removeoncompletion']
+            $collectiondata->name,
+            $collectiondata->showtostudent,
+            $removal
         );
+
         $collection->set_id($collectionrepository->save($collection));
 
         // foreach collection items
-        foreach ($collectiondata['items'] as $item) {
+        foreach ($collectiondata->items as $item) {
             $collectionitem = new collection_item(
                 $collection->get_id(),
-                $item['itemid'],
+                $item,
             );
             $collectionrepository->save_item($collectionitem);
         }
         // foreach collection prizes
-        foreach ($collectiondata['prizes'] as $prize) {
-            $collectionprize = new collection_prize(
-                $collection->get_id(),
-                $prize['itemid'],
-            );
-            $collectionrepository->save_prize($collectionitem);
+        if (count($collectiondata->prizes) == 1 && $collectiondata->prizes[0] == 0) {
+            return;
+        }
+        foreach ($collectiondata->prizes as $prize) {
+            if ($prize != 0) { // 0 Is none, and we are not saving that.
+                $collectionprize = new collection_prize(
+                    $collection->get_id(),
+                    $prize,
+                );
+                $collectionrepository->save_prize($collectionprize);
+            }
         }
     }
 
