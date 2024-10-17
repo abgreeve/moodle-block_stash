@@ -32,7 +32,6 @@ use block_stash\local\models\collection_prize;
 class collection {
 
 
-
     public function save(collection_model $collection) {
         global $DB;
 
@@ -57,9 +56,25 @@ class collection {
 
     }
 
-    public function load_all(): array {
+    public function load_all($stashid): array {
         global $DB;
+        // Collection
+        $collectionresults = $DB->get_records('block_stash_collections', ['stashid' => $stashid]);
+        // print_object($collectionresults);
+        $collections = array_map(function($collectiondata) {
+            return new collection_model(
+                $collectiondata->stashid,
+                $collectiondata->name,
+                $collectiondata->showtostudent,
+                $collectiondata->removeoncompletion,
+                $collectiondata->id
+            );
+        }, $collectionresults);
+        return $collections;
+        // print_object($collections);
 
+        // items
+        // prizes
 
 
     }

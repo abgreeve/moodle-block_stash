@@ -58,7 +58,8 @@ $form = new \block_stash\form\collection($url->out(false), $customdata);
 if ($data = $form->get_data()) {
     // print_object($data);
     // die();
-    $collectionmanager = new \block_stash\local\stash_elements\collection_manager($manager);
+    $collectionrepository = new \block_stash\local\repositories\collection();
+    $collectionmanager = new \block_stash\local\stash_elements\collection_manager($manager, $collectionrepository);
     $collectionmanager->create_collection($data);
 
     redirect($returnurl);

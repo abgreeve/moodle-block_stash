@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Removal of items element helper
+ * Collection manager
  *
  * @package    block_stash\local\stash_elements
- * @copyright  2023 Adrian Greeve <adriangreeve.com>
+ * @copyright  2024 Adrian Greeve
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,17 +29,17 @@ use block_stash\local\models\collection_item;
 use block_stash\local\models\collection_prize;
 use block_stash\local\repositories\collection as collection_repository;
 
-
 class collection_manager {
 
     private $manager;
+    private $collectionrepository;
 
-    public function __construct($manager) {
+    public function __construct($manager, collection_repository $collectionrepository) {
         $this->manager = $manager;
+        $this->collectionrepository = $collectionrepository;
     }
 
     public function create_collection($collectiondata) {
-        $collectionrepository = new collection_repository();
         $removal = isset($collectiondata->removeoncompletion) ? 1 : 0;
         $collection = new collection(
             $this->manager->get_stash()->get_id(),
@@ -48,7 +48,7 @@ class collection_manager {
             $removal
         );
 
-        $collection->set_id($collectionrepository->save($collection));
+        $collection->set_id($this->collectionrepository->save($collection));
 
         // foreach collection items
         foreach ($collectiondata->items as $item) {
@@ -56,7 +56,7 @@ class collection_manager {
                 $collection->get_id(),
                 $item,
             );
-            $collectionrepository->save_item($collectionitem);
+            $this->collectionrepository->save_item($collectionitem);
         }
         // foreach collection prizes
         if (count($collectiondata->prizes) == 1 && $collectiondata->prizes[0] == 0) {
@@ -68,17 +68,17 @@ class collection_manager {
                     $collection->get_id(),
                     $prize,
                 );
-                $collectionrepository->save_prize($collectionprize);
+                $this->collectionrepository->save_prize($collectionprize);
             }
         }
     }
 
 
     public function get_all_collections() {
-
+        return $this->collectionrepository->load_all($this->manager->get_stash()->get_id());
     }
 
-    public function get_collection($collectionid) {
+    public function get_collection_items($collectionid) {
 
 
     }

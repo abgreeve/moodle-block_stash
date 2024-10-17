@@ -62,6 +62,11 @@ class block_content implements renderable, templatable {
 
             $data['items'][] = $exported;
         }
+        // print_object($data['items']);
+        $collectionrepository = new \block_stash\local\repositories\collection();
+        $collectionmanager = new \block_stash\local\stash_elements\collection_manager($this->manager, $collectionrepository);
+        $collections = $collectionmanager->get_all_collections();
+        print_object($collections);
 
         $swaphandler = new \block_stash\swap_handler($this->manager);
         $swapcount = $swaphandler->get_unread_requests($userid);
