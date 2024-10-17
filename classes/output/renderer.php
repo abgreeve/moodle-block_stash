@@ -154,6 +154,12 @@ class renderer extends plugin_renderer_base {
                 );
             }
 
+            $tabs[] = new tabobject(
+                'collections',
+                new moodle_url('/blocks/stash/collections.php', ['courseid' => $courseid]),
+                get_string('collections', 'block_stash')
+            );
+
             // I want to hide this depending on the block filter being enabled and there being at least one item defined.
             $tabs[] = new tabobject(
                 'trade',
