@@ -29,13 +29,34 @@
 
 <div id="stash-area-{{id}}" data-id="{{id}}">
 {{#canacquireitems}}
-    <div class="item-list">
-        {{#items}}
-            {{>block_stash/user_item}}
-        {{/items}}
-        {{^items}}
-            <div class="empty-content alert alert-info">{{#str}}yourinventoryisempty, block_stash{{/str}}</div>
-        {{/items}}
+    <ul class="nav nav-tabs" id="itemTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-toggle="tab" data-target="#allitems" type="button" role="tab" aria-controls="allitems" aria-selected="true">{{#str}}all, block_stash{{/str}}</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="collections-tab" data-toggle="tab" data-target="#collections" type="button" role="tab" aria-controls="collections" aria-selected="false">{{#str}}collections, block_stash{{/str}}</button>
+        </li>
+    </ul>
+    <div class="item-list tab-content" id="block-stash-tabContent">
+        <div class="tab-pane fade show active mt-2" id="allitems" role="tabpanel" aria-labelledby="all-tab">
+            {{#items}}
+                {{>block_stash/user_item}}
+            {{/items}}
+            {{^items}}
+                <div class="empty-content alert alert-info">{{#str}}yourinventoryisempty, block_stash{{/str}}</div>
+            {{/items}}
+        </div>
+
+        <div class="tab-pane fade" id="collections" role="tabpanel" aria-labelledby="collections-tab">
+        {{#collections}}
+            <fieldset class="block-stash-collections mb-1 p-2" {{#completed}} style="border-color: #088208; color: #088208;" {{/completed}}>
+                <legend class="block-stash-collection-legend p-1">{{collection}}</legend>
+                {{#items}}
+                    {{>block_stash/user_item}}
+                {{/items}}
+            </fieldset>
+        {{/collections}}
+        </div>
     </div>
 {{/canacquireitems}}
 

@@ -252,3 +252,15 @@
     color: black !important;
     top: unset !important;
 }
+
+.block-stash-collections {
+    border: 1px solid #bbb;
+    border-radius: 5px;
+}
+
+.block-stash-collection-legend {
+    width: unset;
+    padding: unset;
+    margin-bottom: unset;
+    font-size: unset;
+}

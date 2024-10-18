@@ -73,15 +73,43 @@ class collection_manager {
         }
     }
 
-
     public function get_all_collections() {
         return $this->collectionrepository->load_all($this->manager->get_stash()->get_id());
     }
 
     public function get_collection_items($collectionid) {
-
-
+        return $this->collectionrepository->get_collection_items_array($collectionid);
     }
 
+    public function organise_items_into_collections($items) {
+        $collections = $this->get_all_collections();
+        $organised = [];
+        $unused = [];
+        foreach ($collections as $collection) {
+            if ($collection->show_to_student()) {
+                // get all collection items.
+                $collectionitems = $this->get_collection_items($collection->get_id());
+                $useditems = array_filter($items, function($item) use ($collectionitems) {
+                    return array_key_exists($item->item->id, $collectionitems) && $item->useritem->quantity != 0;
+                });
 
+                if (count($useditems) >= 1) {
+                    $a = (object) [
+                        'name' => $collection->get_name(),
+                        'collected' => count($useditems),
+                        'total' => count($collectionitems)
+                    ];
+
+                    $thing = (count($useditems) == count($collectionitems));
+
+                    $organised[] = [
+                        'collection' => get_string('collected', 'block_stash', $a),
+                        'completed' => $thing,
+                        'items' => array_values($useditems)
+                    ];
+                }
+            }
+        }
+        return $organised;
+    }
 }

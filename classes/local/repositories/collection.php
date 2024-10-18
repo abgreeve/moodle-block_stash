@@ -75,10 +75,28 @@ class collection {
 
         // items
         // prizes
-
-
     }
 
+    public function get_collection_items($collectionid) {
+        global $DB;
+        $collectionitems = $DB->get_records('block_stash_collection_items', ['collectionid' => $collectionid]);
+        $items = array_map(function($collectionitem) {
+            return new collection_item(
+                $collectionitem->collectionid,
+                $collectionitem->itemid,
+                $collectionitem->id
+            );
+        }, $collectionitems);
+        return $items;
+    }
 
-
+    public function get_collection_items_array($collectionid) {
+        global $DB;
+        $collectionitems = $DB->get_records('block_stash_collection_items', ['collectionid' => $collectionid]);
+        $items = [];
+        foreach ($collectionitems as $citems) {
+            $items[$citems->itemid] = $citems;
+        }
+        return $items;
+    }
 }

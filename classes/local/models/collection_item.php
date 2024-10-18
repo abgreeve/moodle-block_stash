@@ -51,6 +51,10 @@ class collection_item {
         return $this->id;
     }
 
+    public function get_item_id() {
+        return $this->itemid;
+    }
+
     public function to_array() {
         return [
             'collectionid' => $this->collectionid,

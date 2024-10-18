@@ -55,6 +55,14 @@ class collection {
         return $this->id;
     }
 
+    public function show_to_student() {
+        return ($this->showtostudent);
+    }
+
+    public function get_name() {
+        return $this->name;
+    }
+
     public function to_array() {
         return [
             'stashid' => $this->stashid,
