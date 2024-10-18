@@ -75,8 +75,8 @@ class collection extends \moodleform {
             $itemselect = $mform->addElement('select', 'items', get_string('collectionitems', 'block_stash'), $options);
             $itemselect->setMultiple(true);
             $mform->addRule('items', null, 'required', null, 'client');
-            array_unshift($options, 'none');
-            $prizeselect = $mform->addElement('select', 'prizes', get_string('prizeitems', 'block_stash'), $options);
+            $newoptions = [0 => get_string('none', 'block_stash')] + $options;
+            $prizeselect = $mform->addElement('select', 'prizes', get_string('prizeitems', 'block_stash'), $newoptions);
             $prizeselect->setMultiple(true);
             $prizeselect->setSelected(0);
         }

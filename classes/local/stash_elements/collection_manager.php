@@ -50,7 +50,6 @@ class collection_manager {
 
         $collection->set_id($this->collectionrepository->save($collection));
 
-        // foreach collection items
         foreach ($collectiondata->items as $item) {
             $collectionitem = new collection_item(
                 $collection->get_id(),
@@ -58,7 +57,6 @@ class collection_manager {
             );
             $this->collectionrepository->save_item($collectionitem);
         }
-        // foreach collection prizes
         if (count($collectiondata->prizes) == 1 && $collectiondata->prizes[0] == 0) {
             return;
         }
@@ -69,6 +67,14 @@ class collection_manager {
                     $prize,
                 );
                 $this->collectionrepository->save_prize($collectionprize);
+                // Create a drop for this prize.
+                $drop = (object) [
+                    'id' => 0,
+                    'itemid' => $prize,
+                    'name' => 'Prize for completing ' . $collection->get_name(),
+                    'pickupinterval' => 3600,
+                ];
+                $this->manager->create_or_update_drop($drop);
             }
         }
     }

@@ -48,6 +48,9 @@
         </div>
 
         <div class="tab-pane fade" id="collections" role="tabpanel" aria-labelledby="collections-tab">
+        {{^items}}
+            <div class="empty-content alert alert-info">{{#str}}yourinventoryisempty, block_stash{{/str}}</div>
+        {{/items}}
         {{#collections}}
             <fieldset class="block-stash-collections mb-1 p-2" {{#completed}} style="border-color: #088208; color: #088208;" {{/completed}}>
                 <legend class="block-stash-collection-legend p-1">{{collection}}</legend>
