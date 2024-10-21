@@ -27,8 +27,8 @@ require_once(__DIR__ . '/../../config.php');
 use \block_stash\local\stash_elements\collection_manager;
 
 $courseid = required_param('courseid', PARAM_INT);
-// $action = optional_param('action', '', PARAM_ALPHA);
-$itemid = optional_param('collectionid', 0, PARAM_INT);
+$action = optional_param('action', '', PARAM_ALPHA);
+$collectionid = optional_param('collectionid', 0, PARAM_INT);
 
 require_login($courseid);
 
@@ -43,14 +43,19 @@ $collectionmanager = collection_manager::init($manager);
 $data = $collectionmanager->get_collections_with_items();
 
 
-// switch ($action) {
-//     case 'delete':
-//         require_sesskey();
-//         $item = $manager->get_item($itemid);
-//         $manager->delete_item($item);
-//         redirect($url, get_string('theitemhasbeendeleted', 'block_stash', $item->get_name()));
-//         break;
-// }
+switch ($action) {
+    case 'delete':
+        require_sesskey();
+
+        $collection = $collectionmanager->get_collection($collectionid);
+        // print_object($collection);
+        $collectionmanager->delete_collection($collection);
+
+        // $item = $manager->get_item($itemid);
+        // $manager->delete_item($item);
+        redirect($url, get_string('theitemhasbeendeleted', 'block_stash', $collection->get_name()));
+        break;
+}
 
 
 $renderer = $PAGE->get_renderer('block_stash');

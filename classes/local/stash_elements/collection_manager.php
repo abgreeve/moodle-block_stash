@@ -80,6 +80,10 @@ class collection_manager {
         }
     }
 
+    public function get_collection($collectionid) {
+        return $this->collectionrepository->load($collectionid);
+    }
+
     public function get_all_collections() {
         return $this->collectionrepository->load_all($this->manager->get_stash()->get_id());
     }
@@ -164,6 +168,15 @@ class collection_manager {
         $exporter = new items_exporter($allitems, ['context' => $this->manager->get_context()]);
         return $exporter->export($output);
 
+    }
+
+    public function delete_collection($collection) {
+        // Remove user drops
+        // Remove drop
+        // $this->manager->delete_drop($drop); // Deletes user drops and drops.
+        $this->collectionrepository->delete_prizes($collection->get_id());
+        $this->collectionrepository->delete_items($collection->get_id());
+        $this->collectionrepository->delete($collection->get_id());
     }
 
     public static function init($manager) {

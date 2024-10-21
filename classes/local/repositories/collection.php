@@ -50,10 +50,36 @@ class collection {
         return $DB->insert_record('block_stash_collection_prizes', $collectionprize->to_array());
     }
 
+    public function delete_prizes(int $collectionid) {
+        global $DB;
+
+        $DB->delete_records('block_stash_collection_prizes', ['collectionid' => $collectionid]);
+    }
+
+    public function delete_items(int $collectionid) {
+        global $DB;
+
+        $DB->delete_records('block_stash_collection_items', ['collectionid' => $collectionid]);
+    }
+
+    public function delete(int $collectionid) {
+        global $DB;
+
+        $DB->delete_records('block_stash_collections', ['id' => $collectionid]);
+    }
+
     // public function save_collection_item()
 
     public function load(int $id): collection_model {
-
+        global $DB;
+        $collectionresult = $DB->get_record('block_stash_collections', ['id' => $id]);
+        return new collection_model(
+            $collectionresult->stashid,
+            $collectionresult->name,
+            $collectionresult->showtostudent,
+            $collectionresult->removeoncompletion,
+            $collectionresult->id
+        );
     }
 
     public function load_all($stashid): array {
