@@ -75,6 +75,7 @@ $string['dropslist'] = 'List of locations';
 $string['dropsnippet'] = 'Snippet for \'{$a}\'';
 $string['dropsummary'] = 'Location summary';
 $string['edit'] = 'Edit'; // Should be replaced with the pix icon.
+$string['editcollection'] = 'Edit collection'; // Should be replaced with the pix icon.
 $string['editdrop'] = 'Edit location \'{$a}\'';
 $string['edititem'] = 'Edit item \'{$a}\'';
 $string['edittrade'] = 'Edit trade widget \'{$a}\'';
@@ -186,6 +187,7 @@ $string['quizitemsremoved'] = 'The following items were removed:'; // Items will
 $string['quizname'] = 'Quiz name';
 $string['quiznotenoughitems'] = 'You do not have enough items to take this quiz. You need the following items:'; // Items will be listed after this string. Please contact me if this does not work with your language.
 $string['quizremovalconfigured'] = 'This quiz is <a href="{$a}">configured</a> to remove stash items.';
+$string['reallydeletecollection'] = 'Are you sure you want to delete this collection?';
 $string['reallydeletedrop'] = 'Are you sure you want to delete this location?';
 $string['reallydeleteitem'] = 'Are you sure you want to delete this item?';
 $string['reallyresetstashof'] = 'Are you sure you want to completely reset the stash of {$a}?';

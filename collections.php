@@ -24,9 +24,11 @@
 
 require_once(__DIR__ . '/../../config.php');
 
+use \block_stash\local\stash_elements\collection_manager;
+
 $courseid = required_param('courseid', PARAM_INT);
 // $action = optional_param('action', '', PARAM_ALPHA);
-// $itemid = optional_param('itemid', 0, PARAM_INT);
+$itemid = optional_param('collectionid', 0, PARAM_INT);
 
 require_login($courseid);
 
@@ -36,6 +38,10 @@ $manager->require_manage();
 
 $url = new moodle_url('/blocks/stash/collections.php', ['courseid' => $courseid]);
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_collections($url, $manager);
+
+$collectionmanager = collection_manager::init($manager);
+$data = $collectionmanager->get_collections_with_items();
+
 
 // switch ($action) {
 //     case 'delete':
@@ -59,9 +65,8 @@ $heading = get_string('collectionslist', 'block_stash') . $addbtn;
 // TODO handle this more like removals
 echo $OUTPUT->heading($heading, 3);
 
-// $table = new \block_stash\output\items_table('itemstable', $manager, $renderer);
-// $table->define_baseurl($url);
-// echo $table->out(50, false);
-
+$table = new \block_stash\output\local\main_pages\collection_table('collectionsstable', $manager, $renderer);
+$table->define_baseurl($url);
+echo $table->out(50, false);
 
 echo $OUTPUT->footer();

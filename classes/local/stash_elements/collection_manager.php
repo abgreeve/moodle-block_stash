@@ -28,6 +28,7 @@ use block_stash\local\models\collection;
 use block_stash\local\models\collection_item;
 use block_stash\local\models\collection_prize;
 use block_stash\local\repositories\collection as collection_repository;
+use block_stash\external\items_exporter;
 
 class collection_manager {
 
@@ -117,5 +118,56 @@ class collection_manager {
             }
         }
         return $organised;
+    }
+
+    public function get_collections_with_items() {
+
+        $richcollectiondata = [];
+        $collections = $this->get_all_collections();
+        $allitems = $this->get_all_item_details_for_display();
+
+        foreach ($collections as $collection) {
+            $collectionitems = $this->get_collection_items($collection->get_id());
+            $itemsdata = $this->find_item_data($collectionitems, $allitems);
+            $richcollectiondata[] = [
+                'collection' => $collection,
+                'items' => $itemsdata
+            ];
+        }
+
+        return $richcollectiondata;
+    }
+
+    public function get_items_for_collection_display($collectionid) {
+        $richcollectiondata = [];
+        $allitems = $this->get_all_item_details_for_display();
+
+        $collectionitems = $this->get_collection_items($collectionid);
+        return $this->find_item_data($collectionitems, $allitems);
+    }
+
+    private function find_item_data($items, $allitems) {
+        $data = [];
+        foreach ($allitems->items as $item) {
+            if (isset($items[$item->id])) {
+                $data[] = $item;
+            }
+        }
+        return $data;
+    }
+
+    private function get_all_item_details_for_display() {
+        global $PAGE;
+
+        $output = $PAGE->get_renderer('block_stash');
+        $allitems = $this->manager->get_items();
+        $exporter = new items_exporter($allitems, ['context' => $this->manager->get_context()]);
+        return $exporter->export($output);
+
+    }
+
+    public static function init($manager) {
+        $repository = new collection_repository();
+        return new self($manager, $repository);
     }
 }
