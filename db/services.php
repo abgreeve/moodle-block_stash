@@ -189,4 +189,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_get_collections' => [
+        'classname'    => 'block_stash\\external\\collection_data',
+        'methodname'   => 'execute',
+        'description'  => 'Get all collection information',
+        'type'         => 'read',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

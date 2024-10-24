@@ -20,126 +20,47 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-    'jquery',
-    'core/templates',
-    'block_stash/item-modal',
-    'block_stash/drop',
-    'block_stash/trade',
-    'core/pubsub'
-], function($, Templates, ItemModal, Drop, Trade, PubSub) {
+import Ajax from 'core/ajax';
+import * as ItemModal from 'block_stash/item-modal';
+import * as PubSub from 'core/pubsub';
+import Templates from 'core/templates';
 
-    /**
-     * Stash class.
-     *
-     * @class
-     * @param {Node} node The node.
-     */
-    function StashArea(node) {
-        this._node = $(node);
-        this._setUp();
-    }
-    StashArea.prototype._node = null;
-    StashArea.prototype._userItemTemplate = 'block_stash/user_item';
+var _collections = [];
 
-    StashArea.prototype._setUp = function() {
-        PubSub.subscribe('block_stash/drop/pickedup', this._dropPickedUpListener.bind(this));
-        PubSub.subscribe('trade:pickedup', this._dropPickedUpListener.bind(this));
+export const init = async(courseid) => {
+    _collections = await getCollectionData(courseid);
+    // window.console.log(_collections);
+    setUpUserItemAreClickable();
+    PubSub.subscribe('block_stash/drop/pickedup', dropPickedUpListener.bind(this));
+    PubSub.subscribe('trade:pickedup', dropPickedUpListener.bind(this));
+};
 
-        this._setUpUserItemAreClickable();
-    };
-
-    /**
-     * Add a user item to the stash.
-     *
-     * @param {UserItem} userItem The user item.
-     * @return {Promise}
-     */
-    StashArea.prototype.addUserItem = function(userItem) {
-        return this._renderUserItem(userItem).then(function(html, js) {
-            var node = $(html),
-                container = this._node.find('.item-list');
-            node.data('useritem', userItem);
-            this._makeUserItemNodeClickable(node);
-            container.append(' ');  // A hacky separator to replicate natural rendering.
-            container.append(node);
-            Templates.runTemplateJS(js);
-        }.bind(this));
-    };
-
-    /**
-     * Whether the item is in the stash.
-     *
-     * @param {Number} id The item ID.
-     * @return {Boolean}
-     */
-    StashArea.prototype.containsItem = function(id) {
-        return this.getUserItemNode(id).length > 0;
-    };
-
-    /**
-     * Listens to drop picked up events.
-     *
-     * @param {Event} e The event.
-     */
-    StashArea.prototype._dropPickedUpListener = function(e) {
-        var userItem = e.useritem;
-        if (this.containsItem(userItem.getItem().get('id'))) {
-            this.updateUserItemQuantity(userItem);
-        } else {
-            this.addUserItem(userItem).then(function() {
-                this._node.find('.empty-content').remove();
-            }.bind(this));
+const getCollectionData = (courseid) => {
+    return Ajax.call([
+        {
+            methodname: 'block_stash_get_collections',
+            args: {courseid: courseid}
         }
-    };
+    ])[0];
+};
 
-    /**
-     * Get the user item node.
-     *
-     * @param {Number} id The item ID.
-     * @return {Node}
-     */
-    StashArea.prototype.getUserItemNode = function(id) {
-        return this._node.find('.block-stash-item[data-id=' + id + ']');
-    };
+const renderUserItem = (userItem) => {
+    return Templates.render('block_stash/user_item', {
+        item: userItem.getItem().getData(),
+        useritem: userItem.getData(),
+    });
+};
 
-    /**
-     * Make a user item node clickable.
-     *
-     * @param {Node} node The node.
-     */
-    StashArea.prototype._makeUserItemNodeClickable = function(node) {
-        node.attr('tabindex', 0);
-        node.attr('role', 'button');
-        node.attr('aria-haspopup', 'true');
-    };
+const setUpUserItemAreClickable = () => {
+    let stashitems = document.querySelectorAll('.block-stash-item');
+    stashitems.forEach(function(item) {
+        makeUserItemNodeClickable(item);
+    });
 
-    /**
-     * Render a user item.
-     *
-     * @param {UserItem} userItem The user item.
-     * @return {Promise}
-     */
-    StashArea.prototype._renderUserItem = function(userItem) {
-        return Templates.render(this._userItemTemplate, {
-            item: userItem.getItem().getData(),
-            useritem: userItem.getData(),
-        });
-    };
-
-    /**
-     * Set-up process to handle items being clickable.
-     */
-    StashArea.prototype._setUpUserItemAreClickable = function() {
-        // Make all items as clickable.
-        this._node.find('.item-list .block-stash-item').each(function(i, node) {
-            this._makeUserItemNodeClickable($(node));
-        }.bind(this));
-
-        // Delegate event.
-        var handler = function(e) {
-            var node = $(e.currentTarget),
-                itemId = node.data('id');
+    const handler = (e) => {
+        if (e.target.closest('.block-stash-item')) {
+            const itemelement = e.target.closest('.block-stash-item');
+            const itemId = itemelement.dataset.id;
 
             if (!itemId) {
                 return;
@@ -147,33 +68,68 @@ define([
 
             ItemModal.init(itemId);
             e.preventDefault();
-        };
-        var selector = '.block-stash-item[aria-haspopup="true"]';
-        this._node.find('.item-list').delegate(selector, 'click', handler);
-        this._node.find('.item-list').delegate(selector, 'keydown', function(e) {
-            if (e.keyCode != 13 && e.keyCode != 32) {
-                return;
+        }
+    };
+
+    let itemlist = document.querySelector('.item-list');
+    itemlist.addEventListener('click', (e) => handler(e));
+    itemlist.addEventListener('keydown', (e) => {
+        if (e.keyCode != 13 && e.keyCode != 32) {
+            return;
+        }
+        handler(e);
+    });
+};
+
+const makeUserItemNodeClickable = (node) => {
+    node.setAttribute('tabindex', 0);
+    node.setAttribute('role', 'button');
+    node.setAttribute('aria-haspopup', 'true');
+};
+
+const dropPickedUpListener = (e) => {
+    let userItem = e.useritem;
+    if (containsItem(userItem.getItem().get('id'))) {
+        updateUserItemQuantity(userItem);
+    } else {
+        addUserItem(userItem).then(() => {
+            const emptyelement = document.querySelector('.empty-content');
+            if (emptyelement !== null) {
+                document.querySelector('.empty-content').remove();
             }
-            handler(e);
         });
-    };
+    }
+};
 
-    /**
-     * Update the quantity of a user item.
-     *
-     * @param {UserItem} userItem The user item.
-     */
-    StashArea.prototype.updateUserItemQuantity = function(userItem) {
-        var node = this.getUserItemNode(userItem.getItem().get('id')),
-            quantityNode = node.find('.item-quantity'),
-            newQuantity = userItem.get('quantity'),
-            quantity = parseInt(quantityNode.text(), 10);
+const containsItem = (itemId) => {
+    const itemnode = document.querySelector('.block-stash-item[data-id="' + itemId + '"]');
+    return (itemnode);
+};
 
-        quantityNode.text(newQuantity);
-        node.removeClass('item-quantity-' + quantity);
-        node.addClass('item-quantity-' + newQuantity);
-    };
+const updateUserItemQuantity = (userItem) => {
+    const itemnode = document.querySelector('.block-stash-item[data-id="' + userItem.getItem().get('id') + '"]'),
+          quantityNode = itemnode.querySelector('.item-quantity'),
+          newQuantity = userItem.get('quantity'),
+          quantity = parseInt(quantityNode.textContent, 10);
 
-    return /** @alias module:block_stash/stash */ StashArea;
+    quantityNode.textContent = newQuantity;
+    quantityNode.style.display = 'block';
+    itemnode.classList.remove('item-quantity-' + quantity);
+    itemnode.classList.add('item-quantity-' + newQuantity);
+};
 
-});
+const addUserItem = (userItem) => {
+    return renderUserItem(userItem).then((html, js) => {
+        // We have two areas to update now, the all tab and the collections tab.
+        window.console.log(_collections);
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        const node = template.content.firstChild;
+        const container = document.querySelector('#allitems');
+        node.dataset.useritem = userItem;
+        makeUserItemNodeClickable(node);
+        container.append(' ');  // A hacky separator to replicate natural rendering.
+        container.append(node);
+        Templates.runTemplateJS(js);
+    });
+};

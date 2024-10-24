@@ -201,6 +201,7 @@ class renderer extends plugin_renderer_base {
 
     public function render_block_content(renderable $page) {
         $data = $page->export_for_template($this);
+        $this->page->requires->js_call_amd('block_stash/stash-area', 'init', ['stashid' => $data['courseid']]);
         return parent::render_from_template('block_stash/main_content', $data);
     }
 

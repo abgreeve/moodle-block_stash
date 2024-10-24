@@ -75,6 +75,7 @@ class block_content implements renderable, templatable {
         $swapcount = $swaphandler->get_unread_requests($userid);
 
         $data['id'] = $this->manager->get_stash()->get_id();
+        $data['courseid'] = $this->manager->get_courseid();
         $data['canacquireitems'] = $this->manager->can_acquire_items();
         $data['canmanage'] = $this->manager->can_manage();
         $data['hasitems'] = (isset($useritems) && !empty($useritems));

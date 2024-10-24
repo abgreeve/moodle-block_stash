@@ -41,6 +41,7 @@ list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_collec
 
 $collectionmanager = collection_manager::init($manager);
 $data = $collectionmanager->get_collections_with_items();
+print_object($data);
 
 
 switch ($action) {

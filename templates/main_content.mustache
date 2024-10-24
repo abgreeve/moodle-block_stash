@@ -96,12 +96,3 @@
     <h5>{{#str}}leaderboards, block_stash{{/str}}</h5>
     {{> block_stash/local/leaderboard_settings/carousel}}
 {{/leaderboards_enabled}}
-
-{{#js}}
-require([
-    'jquery',
-    'block_stash/stash-area'
-], function($, StashArea) {
-    var Area = new StashArea('#stash-area-{{id}}');
-});
-{{/js}}

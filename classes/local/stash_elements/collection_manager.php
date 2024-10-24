@@ -131,10 +131,12 @@ class collection_manager {
         $allitems = $this->get_all_item_details_for_display();
 
         foreach ($collections as $collection) {
+            $cdata = $collection->to_array();
+            $cdata['id'] = $collection->get_id();
             $collectionitems = $this->get_collection_items($collection->get_id());
             $itemsdata = $this->find_item_data($collectionitems, $allitems);
             $richcollectiondata[] = [
-                'collection' => $collection,
+                'collection' => $cdata,
                 'items' => $itemsdata
             ];
         }

@@ -486,7 +486,7 @@ class manager {
      */
     public function get_items() {
         $this->require_enabled();
-        $this->require_manage();
+        // $this->require_manage();
 
         return item::get_records(['stashid' => $this->get_stash()->get_id()], 'name');
     }
