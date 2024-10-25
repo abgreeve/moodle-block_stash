@@ -24,10 +24,13 @@ import Ajax from 'core/ajax';
 import * as ItemModal from 'block_stash/item-modal';
 import * as PubSub from 'core/pubsub';
 import Templates from 'core/templates';
+import {get_string as getString} from 'core/str';
 
 var _collections = [];
+var _node = null;
 
 export const init = async(courseid) => {
+    _node = document.querySelector('.block-stash-main-block');
     _collections = await getCollectionData(courseid);
     // window.console.log(_collections);
     setUpUserItemAreClickable();
@@ -52,7 +55,7 @@ const renderUserItem = (userItem) => {
 };
 
 const setUpUserItemAreClickable = () => {
-    let stashitems = document.querySelectorAll('.block-stash-item');
+    let stashitems = _node.querySelectorAll('.block-stash-item');
     stashitems.forEach(function(item) {
         makeUserItemNodeClickable(item);
     });
@@ -71,7 +74,7 @@ const setUpUserItemAreClickable = () => {
         }
     };
 
-    let itemlist = document.querySelector('.item-list');
+    let itemlist = _node.querySelector('.item-list');
     itemlist.addEventListener('click', (e) => handler(e));
     itemlist.addEventListener('keydown', (e) => {
         if (e.keyCode != 13 && e.keyCode != 32) {
@@ -102,34 +105,116 @@ const dropPickedUpListener = (e) => {
 };
 
 const containsItem = (itemId) => {
-    const itemnode = document.querySelector('.block-stash-item[data-id="' + itemId + '"]');
+    const itemnode = _node.querySelector('.block-stash-item[data-id="' + itemId + '"]');
     return (itemnode);
 };
 
 const updateUserItemQuantity = (userItem) => {
-    const itemnode = document.querySelector('.block-stash-item[data-id="' + userItem.getItem().get('id') + '"]'),
-          quantityNode = itemnode.querySelector('.item-quantity'),
-          newQuantity = userItem.get('quantity'),
-          quantity = parseInt(quantityNode.textContent, 10);
+    const itemnodes = _node.querySelectorAll('.block-stash-item[data-id="' + userItem.getItem().get('id') + '"]');
+    itemnodes.forEach((itemnode) => {
+        const quantityNode = itemnode.querySelector('.item-quantity'),
+              newQuantity = userItem.get('quantity'),
+              quantity = parseInt(quantityNode.textContent, 10);
 
-    quantityNode.textContent = newQuantity;
-    quantityNode.style.display = 'block';
-    itemnode.classList.remove('item-quantity-' + quantity);
-    itemnode.classList.add('item-quantity-' + newQuantity);
+        quantityNode.textContent = newQuantity;
+        quantityNode.style.display = 'block';
+        itemnode.classList.remove('item-quantity-' + quantity);
+        itemnode.classList.add('item-quantity-' + newQuantity);
+    });
 };
 
 const addUserItem = (userItem) => {
     return renderUserItem(userItem).then((html, js) => {
         // We have two areas to update now, the all tab and the collections tab.
-        window.console.log(_collections);
+        // window.console.log(_collections);
+        const collectionids = getCollectionDisplayInfo(userItem);
         const template = document.createElement('template');
         template.innerHTML = html;
         const node = template.content.firstChild;
+        // All items display
         const container = document.querySelector('#allitems');
         node.dataset.useritem = userItem;
         makeUserItemNodeClickable(node);
         container.append(' ');  // A hacky separator to replicate natural rendering.
         container.append(node);
+
+        // Collections display
+        if (collectionids.length > 0) {
+            collectionids.forEach(async(id) => {
+                let collectionnode = node.cloneNode(true);
+                const collectioncontainer = _node.querySelector('.block-stash-collections[data-collectionid="' + id + '"');
+                if (collectioncontainer) {
+                    collectioncontainer.appendChild(collectionnode);
+                } else {
+                    // If there are no items in the collection then the collection needs to be added.
+                    const collectionelement = document.createElement('fieldset');
+                    collectionelement.classList.add("block-stash-collections", "mb-1", "p-2");
+                    collectionelement.dataset.collectionid = id;
+                    // Now we need a legend.
+                    const legendelement = document.createElement('legend');
+                    legendelement.classList.add('block-stash-collection-legend', 'p-1');
+                    legendelement.innerText = await getCollectionString(id);
+                    collectionelement.appendChild(legendelement);
+                    collectionelement.appendChild(collectionnode);
+                    const parentelement = _node.querySelector('.block-stash-collections-area');
+                    parentelement.appendChild(collectionelement);
+                }
+            });
+        }
+
         Templates.runTemplateJS(js);
     });
+};
+
+const getCollectionString = async(collectionid) => {
+    const currentcount = countCollectionItems(collectionid);
+    const collection = getInternalCollectionData(collectionid);
+    window.console.log(collection);
+    const data = {
+        name: collection['collection'].name,
+        collected: parseInt(currentcount+1),
+        total: collection['items'].length
+    };
+    const colstring = await getString('collected', 'block_stash', data);
+    return colstring;
+};
+
+const countCollectionItems = (collectionid) => {
+    const collectioncontainer = _node.querySelector('.block-stash-collections[data-collectionid="' + collectionid + '"');
+    if (!collectioncontainer) {
+        return 0;
+    }
+    const items = collectioncontainer.querySelector('.block-stash-item');
+    return items.length;
+};
+
+const getInternalCollectionData = (collectionid) => {
+    let collectionresult = null;
+    _collections.forEach((collection) => {
+        window.console.log(collectionid);
+        window.console.log(collection);
+        if (collection['collection'].id == collectionid) {
+
+            window.console.log('yeah here man');
+            collectionresult = collection;
+        }
+    });
+    // window.console.log('yeah here man');
+    return collectionresult;
+};
+
+const getCollectionDisplayInfo = (userItem) => {
+    // Loop through each collection
+    let data = [];
+    _collections.forEach((collection) => {
+        // Loop through the collections items to see if we have a match.
+        collection['items'].forEach((item) => {
+            if (item.id == userItem.getItem().get('id')) {
+                const quick = collection['collection'];
+                data.push(quick.id);
+            }
+
+        });
+    });
+    return data;
 };

@@ -27,7 +27,7 @@
     * -
 }}
 
-<div id="stash-area-{{id}}" data-id="{{id}}">
+<div id="stash-area-{{id}}" class="block-stash-main-block" data-id="{{id}}">
 {{#canacquireitems}}
     <ul class="nav nav-tabs" id="itemTab" role="tablist">
         <li class="nav-item" role="presentation">
@@ -47,12 +47,15 @@
             {{/items}}
         </div>
 
-        <div class="tab-pane fade" id="collections" role="tabpanel" aria-labelledby="collections-tab">
+        <div class="tab-pane fade block-stash-collections-area" id="collections" role="tabpanel" aria-labelledby="collections-tab">
         {{^items}}
             <div class="empty-content alert alert-info">{{#str}}yourinventoryisempty, block_stash{{/str}}</div>
         {{/items}}
         {{#collections}}
-            <fieldset class="block-stash-collections mb-1 p-2" {{#completed}} style="border-color: #088208; color: #088208;" {{/completed}}>
+            <fieldset
+             class="block-stash-collections mb-1 p-2"
+             data-collectionid={{collectionid}}
+             {{#completed}} style="border-color: #088208; color: #088208;" {{/completed}}>
                 <legend class="block-stash-collection-legend p-1">{{collection}}</legend>
                 {{#items}}
                     {{>block_stash/user_item}}

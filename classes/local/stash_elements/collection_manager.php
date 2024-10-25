@@ -114,6 +114,7 @@ class collection_manager {
                     $thing = (count($useditems) == count($collectionitems));
 
                     $organised[] = [
+                        'collectionid' => $collection->get_id(),
                         'collection' => get_string('collected', 'block_stash', $a),
                         'completed' => $thing,
                         'items' => array_values($useditems)
