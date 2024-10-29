@@ -125,4 +125,42 @@ class collection {
         }
         return $items;
     }
+
+    public function get_collections_with_prizes($stashid) {
+        global $DB;
+
+        $sql = "SELECT cp.id as collectionprizeid, cp.itemid, c.id, c.stashid, c.name, c.showtostudent, c.removeoncompletion
+        FROM {block_stash_collection_prizes} cp
+        JOIN {block_stash_collections} c ON cp.collectionid = c.id
+        WHERE c.stashid = :stashid";
+
+        $collectionrecords = $DB->get_records_sql($sql, ['stashid' => $stashid]);
+        $collections = [];
+        foreach ($collectionrecords as $collectionrecord) {
+            if (!isset($collections[$collectionrecord->id])) {
+                $collection = new collection_model(
+                    $collectionrecord->stashid,
+                    $collectionrecord->name,
+                    $collectionrecord->showtostudent,
+                    $collectionrecord->removeoncompletion,
+                    $collectionrecord->id
+                );
+                $prizes = [];
+                $prizes[$collectionrecord->itemid] = [
+                    'id' => $collectionrecord->collectionprizeid,
+                    'itemid' => $collectionrecord->itemid
+                ];
+                $collections[$collectionrecord->id] = [
+                    'collection' => $collection,
+                    'prizes' => $prizes
+                ];
+            } else {
+                $collections[$collectionrecord->id]['prizes'][] = [
+                    'id' => $collectionrecord->collectionprizeid,
+                    'itemid' => $collectionrecord->itemid
+                ];
+            }
+        }
+        return $collections;
+    }
 }

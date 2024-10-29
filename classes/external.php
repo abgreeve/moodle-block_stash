@@ -156,6 +156,17 @@ class external extends external_api {
             'item' => $manager->get_item($drop->get_itemid()),
             'useritem' => $manager->get_user_item($USER->id, $drop->get_itemid())
         ]);
+
+        // Check for collection completion.
+        // Need to check all collections for completion.
+        // Send the user id and the item id.
+        $collectionmanager = block_stash\local\stash_elements\collection_manager::init($manager);
+        // This only returns newly completed collections with prizes.
+        $completedcollections = $collectionmanager->get_collection_completion_with_item($USER->id, $drop->get_itemid());
+
+
+
+
         return $exporter->export($output);
     }
 

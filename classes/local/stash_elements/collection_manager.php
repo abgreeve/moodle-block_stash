@@ -182,6 +182,49 @@ class collection_manager {
         $this->collectionrepository->delete($collection->get_id());
     }
 
+    public function get_collection_completion_with_item($userid, $itemid) {
+        $result = [];
+        $collections = $this->collectionrepository->get_collections_with_prizes($this->manager->get_stash()->get_id());
+        foreach ($collections as $collection) {
+            $collection['items'] = $this->get_collection_items($collection['collection']->get_id());
+
+            if (array_key_exists($itemid, $collection['items'])) {
+                $result[$collection['collection']->get_id()] = $collection;
+            }
+        }
+        if (empty($result)) {
+            return [];
+        }
+        // We have a list of potential collections that may have been completed. Now to query if the user has all of the items in these collections.
+        $useritems = $this->manager->get_all_user_items_in_stash($userid);
+
+        $verdict = [];
+
+        foreach ($result as $collection) {
+            $collectionid = $collection['collection']->get_id();
+            foreach ($collection['items'] as $item) {
+                if (array_key_exists($item->itemid, $useritems)) {
+                    if ($useritems[$item->itemid]->useritem->get_quantity() > 0) {
+                        $verdict[$collectionid]['items'][$item->itemid] = $item;
+                    }
+                }
+            }
+            if (isset($verdict[$collectionid])) {
+                if (count($collection['items']) == count($verdict[$collectionid]['items'])) {
+                    $verdict[$collectionid]['completed'] = true;
+                }
+            }
+        }
+
+        $yetanotherarray = [];
+        foreach ($verdict as $key => $data) {
+            if (isset($data['completed'])) {
+                $yetanotherarray[] = $result[$key];
+            }
+        }
+        return $yetanotherarray;
+    }
+
     public static function init($manager) {
         $repository = new collection_repository();
         return new self($manager, $repository);
