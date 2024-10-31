@@ -120,6 +120,25 @@ const updateUserItemQuantity = (userItem) => {
         quantityNode.style.display = 'block';
         itemnode.classList.remove('item-quantity-' + quantity);
         itemnode.classList.add('item-quantity-' + newQuantity);
+        if (newQuantity == "0") {
+            window.console.log("I want to know about it");
+            // Get collection ids
+            const collectionids = getCollectionDisplayInfo(userItem);
+            if (collectionids.length > 0) {
+                collectionids.forEach(async(id) => {
+                    const collectioncontainer = _node.querySelector('.block-stash-collections[data-collectionid="' + id + '"');
+                    if (collectioncontainer) {
+                        const existinglegendelement = collectioncontainer.querySelector('legend');
+                        existinglegendelement.innerText = await getCollectionString(id, true);
+                        // If the legend color style is set then remove
+                        if (existinglegendelement.getAttribute("style") !== null) {
+                            existinglegendelement.style.removeProperty("color");
+                            existinglegendelement.style.removeProperty("border-color");
+                        }
+                    }
+                });
+            }
+        }
     });
 };
 
@@ -144,7 +163,15 @@ const addUserItem = (userItem) => {
                 let collectionnode = node.cloneNode(true);
                 const collectioncontainer = _node.querySelector('.block-stash-collections[data-collectionid="' + id + '"');
                 if (collectioncontainer) {
+                    const existinglegendelement = collectioncontainer.querySelector('legend');
+                    existinglegendelement.innerText = await getCollectionString(id);
                     collectioncontainer.appendChild(collectionnode);
+                    if (softCheckCollectioComplete(id)) {
+                        existinglegendelement.style.borderColor = '#088208';
+                        existinglegendelement.style.color = '#088208';
+                    }
+                    // window.console.log(existinglegendelement);
+
                 } else {
                     // If there are no items in the collection then the collection needs to be added.
                     const collectionelement = document.createElement('fieldset');
@@ -166,13 +193,13 @@ const addUserItem = (userItem) => {
     });
 };
 
-const getCollectionString = async(collectionid) => {
+const getCollectionString = async(collectionid, check = false) => {
     const currentcount = countCollectionItems(collectionid);
     const collection = getInternalCollectionData(collectionid);
-    window.console.log(collection);
+    let collectedcount = (check) ? currentcount : parseInt(currentcount+1);
     const data = {
         name: collection['collection'].name,
-        collected: parseInt(currentcount+1),
+        collected: collectedcount,
         total: collection['items'].length
     };
     const colstring = await getString('collected', 'block_stash', data);
@@ -184,22 +211,30 @@ const countCollectionItems = (collectionid) => {
     if (!collectioncontainer) {
         return 0;
     }
-    const items = collectioncontainer.querySelector('.block-stash-item');
-    return items.length;
+    const items = collectioncontainer.querySelectorAll('.block-stash-item');
+    let collectioncount = items.length;
+    items.forEach((item) => {
+        const quantitynode = item.querySelector('.item-quantity');
+        if (quantitynode.innerText == '0') {
+            collectioncount--;
+        }
+    });
+    return collectioncount;
+};
+
+const softCheckCollectioComplete = (collectionid) => {
+    const currentcount = countCollectionItems(collectionid);
+    const collection = getInternalCollectionData(collectionid);
+    return (collection['items'].length == currentcount);
 };
 
 const getInternalCollectionData = (collectionid) => {
     let collectionresult = null;
     _collections.forEach((collection) => {
-        window.console.log(collectionid);
-        window.console.log(collection);
         if (collection['collection'].id == collectionid) {
-
-            window.console.log('yeah here man');
             collectionresult = collection;
         }
     });
-    // window.console.log('yeah here man');
     return collectionresult;
 };
 
