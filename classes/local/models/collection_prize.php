@@ -36,11 +36,13 @@ class collection_prize {
     private $id;
     private $collectionid;
     private $itemid;
+    private $dropid;
 
-    public function __construct($collectionid, $itemid, $id = null) {
+    public function __construct($collectionid, $itemid, $dropid, $id = null) {
         $this->id = $id;
         $this->collectionid = $collectionid;
         $this->itemid = $itemid;
+        $this->dropid = $dropid;
     }
 
     public function set_id($id) {
@@ -55,6 +57,7 @@ class collection_prize {
         return [
             'collectionid' => $this->collectionid,
             'itemid' => $this->itemid,
+            'dropid' => $this->dropid
         ];
     }
 }

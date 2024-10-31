@@ -149,6 +149,26 @@ class external extends external_api {
 
         $manager->pickup_drop($drop);
 
+        // Check for collection completion.
+        // Need to check all collections for completion.
+        // Send the user id and the item id.
+        $collectionmanager = \block_stash\local\stash_elements\collection_manager::init($manager);
+        // This only returns newly completed collections with prizes.
+        $completedcollections = $collectionmanager->get_collection_completion_with_item($USER->id, $drop->get_itemid());
+
+        // Loop through completed collections that have prizes and try picking them up. Check for exception. No exception then
+        // record that to inform the student that they have completed a collection and received a new item.
+        foreach ($completedcollections as $collection) {
+            foreach ($collection['prizes'] as $prize) {
+                $prizedrop = $manager->get_drop($prize['dropid']);
+                try {
+                    $manager->pickup_drop($prizedrop);
+                } catch (\Exception $e) {
+                    // TODO More to happen.
+                }
+            }
+        }
+
         // TODO Do not disclose so much information to the student.
         $output = $PAGE->get_renderer('block_stash');
         $exporter = new user_item_summary_exporter([], [
@@ -156,16 +176,6 @@ class external extends external_api {
             'item' => $manager->get_item($drop->get_itemid()),
             'useritem' => $manager->get_user_item($USER->id, $drop->get_itemid())
         ]);
-
-        // Check for collection completion.
-        // Need to check all collections for completion.
-        // Send the user id and the item id.
-        $collectionmanager = block_stash\local\stash_elements\collection_manager::init($manager);
-        // This only returns newly completed collections with prizes.
-        $completedcollections = $collectionmanager->get_collection_completion_with_item($USER->id, $drop->get_itemid());
-
-
-
 
         return $exporter->export($output);
     }

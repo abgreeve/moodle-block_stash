@@ -63,19 +63,20 @@ class collection_manager {
         }
         foreach ($collectiondata->prizes as $prize) {
             if ($prize != 0) { // 0 Is none, and we are not saving that.
-                $collectionprize = new collection_prize(
-                    $collection->get_id(),
-                    $prize,
-                );
-                $this->collectionrepository->save_prize($collectionprize);
                 // Create a drop for this prize.
-                $drop = (object) [
+                $dropdata = (object) [
                     'id' => 0,
                     'itemid' => $prize,
                     'name' => 'Prize for completing ' . $collection->get_name(),
                     'pickupinterval' => 3600,
                 ];
-                $this->manager->create_or_update_drop($drop);
+                $drop = $this->manager->create_or_update_drop($dropdata);
+                $collectionprize = new collection_prize(
+                    $collection->get_id(),
+                    $prize,
+                    $drop->get_id()
+                );
+                $this->collectionrepository->save_prize($collectionprize);
             }
         }
     }
@@ -90,6 +91,10 @@ class collection_manager {
 
     public function get_collection_items($collectionid) {
         return $this->collectionrepository->get_collection_items_array($collectionid);
+    }
+
+    public function get_collection_prizes($collectionid) {
+        return $this->collectionrepository->get_collection_prizes_array($collectionid);
     }
 
     public function organise_items_into_collections($items) {
@@ -174,14 +179,16 @@ class collection_manager {
     }
 
     public function delete_collection($collection) {
-        // Remove user drops
-        // Remove drop
-        // $this->manager->delete_drop($drop); // Deletes user drops and drops.
+        $prizes = $this->get_collection_prizes($collection->get_id());
+        foreach ($prizes as $prize) {
+            $this->manager->delete_drop($prize->dropid); // Deletes user drops and drops.
+        }
         $this->collectionrepository->delete_prizes($collection->get_id());
         $this->collectionrepository->delete_items($collection->get_id());
         $this->collectionrepository->delete($collection->get_id());
     }
 
+    // This function needs refactoring. Too many loops.
     public function get_collection_completion_with_item($userid, $itemid) {
         $result = [];
         $collections = $this->collectionrepository->get_collections_with_prizes($this->manager->get_stash()->get_id());

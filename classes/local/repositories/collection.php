@@ -126,10 +126,20 @@ class collection {
         return $items;
     }
 
+    public function get_collection_prizes_array($collectionid) {
+        global $DB;
+        $collectionprizes = $DB->get_records('block_stash_collection_prizes', ['collectionid' => $collectionid]);
+        $prizes = [];
+        foreach ($collectionprizes as $cprizes) {
+            $prizes[$cprizes->itemid] = $cprizes;
+        }
+        return $prizes;
+    }
+
     public function get_collections_with_prizes($stashid) {
         global $DB;
 
-        $sql = "SELECT cp.id as collectionprizeid, cp.itemid, c.id, c.stashid, c.name, c.showtostudent, c.removeoncompletion
+        $sql = "SELECT cp.id as collectionprizeid, cp.itemid, cp.dropid, c.id, c.stashid, c.name, c.showtostudent, c.removeoncompletion
         FROM {block_stash_collection_prizes} cp
         JOIN {block_stash_collections} c ON cp.collectionid = c.id
         WHERE c.stashid = :stashid";
@@ -148,7 +158,8 @@ class collection {
                 $prizes = [];
                 $prizes[$collectionrecord->itemid] = [
                     'id' => $collectionrecord->collectionprizeid,
-                    'itemid' => $collectionrecord->itemid
+                    'itemid' => $collectionrecord->itemid,
+                    'dropid' => $collectionrecord->dropid
                 ];
                 $collections[$collectionrecord->id] = [
                     'collection' => $collection,
@@ -157,7 +168,8 @@ class collection {
             } else {
                 $collections[$collectionrecord->id]['prizes'][] = [
                     'id' => $collectionrecord->collectionprizeid,
-                    'itemid' => $collectionrecord->itemid
+                    'itemid' => $collectionrecord->itemid,
+                    'dropid' => $collectionrecord->dropid
                 ];
             }
         }

@@ -533,7 +533,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024019002, 'stash');
     }
 
-    if ($oldversion < 2024101700) {
+    if ($oldversion < 2024101703) {
 
         // Define table block_stash_collections to be created.
         $table = new xmldb_table('block_stash_collections');
@@ -576,6 +576,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('collectionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('dropid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'itemid');
 
         // Adding keys to table block_stash_collection_prizes.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
@@ -586,7 +587,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         }
 
         // Stash savepoint reached.
-        upgrade_block_savepoint(true, 2024101700, 'stash');
+        upgrade_block_savepoint(true, 2024101703, 'stash');
     }
 
     return true;
