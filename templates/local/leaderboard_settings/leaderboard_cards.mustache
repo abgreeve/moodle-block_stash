@@ -22,13 +22,13 @@
 <div class="card mb-1">
     <div class="card-body">
         <h4 class="card-title">{{title}}</h4>
-        <div class="ml-3">
-            <div class="row custom-control custom-switch">
-                <input type="checkbox" class="block_stash-leaderboard custom-control-input"
+        <div class="ms-3">
+            <div class="row form-check form-switch">
+                <input type="checkbox" class="block_stash-leaderboard form-check-input"
                     id="cS-leaderboard-{{id}}" data-courseid="{{courseid}}" data-location="{{location}}"
                     {{#active}}checked="true"{{/active}}
                 >
-                <label class="custom-control-label" for="cS-leaderboard-{{id}}">Enable</label>
+                <label class="form-check-label" for="cS-leaderboard-{{id}}">Enable</label>
             </div>
             {{{optionshtml}}}
             <input type="hidden" name="leaderboard-options-{{id}}" data-options="">

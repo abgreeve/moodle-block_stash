@@ -25,17 +25,17 @@
         <div class="card-body">
             <h4 class="card-title">{{#str}}generalsettings, block_stash{{/str}}</h4>
             <div>
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="block-stash-lbsetting custom-control-input" id="cS-leaderboard"
+                <div class="form-check form-switch">
+                    <input type="checkbox" class="block-stash-lbsetting form-check-input" id="cS-leaderboard"
                         data-courseid="{{courseid}}" {{#lbenabled}}checked="true"{{/lbenabled}}
                     >
-                    <label class="custom-control-label" for="cS-leaderboard">{{#str}}leaderboard, block_stash{{/str}}</label>
+                    <label class="form-check-label" for="cS-leaderboard">{{#str}}leaderboard, block_stash{{/str}}</label>
                 </div>
-                <div class="custom-control custom-switch mt-2">
-                    <input type="checkbox" class="block-stash-lbgroups custom-control-input" id="cS-leaderboard-groups"
+                <div class="form-check form-switch mt-2">
+                    <input type="checkbox" class="block-stash-lbgroups form-check-input" id="cS-leaderboard-groups"
                         data-courseid="{{courseid}}" {{#lbgroups}}checked="true"{{/lbgroups}}
                     >
-                    <label class="custom-control-label" for="cS-leaderboard-groups">{{#str}}leaderboard_groups, block_stash{{/str}}
+                    <label class="form-check-label" for="cS-leaderboard-groups">{{#str}}leaderboard_groups, block_stash{{/str}}
                     </label>
                 </div>
             </div>
