@@ -20,26 +20,26 @@
     Swap navigation.
 }}
 <div class="container-fluid tertiary-navigation full-width-bottom-border">
-    <div class="row">
-        <div class="navitem">
-            <h2 class="h4">{{header}}</h2>
+    <nav class="navbar navbar-expand-lg">
+        <span class="navbar-brand mb-0 h4">{{header}}</span>
+        <div class="navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a href="{{tradeurl}}">{{#str}}tradecenter, block_stash{{/str}}</a>
+                </li>
+                <li class="nav-item px-1">|</li>
+                <li class="nav-item">
+                    <a href="{{offerurl}}">{{#str}}offers, block_stash{{/str}}</a>
+                </li>
+                {{#other}}
+                <li class="nav-item ps-1">
+                    {{>block_stash/item_selector}}
+                </li>
+                <li class="nav-item ps-1">
+                    {{>block_stash/user_selector}}
+                </li>
+                {{/other}}
+            </ul>
         </div>
-        <div class="navitem-divider"></div>
-        <div class="navitem align-items-center">
-            <a href="{{tradeurl}}">{{#str}}tradecenter, block_stash{{/str}}</a>
-        </div>
-        <div class="navitem align-items-center">/</div>
-        <div class="navitem align-items-center">
-            <a href="{{offerurl}}">{{#str}}offers, block_stash{{/str}}</a>
-        </div>
-        <div class="navitem-divider"></div>
-        {{#other}}
-        <div class="navitem">
-                {{>block_stash/item_selector}}
-        </div>
-        <div class="navitem">
-                {{>block_stash/user_selector}}
-        </div>
-        {{/other}}
-    </div>
+    </nav>
 </div>
