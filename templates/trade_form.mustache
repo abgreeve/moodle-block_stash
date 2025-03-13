@@ -84,16 +84,18 @@
             </div>
         </div>
         <div class="row">
-            <input type="hidden" name="courseid" value="{{courseid}}" />
-            {{#tradeid}}
-            <input type="hidden" name="id" value="{{tradeid}}" />
-            {{/tradeid}}
-            <input type="hidden" name="stashid" value="{{stashid}}" />
-            <input type="hidden" name="hashcode" value="{{hashcode}}" />
-            <input type="hidden" name="sesskey" value="{{sesskey}}" />
-            {{^removeformbuttons}}
-            <input type="submit" value="{{#str}}savechanges, block_stash{{/str}}" class="btn btn-primary" />
-            {{/removeformbuttons}}
+            <div clas="col">
+                <input type="hidden" name="courseid" value="{{courseid}}" />
+                {{#tradeid}}
+                <input type="hidden" name="id" value="{{tradeid}}" />
+                {{/tradeid}}
+                <input type="hidden" name="stashid" value="{{stashid}}" />
+                <input type="hidden" name="hashcode" value="{{hashcode}}" />
+                <input type="hidden" name="sesskey" value="{{sesskey}}" />
+                {{^removeformbuttons}}
+                <button type="submit" class="btn btn-primary">{{#str}}savechanges, block_stash{{/str}}</button>
+                {{/removeformbuttons}}
+            </div>
         </div>
     </div>
     </form>

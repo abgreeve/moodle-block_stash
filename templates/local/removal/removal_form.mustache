@@ -25,9 +25,9 @@
     </div>
     <div class="input-group">
         <!-- Quiz selector -->
-        <label for="quiz_selector">{{#str}}selectquiz, block_stash{{/str}}</label>
-        <select class="form-control block-stash-quiz-select" id="quiz_selector">
-            <option value="0">Select a quiz</option>
+        <label class="pe-2" for="quiz_selector">{{#str}}selectquiz, block_stash{{/str}}</label>
+        <select class="form-control form-select block-stash-quiz-select" id="quiz_selector">
+            <option value="0">{{#str}}selectquizcheck, block_stash{{/str}}</option>
             {{#quizzes}}
                 <option value="{{id}}" {{#selected}}selected="{{selected}}"{{/selected}}>{{name}}</option>
             {{/quizzes}}
