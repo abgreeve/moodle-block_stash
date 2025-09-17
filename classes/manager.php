@@ -1402,4 +1402,32 @@ class manager {
         // block_stash
         $DB->delete_records('block_stash', ['id' => $this->get_stash()->get_id()]);
     }
+
+    public function delete_all_users_items() {
+        global $DB;
+
+        // Remove all user drop pickups
+        $sql = "SELECT d.id
+                  FROM {block_stash_drops} d
+             LEFT JOIN {block_stash_items} i ON i.id = d.itemid
+                 WHERE i.stashid = :stashid";
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
+        $DB->delete_records_list('block_stash_drop_pickups', 'dropid', array_keys($records));
+        // Remove all user items
+        $sql = "SELECT ui.id
+                  FROM {block_stash_user_items} ui
+             LEFT JOIN {block_stash_items} i ON i.id = ui.itemid
+                 WHERE i.stashid = :stashid";
+        $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
+        $DB->delete_records_list('block_stash_user_items', 'id', array_keys($records));
+        // Reset all item counts
+        // This is horrible, to do this the Moodle way we loop through every item and do an individual update.
+        $items = $this->get_items();
+        foreach($items as $item) {
+            if ($item->is_scarce_item()) {
+                $item->set_currentamount($item->get_amountlimit());
+                $item->update();
+            }
+        }
+    }
 }

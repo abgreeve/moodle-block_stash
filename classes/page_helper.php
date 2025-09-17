@@ -262,4 +262,26 @@ class page_helper {
         return [$title, $subtitle, $returnurl];
     }
 
+    public static function setup_for_settings(moodle_url $url, manager $manager, $subtitle = '') {
+        global $PAGE;
+
+        $context = $manager->get_context();
+        $heading = $context->get_context_name();
+        $title = get_string('settings', 'block_stash');
+
+        $PAGE->set_context($context);
+        $PAGE->set_pagelayout('course');
+        $PAGE->set_title($title);
+        $PAGE->set_heading($heading);
+        $PAGE->set_url($url);
+
+        $returnurl = new moodle_url('/blocks/stash/settings.php', ['courseid' => $manager->get_courseid()]);
+
+        $PAGE->navbar->add(get_string('stash', 'block_stash'));
+        $PAGE->navbar->add($title, $returnurl);
+
+        return [$title, $subtitle, $returnurl];
+    }
+
+
 }

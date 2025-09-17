@@ -178,6 +178,11 @@ class renderer extends plugin_renderer_base {
                 new moodle_url('/blocks/stash/lbsettings.php', ['courseid' => $courseid]),
                 get_string('navleaderboadsettings', 'block_stash')
             );
+            $tabs[] = new tabobject(
+                'settings',
+                new moodle_url('/blocks/stash/settings.php', ['courseid' => $courseid]),
+                get_string('settings', 'block_stash')
+            );
         }
 
         // If there is only one page, then that is the page we are on.
@@ -261,6 +266,11 @@ class renderer extends plugin_renderer_base {
         $data = $page->export_for_template($this);
         $this->page->requires->js_call_amd('block_stash/local/removals/main', 'init', [$data['courseid']]);
         return parent::render_from_template('block_stash/local/removal/main_information', $data);
+    }
+
+    public function render_reset_user_button(renderable $page) {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('block_stash/local/settings/reset_users_items', $data);
     }
 
 }

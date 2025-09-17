@@ -1,6 +1,17 @@
 Block Stash
 ===========
 
+Version 2.2.1 (TBA)
+-------------------
+
+* Added a setting to allow teachers to reset all student items in a way that activities can be reset in a course.
+
+
+Version 2.2.0 (19th August 2025)
+--------------------------------
+
+* Fix most of the frontend that was using bootstrap 4 classes. Core changed to bootstrap 5 in a non backwards compatible way.
+
 Version 2.1.1 (12th September 2024)
 -----------------------------------
 
