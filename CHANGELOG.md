@@ -1,7 +1,7 @@
 Block Stash
 ===========
 
-Version 2.2.1 (TBA)
+Version 2.2.1 (8th October 2025)
 -------------------
 
 * Added a setting to allow teachers to reset all student items in a way that activities can be reset in a course.
