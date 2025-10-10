@@ -20,45 +20,25 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-    'jquery',
-    'core/ajax',
-    'core/log',
-    'block_stash/base',
-    'block_stash/item',
-    'block_stash/user-item',
-    'core/pubsub'
-], function($, Ajax, Log, Base, Item, UserItem, PubSub) {
+import base from 'block_stash/baseclass';
+import Ajax from 'core/ajax';
+import Log from 'core/log';
+import Item from 'block_stash/item';
+import UserItem from 'block_stash/user-item';
+import * as PubSub from 'core/pubsub';
 
-    /**
-     * Drop class.
-     *
-     * @param {Object} dropdata The data of this drop.
-     * @param {Item} item The item related to this drop.
-     */
-    function Drop(dropdata, item) {
-        Base.prototype.constructor.apply(this, [dropdata]);
-        this._item = item;
+export default class drop extends base {
+
+    constructor(dropdata, item) {
+        super(dropdata);
+        this.item = item;
     }
-    Drop.prototype = Object.create(Base.prototype);
 
-    Drop.prototype.EVENT_PICKEDUP = 'drop:pickedup';
+    getItem() {
+        return this.item;
+    }
 
-    /**
-     * Return the item of this drop.
-     *
-     * @return {Item}
-     */
-    Drop.prototype.getItem = function() {
-        return this._item;
-    };
-
-    /**
-     * Is the drop visible to the current user?
-     *
-     * @return {Promise} Rejected when not visible.
-     */
-    Drop.prototype.isVisible = function() {
+    isVisible() {
         return Ajax.call([{
             methodname: 'block_stash_is_drop_visible',
             args: {
@@ -67,18 +47,13 @@ define([
             }
         }])[0].then(function(visible) {
             if (!visible) {
-                return $.Deferred().reject();
+                return Promise.reject();
             }
             return true;
         });
-    };
+    }
 
-    /**
-     * Report the drop has having been picked up.
-     *
-     * @return {Promise} Resolved when picked up without errors.
-     */
-    Drop.prototype.pickup = function() {
+    pickup() {
         return Ajax.call([{
             methodname: 'block_stash_pickup_drop',
             args: {
@@ -97,8 +72,6 @@ define([
                 useritem: userItem
             });
         }.bind(this));
-    };
+    }
 
-    return /** @alias module:block_stash/drop */ Drop;
-
-});
+}

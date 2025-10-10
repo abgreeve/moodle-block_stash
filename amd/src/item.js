@@ -20,39 +20,23 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-    'core/ajax',
-    'block_stash/base',
-], function(Ajax, Base) {
+import base from 'block_stash/baseclass';
+import Ajax from 'core/ajax';
 
-    /**
-     * Item class.
-     *
-     * @param {Object} itemdata Data of the item.
-     */
-    function Item(itemdata) {
-        Base.prototype.constructor.apply(this, [itemdata]);
+export default class Item extends base {
+
+    constructor(itemdata) {
+        super(itemdata);
     }
-    Item.prototype = Object.create(Base.prototype);
 
-    /**
-     * Get an item.
-     *
-     * @param {Number} itemId The item ID.
-     * @return {Promise} Resolved with the item.
-     * @static
-     */
-    Item.getItem = function(itemId) {
+    static getItem(itemId) {
         return Ajax.call([{
             methodname: 'block_stash_get_item',
             args: {
                 itemid: itemId
             }
-        }])[0].then(function(data) {
+        }])[0].then((data) => {
             return new Item(data);
         });
-    };
-
-    return /** @alias module:block_stash/item */ Item;
-
-});
+    }
+}

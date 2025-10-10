@@ -20,31 +20,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-    'jquery',
-    'core/ajax',
-    'core/log',
-    'block_stash/base',
-    'block_stash/item',
-    'block_stash/user-item',
-    'core/pubsub'
-], function($, Ajax, Log, Base, Item, UserItem, PubSub) {
+import base from 'block_stash/baseclass';
+import Ajax from 'core/ajax';
+import Log from 'core/log';
+import Item from 'block_stash/item';
+import UserItem from 'block_stash/user-item';
+import * as PubSub from 'core/pubsub';
 
-    /**
-     * Trade class.
-     *
-     * @param {Object} tradedata The data of this trade widget.
-     */
-    function Trade(tradedata) {
-        Base.prototype.constructor.apply(this, [tradedata]);
+export default class Trade extends base {
+
+    constructor(tradedata) {
+        super(tradedata);
+        this.EVENT_TRADE = 'trade:pickedup';
     }
-    Trade.prototype = Object.create(Base.prototype);
 
-    Trade.prototype.EVENT_TRADE = 'trade:pickedup';
-
-
-    Trade.prototype.do = function() {
-
+    do() {
         return Ajax.call([{
             methodname: 'block_stash_complete_trade',
             args: {
@@ -53,7 +43,6 @@ define([
             }
         }])[0].fail(function() {
             Log.debug('The trade could not be completed.');
-
         }).then(function(data) {
 
             // Notify other areas about item removal and acquirement.
@@ -79,9 +68,6 @@ define([
             }
 
         }.bind(this));
-    };
+    }
 
-
-    return /** @alias module:block_stash/trade */ Trade;
-
-});
+}

@@ -1,6 +1,11 @@
 Block Stash
 ===========
 
+Version 2.2.2 (TBD)
+-------------------
+
+* Tidied up some of the JavaScript to use modern classes. Removed some jquery where found.
+
 Version 2.2.1 (8th October 2025)
 -------------------
 

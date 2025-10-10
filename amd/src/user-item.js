@@ -20,31 +20,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-    'block_stash/base'
-], function(Base) {
+import base from 'block_stash/baseclass';
 
-    /**
-     * UserItem class.
-     *
-     * @param {Object} data Data of the item.
-     * @param {Object} item Item information.
-     */
-    function UserItem(data, item) {
-        Base.prototype.constructor.apply(this, [data]);
-        this._item = item;
+export default class UserItem extends base {
+
+    constructor(data, item) {
+        super(data);
+        this.item = item;
     }
-    UserItem.prototype = Object.create(Base.prototype);
 
-    /**
-     * Return the item of this user item.
-     *
-     * @return {Item}
-     */
-    UserItem.prototype.getItem = function() {
-        return this._item;
-    };
+    getItem() {
+        return this.item;
+    }
 
-    return /** @alias module:block_stash/user-item */ UserItem;
-
-});
+}

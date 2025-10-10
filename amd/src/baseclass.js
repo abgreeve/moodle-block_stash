@@ -22,38 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([
-], function() {
-
-    /**
-     * Base class.
-     *
-     * @param {Object} data Data of the item.
-     */
-    function Base(data) {
-        this._data = data || {};
+export default class baseclass {
+    constructor(data) {
+        this.data = data;
     }
-    Base.prototype._data = null;
 
-    /**
-     * Return a property of the item.
-     *
-     * @param {String} property The name of the property.
-     * @return {Mixed}
-     */
-    Base.prototype.get = function(property) {
-        return this._data[property];
-    };
+    get(property) {
+        return this.data[property];
+    }
 
-    /**
-     * Return the data of this item.
-     *
-     * @return {Object}
-     */
-    Base.prototype.getData = function() {
-        return this._data;
-    };
-
-    return /** @alias module:block_stash/base */ Base;
-
-});
+    getData() {
+        return this.data;
+    }
+}
