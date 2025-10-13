@@ -29,11 +29,21 @@ import * as PubSub from 'core/pubsub';
 
 export default class Trade extends base {
 
+    /**
+     * Create a trade instance from raw data.
+     *
+     * @param {Object} tradedata Raw trade data originating from the backend.
+     */
     constructor(tradedata) {
         super(tradedata);
         this.EVENT_TRADE = 'trade:pickedup';
     }
 
+    /**
+     * Execute the trade and notify subscribers of item changes.
+     *
+     * @return {Promise<*>} Resolves with the trade response data.
+     */
     do() {
         return Ajax.call([{
             methodname: 'block_stash_complete_trade',

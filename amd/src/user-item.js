@@ -24,11 +24,22 @@ import base from 'block_stash/baseclass';
 
 export default class UserItem extends base {
 
+    /**
+     * Create a user item wrapper from raw data.
+     *
+     * @param {Object} data The user item data returned from the backend.
+     * @param {Item} item The item associated with this user item.
+     */
     constructor(data, item) {
         super(data);
         this.item = item;
     }
 
+    /**
+     * Get the item associated with this user item.
+     *
+     * @return {Item} The linked item instance.
+     */
     getItem() {
         return this.item;
     }

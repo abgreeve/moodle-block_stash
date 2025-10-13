@@ -25,10 +25,21 @@ import Ajax from 'core/ajax';
 
 export default class Item extends base {
 
+    /**
+     * Create a new item instance from raw data.
+     *
+     * @param {Object} itemdata The raw item data received from the backend.
+     */
     constructor(itemdata) {
         super(itemdata);
     }
 
+    /**
+     * Fetch an item by ID from the server.
+     *
+     * @param {number} itemId The item identifier.
+     * @return {Promise<Item>} Resolves with the retrieved item instance.
+     */
     static getItem(itemId) {
         return Ajax.call([{
             methodname: 'block_stash_get_item',
