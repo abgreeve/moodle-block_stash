@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_save_cancel';
 import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import Ajax from 'core/ajax';
@@ -60,10 +60,9 @@ const buildModal = async(courseid, userstash, mystash, userid, myuserid, itemid 
             myuserid: myuserid,
             itemid: itemid
     };
-    return ModalFactory.create({
+    return Modal.create({
         title: getString('createtrade', 'block_stash'),
         body: Templates.render('block_stash/local/swap/swap_form', context),
-        type: ModalFactory.types.SAVE_CANCEL
     });
 };
 

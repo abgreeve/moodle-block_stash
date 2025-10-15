@@ -20,10 +20,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_cancel';
 import ModalEvents from 'core/modal_events';
 import Item from 'block_stash/item';
 import Templates from 'core/templates';
+// import Str from 'core/str';
 
 const showModal = async(itemId) => {
     const modal = await buildModal(itemId);
@@ -34,11 +35,12 @@ const buildModal = async(itemId) => {
     let items = await Item.getItem(itemId);
     let context = items.getData();
 
-    return ModalFactory.create({
+    const modal = await Modal.create({
         title: context.name,
-        body: Templates.render('block_stash/item_detail', context),
-        type: ModalFactory.types.CANCEL
+        body: Templates.render('block_stash/item_detail', context)
     });
+
+    return modal;
 };
 
 const displayModal = async(modal) => {

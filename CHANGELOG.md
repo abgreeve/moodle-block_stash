@@ -5,6 +5,7 @@ Version 2.2.2 (TBD)
 -------------------
 
 * Tidied up some of the JavaScript to use modern classes. Removed some jquery where found.
+* Updated the JavaScript modals as the old ones were deprecated.
 
 Version 2.2.1 (8th October 2025)
 -------------------

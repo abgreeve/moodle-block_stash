@@ -22,7 +22,7 @@
 
 import Item from 'block_stash/item';
 import Drop from 'block_stash/drop';
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_cancel';
 import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import SimpleDropSnippetMaker from 'block_stash/drop-snippet-maker';
@@ -56,10 +56,9 @@ const buildModal = async(drop, altsnippetmaker, warnings) => {
         context.snippet = dropsnippetmaker.getSnippet();
     }
 
-    return ModalFactory.create({
+    return Modal.create({
         title: drop.get('name'),
         body: Templates.render('block_stash/drop_snippet_dialogue', context),
-        type: ModalFactory.types.CANCEL
     });
 };
 

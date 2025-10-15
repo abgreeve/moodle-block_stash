@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_save_cancel';
 import ModalEvents from 'core/modal_events';
 import {get_string as getString} from 'core/str';
 import Templates from 'core/templates';
@@ -38,10 +38,9 @@ const buildModal = async(tradetype) => {
     let courseid = courseelement.value;
     let context = await getItems(courseid);
     context.type = tradetype;
-    return ModalFactory.create({
+    return Modal.create({
         title: getString('addnewtradeitem', 'block_stash'),
         body: Templates.render('block_stash/trade_item_picker', context),
-        type: ModalFactory.types.SAVE_CANCEL
     });
 };
 

@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_cancel';
 import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import Ajax from 'core/ajax';
@@ -42,10 +42,9 @@ const buildModal = async(trade) => {
     let tradesnippetmaker = new TradeSnippet(trade);
     context.snippet = tradesnippetmaker.getSnippet();
 
-    return ModalFactory.create({
+    return Modal.create({
         title: context.trade.name,
         body: Templates.render('block_stash/trade_snippet_dialogue', context),
-        type: ModalFactory.types.CANCEL
     });
 };
 
