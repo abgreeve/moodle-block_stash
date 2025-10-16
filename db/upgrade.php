@@ -533,7 +533,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024019002, 'stash');
     }
 
-    if ($oldversion < 2024101703) {
+    if ($oldversion < 2025101600) {
 
         // Define table block_stash_collections to be created.
         $table = new xmldb_table('block_stash_collections');
@@ -587,7 +587,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         }
 
         // Stash savepoint reached.
-        upgrade_block_savepoint(true, 2024101703, 'stash');
+        upgrade_block_savepoint(true, 2025101600, 'stash');
     }
 
     return true;
