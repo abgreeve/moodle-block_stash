@@ -31,10 +31,10 @@
 {{#canacquireitems}}
     <ul class="nav nav-tabs" id="itemTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="all-tab" data-toggle="tab" data-target="#allitems" type="button" role="tab" aria-controls="allitems" aria-selected="true">{{#str}}all, block_stash{{/str}}</button>
+            <a class="nav-link active" id="all-tab" data-bs-toggle="tab" href="#allitems" role="tab" aria-controls="allitems" aria-selected="true">{{#str}}all, block_stash{{/str}}</a>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="collections-tab" data-toggle="tab" data-target="#collections" type="button" role="tab" aria-controls="collections" aria-selected="false">{{#str}}collections, block_stash{{/str}}</button>
+            <a class="nav-link" id="collections-tab" data-bs-toggle="tab" href="#collections" role="tab" aria-controls="collections" aria-selected="false">{{#str}}collections, block_stash{{/str}}</a>
         </li>
     </ul>
     <div class="item-list tab-content" id="block-stash-tabContent">

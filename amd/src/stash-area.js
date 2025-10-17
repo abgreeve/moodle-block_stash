@@ -121,21 +121,19 @@ const updateUserItemQuantity = (userItem) => {
         itemnode.classList.remove('item-quantity-' + quantity);
         itemnode.classList.add('item-quantity-' + newQuantity);
         if (newQuantity == "0") {
-            window.console.log("I want to know about it");
-            // Get collection ids
             const collectionids = getCollectionDisplayInfo(userItem);
             if (collectionids.length > 0) {
                 collectionids.forEach(async(id) => {
                     const collectioncontainer = _node.querySelector('.block-stash-collections[data-collectionid="' + id + '"');
-                    if (collectioncontainer) {
-                        const existinglegendelement = collectioncontainer.querySelector('legend');
-                        existinglegendelement.innerText = await getCollectionString(id, true);
-                        // If the legend color style is set then remove
-                        if (existinglegendelement.getAttribute("style") !== null) {
-                            existinglegendelement.style.removeProperty("color");
-                            existinglegendelement.style.removeProperty("border-color");
-                        }
+                    if (!collectioncontainer) {
+                        return;
                     }
+                    const existinglegendelement = collectioncontainer.querySelector('legend');
+                    if (!existinglegendelement) {
+                        return;
+                    }
+                    existinglegendelement.innerText = await getCollectionString(id, true);
+                    setCollectionCompletionStyles(collectioncontainer, softCheckCollectioComplete(id));
                 });
             }
         }
@@ -166,11 +164,7 @@ const addUserItem = (userItem) => {
                     const existinglegendelement = collectioncontainer.querySelector('legend');
                     existinglegendelement.innerText = await getCollectionString(id);
                     collectioncontainer.appendChild(collectionnode);
-                    if (softCheckCollectioComplete(id)) {
-                        existinglegendelement.style.borderColor = '#088208';
-                        existinglegendelement.style.color = '#088208';
-                    }
-                    // window.console.log(existinglegendelement);
+                    setCollectionCompletionStyles(collectioncontainer, softCheckCollectioComplete(id));
 
                 } else {
                     // If there are no items in the collection then the collection needs to be added.
@@ -185,6 +179,7 @@ const addUserItem = (userItem) => {
                     collectionelement.appendChild(collectionnode);
                     const parentelement = _node.querySelector('.block-stash-collections-area');
                     parentelement.appendChild(collectionelement);
+                    setCollectionCompletionStyles(collectionelement, softCheckCollectioComplete(id));
                 }
             });
         }
@@ -227,6 +222,33 @@ const softCheckCollectioComplete = (collectionid) => {
     const collection = getInternalCollectionData(collectionid);
     return (collection['items'].length == currentcount);
 };
+
+/**
+ * Toggle inline styles that highlight a collection as complete.
+ *
+ * @param {HTMLElement} collectioncontainer The fieldset element for the collection.
+ * @param {boolean} isComplete Whether the collection currently has all required items.
+ */
+function setCollectionCompletionStyles(collectioncontainer, isComplete) {
+    if (!collectioncontainer) {
+        return;
+    }
+    const existinglegendelement = collectioncontainer.querySelector('legend');
+    if (!existinglegendelement) {
+        return;
+    }
+    if (isComplete) {
+        existinglegendelement.style.borderColor = '#088208';
+        existinglegendelement.style.color = '#088208';
+        collectioncontainer.style.borderColor = '#088208';
+        collectioncontainer.style.color = '#088208';
+    } else {
+        existinglegendelement.style.removeProperty('border-color');
+        existinglegendelement.style.removeProperty('color');
+        collectioncontainer.style.removeProperty('border-color');
+        collectioncontainer.style.removeProperty('color');
+    }
+}
 
 const getInternalCollectionData = (collectionid) => {
     let collectionresult = null;

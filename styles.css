@@ -259,8 +259,10 @@
 }
 
 .block-stash-collection-legend {
-    width: unset;
-    padding: unset;
-    margin-bottom: unset;
-    font-size: unset;
+    display: block;
+    float: none;
+    width: auto;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
 }
