@@ -1,4 +1,4 @@
-import ModalFactory from 'core/modal_factory';
+import Modal from 'core/modal_save_cancel';
 import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import * as tradeAdder from 'block_stash/local/trade_adder/main';
@@ -45,10 +45,9 @@ const buildModal = async(courseid, editdetails) => {
     }
     window.console.log(context);
 
-    return ModalFactory.create({
+    return Modal.create({
         title: getString('configureremoval', 'block_stash'),
         body: Templates.render('block_stash/local/removal/removal_form', context),
-        type: ModalFactory.types.SAVE_CANCEL
     });
 };
 
