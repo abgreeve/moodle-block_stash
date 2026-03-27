@@ -66,10 +66,10 @@ class fulltrade implements renderable, templatable {
      *
      * @param int        $stashid    Stash ID
      * @param trade      $trade      Trade details
-     * @param array      $tradeitems Items for the trade
-     * @param int        $courseid   Course ID
+     * @param ?array      $tradeitems Items for the trade
+     * @param ?int        $courseid   Course ID
      */
-    public function __construct(int $stashid, trade $trade = null, array $tradeitems = null, int $courseid = null) {
+    public function __construct(int $stashid, ?trade $trade = null, ?array $tradeitems = null, ?int $courseid = null) {
         $this->stashid = $stashid;
         $this->trade = $trade;
         $this->tradeitems = $tradeitems;

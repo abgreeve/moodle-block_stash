@@ -54,7 +54,7 @@ class swap {
     private $status;
 
     public function __construct(int $stashid, int $initiator, int $receiver, array $initiatoritems = [], array $receiveritems = [],
-            string $message = '', int $messageformat = 1, int $status = null) {
+            string $message = '', int $messageformat = 1, ?int $status = null) {
         $this->stashid = $stashid;
         $this->initiator = $initiator;
         $this->receiver = $receiver;

@@ -61,9 +61,9 @@ abstract class persistent {
      * Create an instance of this class.
      *
      * @param int $id If set, this is the id of an existing record, used to load the data.
-     * @param stdClass $record If set will be passed to {@link self::from_record()}.
+     * @param ?stdClass $record If set will be passed to {@link self::from_record()}.
      */
-    public function __construct($id = 0, stdClass $record = null) {
+    public function __construct($id = 0, ?stdClass $record = null) {
         if ($id > 0) {
             $this->set('id', $id);
             $this->read();
@@ -855,10 +855,10 @@ abstract class persistent {
      * Check if a records exists.
      *
      * @param string $select
-     * @param array $params
+     * @param ?array $params
      * @return bool
      */
-    public static function record_exists_select($select, array $params = null) {
+    public static function record_exists_select($select, ?array $params = null) {
         global $DB;
         return $DB->record_exists_select(static::TABLE, $select, $params);
     }
