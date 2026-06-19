@@ -92,7 +92,7 @@
         <INDEX NAME="userdrop" UNIQUE="true" FIELDS="dropid, userid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="block_stash_drop_pool_items" COMMENT="Item pool entries for drops.">
+    <TABLE NAME="block_stash_drop_pool_items" COMMENT="Random drop pool entries for drops.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="dropid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -105,7 +105,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="dropitem" UNIQUE="true" FIELDS="dropid, itemid"/>
+        <INDEX NAME="droppoolitem" UNIQUE="true" FIELDS="dropid, itemid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_stash_trade" COMMENT="Trade widget for exchanging items.">

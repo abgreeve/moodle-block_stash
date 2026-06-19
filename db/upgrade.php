@@ -565,7 +565,7 @@ function xmldb_block_stash_upgrade($oldversion) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
         // Adding indexes to table block_stash_drop_pool_items.
-        $table->add_index('dropitem', XMLDB_INDEX_UNIQUE, ['dropid', 'itemid']);
+        $table->add_index('droppoolitem', XMLDB_INDEX_UNIQUE, ['dropid', 'itemid']);
 
         // Conditionally launch create table for block_stash_drop_pool_items.
         if (!$dbman->table_exists($table)) {
