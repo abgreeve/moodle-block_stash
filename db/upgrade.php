@@ -533,5 +533,20 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2024019002, 'stash');
     }
 
+    if ($oldversion < 2026061900) {
+
+        // Define field droptype to be added to block_stash_drops.
+        $table = new xmldb_table('block_stash_drops');
+        $field = new xmldb_field('droptype', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'hashcode');
+
+        // Conditionally launch add field droptype.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Stash savepoint reached.
+        upgrade_block_savepoint(true, 2026061900, 'stash');
+    }
+
     return true;
 }

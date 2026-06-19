@@ -49,11 +49,20 @@ class drop {
 
     const TABLE = 'block_stash_drops';
 
+    /** Drop type: awards a single fixed item. */
+    const TYPE_FIXED  = 0;
+
+    /** Drop type: awards one item selected at pickup time from a configured pool. */
+    const TYPE_RANDOM = 1;
+
     /** @var int Primary key. */
     private int $id = 0;
 
     /** @var int The item this drop is for. */
     private int $itemid = 0;
+
+    /** @var int The drop type (TYPE_FIXED or TYPE_RANDOM). */
+    private int $droptype = self::TYPE_FIXED;
 
     /** @var string The display name of the drop location. */
     private string $name = '';
@@ -131,6 +140,11 @@ class drop {
                 'default' => function() {
                     return random_string(6);
                 },
+            ],
+            'droptype' => [
+                'type'    => PARAM_INT,
+                'default' => self::TYPE_FIXED,
+                'choices' => [self::TYPE_FIXED, self::TYPE_RANDOM],
             ],
         ];
     }
@@ -216,6 +230,7 @@ class drop {
                 case 'maxpickup':      $this->maxpickup      = $value !== null ? (int) $value : null; break;
                 case 'pickupinterval': $this->pickupinterval = (int) $value; break;
                 case 'hashcode':       $this->hashcode       = (string) $value; break;
+                case 'droptype':       $this->droptype       = (int) $value; break;
                 case 'timecreated':    $this->timecreated    = (int) $value; break;
                 case 'timemodified':   $this->timemodified   = (int) $value; break;
             }
@@ -236,6 +251,7 @@ class drop {
         $record->maxpickup      = $this->maxpickup;
         $record->pickupinterval = $this->pickupinterval;
         $record->hashcode       = $this->hashcode;
+        $record->droptype       = $this->droptype;
         $record->timecreated    = $this->timecreated;
         $record->timemodified   = $this->timemodified;
         return $record;
@@ -549,6 +565,45 @@ class drop {
         $this->hashcode  = $hashcode;
         $this->validated = false;
         return $this;
+    }
+
+    /**
+     * Get the drop type.
+     *
+     * @return int One of the TYPE_* constants.
+     */
+    public function get_droptype(): int {
+        return $this->droptype;
+    }
+
+    /**
+     * Set the drop type.
+     *
+     * @param int $droptype One of the TYPE_* constants.
+     * @return static
+     */
+    public function set_droptype(int $droptype): static {
+        $this->droptype  = $droptype;
+        $this->validated = false;
+        return $this;
+    }
+
+    /**
+     * Whether this is a fixed item drop.
+     *
+     * @return bool
+     */
+    public function is_fixed(): bool {
+        return $this->droptype === self::TYPE_FIXED;
+    }
+
+    /**
+     * Whether this is a random item drop.
+     *
+     * @return bool
+     */
+    public function is_random(): bool {
+        return $this->droptype === self::TYPE_RANDOM;
     }
 
     // -----------------------------------------------------------------------
