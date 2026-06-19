@@ -606,6 +606,35 @@ class drop {
         return $this->droptype === self::TYPE_RANDOM;
     }
 
+    /**
+     * Get the pool items configured for this drop.
+     *
+     * @return drop_pool_item[]
+     */
+    public function get_pool_items(): array {
+        return drop_pool_item::get_records(['dropid' => $this->get_id()], 'id');
+    }
+
+    /**
+     * Whether this drop has a valid random pool.
+     *
+     * @param drop_pool_item[]|null $poolitems Candidate pool entries, or null to use stored entries.
+     * @return bool
+     */
+    public function is_valid_random_pool(?array $poolitems = null): bool {
+        return (new random_drop_pool_validator())->is_valid($this, $poolitems);
+    }
+
+    /**
+     * Return the random pool validation errors keyed by business rule.
+     *
+     * @param drop_pool_item[]|null $poolitems Candidate pool entries, or null to use stored entries.
+     * @return array
+     */
+    public function get_random_pool_validation_errors(?array $poolitems = null): array {
+        return (new random_drop_pool_validator())->get_errors($this, $poolitems);
+    }
+
     // -----------------------------------------------------------------------
     // Business methods
     // -----------------------------------------------------------------------

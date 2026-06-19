@@ -40,7 +40,7 @@ use stdClass;
  */
 class drop_pool_item {
 
-    const TABLE = 'block_stash_drop_items';
+    const TABLE = 'block_stash_drop_pool_items';
 
     /** @var int Primary key. */
     private int $id = 0;
