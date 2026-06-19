@@ -686,10 +686,21 @@ class manager {
             throw new coding_exception('The drop cannot be picked up.');
         }
 
-
         // TODO Implement quantity from the drop configuration.
         $quantity = 1;
-        $item = $this->get_item($drop->get_itemid());
+
+        if ($drop->is_random()) {
+            $poolitems = $drop->get_pool_items();
+            $validator = new random_drop_pool_validator();
+            if (!$validator->is_valid($drop, $poolitems)) {
+                throw new coding_exception('The drop cannot be picked up.');
+            }
+            $poolitem = (new random_drop_pool_selector())->select($poolitems);
+            $item = $this->get_item($poolitem->get_itemid());
+        } else {
+            $item = $this->get_item($drop->get_itemid());
+        }
+
         if ($item->is_scarce_item() && !$item->scarce_item_available($quantity)) {
             throw new coding_exception('The drop cannot be picked up.');
         }
@@ -703,6 +714,8 @@ class manager {
         } else {
             $dp->update();
         }
+
+        return $item;
     }
 
     /**

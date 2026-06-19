@@ -147,14 +147,14 @@ class external extends external_api {
             throw new coding_exception('Unexpected hash code.');
         }
 
-        $manager->pickup_drop($drop);
+        $item = $manager->pickup_drop($drop);
 
         // TODO Do not disclose so much information to the student.
         $output = $PAGE->get_renderer('block_stash');
         $exporter = new user_item_summary_exporter([], [
             'context' => $manager->get_context(),
-            'item' => $manager->get_item($drop->get_itemid()),
-            'useritem' => $manager->get_user_item($USER->id, $drop->get_itemid())
+            'item' => $item,
+            'useritem' => $manager->get_user_item($USER->id, $item->get_id())
         ]);
         return $exporter->export($output);
     }
