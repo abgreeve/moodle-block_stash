@@ -548,5 +548,33 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026061900, 'stash');
     }
 
+    if ($oldversion < 2026061901) {
+
+        // Define table block_stash_drop_items to be created.
+        $table = new xmldb_table('block_stash_drop_items');
+
+        // Adding fields to table block_stash_drop_items.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('dropid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('weight', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table block_stash_drop_items.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table block_stash_drop_items.
+        $table->add_index('dropitem', XMLDB_INDEX_UNIQUE, ['dropid', 'itemid']);
+
+        // Conditionally launch create table for block_stash_drop_items.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Stash savepoint reached.
+        upgrade_block_savepoint(true, 2026061901, 'stash');
+    }
+
     return true;
 }
