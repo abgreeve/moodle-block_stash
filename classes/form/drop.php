@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
+use block_stash\drop as drop_model;
 use stdClass;
 use MoodleQuickForm;
 
@@ -45,6 +46,28 @@ class drop extends persistent {
     protected static $fieldstoremove = array('save', 'submitbutton');
 
     protected static $foreignfields = array('saveandnext');
+
+    /**
+     * Return the drop type this form should submit.
+     *
+     * @return int
+     */
+    protected function get_drop_type(): int {
+        $drop = $this->get_persistent();
+        if ($drop->get_id()) {
+            return $drop->get_droptype();
+        }
+        return drop_model::TYPE_FIXED;
+    }
+
+    /**
+     * Whether the form should expose the save-and-next action.
+     *
+     * @return bool
+     */
+    protected function should_show_save_and_next(): bool {
+        return !$this->get_persistent()->get_id();
+    }
 
     public function definition() {
         global $PAGE, $OUTPUT;
@@ -79,6 +102,11 @@ class drop extends persistent {
         $mform->setType('hashcode', PARAM_ALPHANUM);
         $mform->setConstant('hashcode', $drop->get_hashcode());
 
+        // Drop type.
+        $mform->addElement('hidden', 'droptype');
+        $mform->setType('droptype', PARAM_INT);
+        $mform->setConstant('droptype', $this->get_drop_type());
+
         // Name.
         $mform->addElement('text', 'name', get_string('dropname', 'block_stash'),
             'maxlength="100" placeholder="' . s(get_string('eginthecastle', 'block_stash')) . '"');
@@ -99,8 +127,7 @@ class drop extends persistent {
 
         // Buttons.
         $buttonarray = [];
-        if (!$this->get_persistent()->get_id()) {
-            // Only for new items.
+        if ($this->should_show_save_and_next()) {
             $buttonarray[] = &$mform->createElement('submit', 'saveandnext', get_string('saveandnext', 'block_stash'),
                 ['class' => 'form-submit']);
             $buttonarray[] = &$mform->createElement('submit', 'save', get_string('savechanges', 'block_stash'));
