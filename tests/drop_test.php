@@ -75,6 +75,18 @@ final class block_stash_drop_testcase extends advanced_testcase {
         $this->assertFalse($drop->is_valid());
         $this->assertArrayHasKey('droptype', $drop->get_errors());
     }
+    public function test_fixed_drop_requires_itemid(): void {
+        $drop = new drop(null, (object) ['name' => 'Drop 1']);
+
+        $this->assertFalse($drop->is_valid());
+        $this->assertArrayHasKey('itemid', $drop->get_errors());
+    }
+
+    public function test_random_drop_does_not_require_itemid(): void {
+        $drop = new drop(null, (object) ['name' => 'Drop 1', 'droptype' => drop::TYPE_RANDOM]);
+
+        $this->assertTrue($drop->is_valid());
+    }
 
     private function create_drop(array $record = []): drop {
         $generator = $this->getDataGenerator()->get_plugin_generator('block_stash');

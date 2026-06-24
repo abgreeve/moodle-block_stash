@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 use block_stash\drop;
-use block_stash\drop_pool_item;
 use block_stash\form\random_drop as random_drop_form;
 use block_stash\manager;
 
@@ -71,20 +70,15 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         [$course, $teacher] = $this->create_course_users();
         $this->setUser($teacher);
 
-        $stash = $this->create_enabled_stash($course->id);
-        $item = $this->getDataGenerator()->get_plugin_generator('block_stash')->create_item([
-            'stash' => $stash,
-            'name' => 'Anchor item',
-        ]);
+        $this->create_enabled_stash($course->id);
         $manager = manager::get($course->id);
         $beforecount = $DB->count_records(drop::TABLE);
 
         random_drop_form::mock_submit([
-            'itemid' => $item->get_id(),
             'name' => 'Random location',
             'maxpickup' => '7',
             'pickupinterval' => HOURSECS * 3,
-            'save' => 1,
+            'submitbutton' => 1,
         ]);
         $form = new random_drop_form(null, ['persistent' => null, 'item' => null, 'manager' => $manager]);
         $data = $form->get_data();
@@ -95,11 +89,11 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $reloaded = new drop($drop->get_id());
         $this->assertSame($beforecount + 1, $DB->count_records(drop::TABLE));
         $this->assertSame(drop::TYPE_RANDOM, $reloaded->get_droptype());
-        $this->assertSame($item->get_id(), $reloaded->get_itemid());
+        $this->assertSame(0, $reloaded->get_itemid());
         $this->assertSame('Random location', $reloaded->get_name());
         $this->assertSame(7, $reloaded->get_maxpickup());
         $this->assertSame(HOURSECS * 3, $reloaded->get_pickupinterval());
-        $this->assertSame(0, $DB->count_records(drop_pool_item::TABLE, ['dropid' => $drop->get_id()]));
+        $this->assertSame(0, $DB->count_records('block_stash_drop_pool', ['dropid' => $drop->get_id()]));
     }
 
     private function execute_page(array $get): string {

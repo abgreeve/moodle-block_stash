@@ -195,6 +195,9 @@ class manager {
 
         } else {
             $drop = new drop($data->id);
+            if (!property_exists($data, 'itemid')) {
+                $data->itemid = $drop->get_itemid();
+            }
             if ($data->itemid != $drop->get_itemid()) {
                 throw new coding_exception('The item ID of a drop cannot be changed.');
             }

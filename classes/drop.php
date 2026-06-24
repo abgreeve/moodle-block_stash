@@ -773,6 +773,10 @@ class drop {
             return new lang_string('invaliddata', 'error');
         }
 
+        if ($this->is_random() && empty($this->get_itemid())) {
+            return true;
+        }
+
         $item = new item($this->get_itemid());
         if (static::hashcode_exists($value, $item->get_stashid(), $this->get_id())) {
             // The hashcode is not unique within the stash.
@@ -788,6 +792,14 @@ class drop {
      * @return true|lang_string
      */
     protected function validate_itemid($value) {
+        if ($this->is_random() && empty($value)) {
+            return true;
+        }
+
+        if ($this->is_fixed() && empty($value)) {
+            return new lang_string('invaliddata', 'error');
+        }
+
         if (!item::record_exists($value)) {
             return new lang_string('invaliddata', 'error');
         }

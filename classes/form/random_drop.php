@@ -25,7 +25,12 @@ namespace block_stash\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-use block_stash\drop;
+require_once($CFG->libdir . '/formslib.php');
+
+use block_stash\drop as drop_model;
+use MoodleQuickForm;
+
+MoodleQuickForm::registerElementType('block_stash_integer', __DIR__ . '/integer.php', 'block_stash_form_integer');
 
 /**
  * Random drop form class.
@@ -34,23 +39,49 @@ use block_stash\drop;
  * @copyright  2026
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class random_drop extends drop {
+class random_drop extends persistent {
+
+    protected static $persistentclass = 'block_stash\\drop';
+
+    protected static $fieldstoremove = ['submitbutton'];
 
     /**
-     * Return the drop type this form should submit.
-     *
-     * @return int
+     * Define the form.
      */
-    protected function get_drop_type(): int {
-        return drop::TYPE_RANDOM;
-    }
+    public function definition() {
+        $mform = $this->_form;
+        $drop = $this->get_persistent();
 
-    /**
-     * Random drops only need a single save action at creation time for now.
-     *
-     * @return bool
-     */
-    protected function should_show_save_and_next(): bool {
-        return false;
+        $mform->addElement('header', 'generalhdr', get_string('general'));
+
+        // Hash code.
+        $mform->addElement('hidden', 'hashcode');
+        $mform->setType('hashcode', PARAM_ALPHANUM);
+        $mform->setConstant('hashcode', $drop->get_hashcode());
+
+        // Drop type.
+        $mform->addElement('hidden', 'droptype');
+        $mform->setType('droptype', PARAM_INT);
+        $mform->setConstant('droptype', drop_model::TYPE_RANDOM);
+
+        // Name.
+        $mform->addElement('text', 'name', get_string('dropname', 'block_stash'),
+            'maxlength="100" placeholder="' . s(get_string('eginthecastle', 'block_stash')) . '"');
+        $mform->setType('name', PARAM_NOTAGS);
+        $mform->addRule('name', null, 'required', null, 'client');
+        $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'client');
+        $mform->addHelpButton('name', 'dropname', 'block_stash');
+
+        // Max pickup.
+        $mform->addElement('block_stash_integer', 'maxpickup', get_string('maxpickup', 'block_stash'), ['style' => 'width: 4em;']);
+        $mform->setType('maxpickup', PARAM_INT);
+        $mform->addHelpButton('maxpickup', 'maxpickup', 'block_stash');
+
+        // Pickup interval.
+        $mform->addElement('duration', 'pickupinterval', get_string('pickupinterval', 'block_stash'));
+        $mform->setType('pickupinterval', PARAM_INT);
+        $mform->addHelpButton('pickupinterval', 'pickupinterval', 'block_stash');
+
+        $this->add_action_buttons(true, get_string('savechanges', 'block_stash'));
     }
 }
