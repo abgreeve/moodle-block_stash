@@ -186,6 +186,14 @@ class manager {
         $this->require_enabled();
         $this->require_manage();
 
+        if (!property_exists($data, 'stashid') || empty($data->stashid)) {
+            if (!empty($data->itemid)) {
+                $data->stashid = $this->get_item($data->itemid)->get_stashid();
+            } else {
+                $data->stashid = $this->get_stash()->get_id();
+            }
+        }
+
         if (!$data->id) {
             $drop = new drop(null, $data);
             while (drop::hashcode_exists($drop->get_hashcode(), $this->get_stash()->get_id())) {
@@ -195,8 +203,14 @@ class manager {
 
         } else {
             $drop = new drop($data->id);
+            if (!property_exists($data, 'stashid')) {
+                $data->stashid = $drop->get_stashid();
+            }
             if (!property_exists($data, 'itemid')) {
                 $data->itemid = $drop->get_itemid();
+            }
+            if ($data->stashid != $drop->get_stashid()) {
+                throw new coding_exception('The stash ID of a drop cannot be changed.');
             }
             if ($data->itemid != $drop->get_itemid()) {
                 throw new coding_exception('The item ID of a drop cannot be changed.');
@@ -223,7 +237,7 @@ class manager {
             $drop = $this->get_drop($droporid);
         }
 
-        if (!$this->is_item_in_stash($drop->get_itemid())) {
+        if ($drop->get_stashid() != $this->get_stash()->get_id()) {
             throw new coding_exception('Unexpected drop ID.');
         }
 
@@ -446,7 +460,7 @@ class manager {
         $this->require_enabled();
 
         $drop = new \block_stash\drop($dropid);
-        if (!$this->is_item_in_stash($drop->get_itemid())) {
+        if ($drop->get_stashid() != $this->get_stash()->get_id()) {
             throw new coding_exception('Unexpected drop ID.');
         }
         return $drop;
@@ -1264,7 +1278,7 @@ class manager {
         $sql = "SELECT sd.id, sd.name as location, sd.hashcode, sd.itemid, i.name
                   FROM {block_stash_drops} sd
                   JOIN {block_stash_items} i ON i.id = sd.itemid
-                 WHERE i.stashid = :stashid";
+                 WHERE sd.stashid = :stashid";
 
         $params = ['stashid' => $stash->get_id()];
 
@@ -1449,8 +1463,7 @@ class manager {
         // block_stash_drops
         $sql = "SELECT d.id
                   FROM {block_stash_drops} d
-             LEFT JOIN {block_stash_items} i ON i.id = d.itemid
-                 WHERE i.stashid = :stashid";
+                 WHERE d.stashid = :stashid";
         $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
         $DB->delete_records_list('block_stash_drop_pickups', 'dropid', array_keys($records));
         $DB->delete_records_list('block_stash_drops', 'id', array_keys($records));
@@ -1476,8 +1489,7 @@ class manager {
         // Remove all user drop pickups
         $sql = "SELECT d.id
                   FROM {block_stash_drops} d
-             LEFT JOIN {block_stash_items} i ON i.id = d.itemid
-                 WHERE i.stashid = :stashid";
+                 WHERE d.stashid = :stashid";
         $records = $DB->get_records_sql($sql, ['stashid' => $this->get_stash()->get_id()]);
         $DB->delete_records_list('block_stash_drop_pickups', 'dropid', array_keys($records));
         // Remove all user items

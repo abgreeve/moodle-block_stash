@@ -149,6 +149,10 @@ class random_drop_pool_validator {
             return $stashid;
         }
 
+        if ($drop->get_stashid() > 0 && stash::record_exists($drop->get_stashid())) {
+            return $drop->get_stashid();
+        }
+
         if ($drop->get_itemid() > 0 && item::record_exists($drop->get_itemid())) {
             return (new item($drop->get_itemid()))->get_stashid();
         }
@@ -162,4 +166,3 @@ class random_drop_pool_validator {
         return null;
     }
 }
-

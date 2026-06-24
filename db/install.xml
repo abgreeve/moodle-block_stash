@@ -59,6 +59,7 @@
     <TABLE NAME="block_stash_drops" COMMENT="Instances of item drops">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="stashid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Owning stash ID"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="maxpickup" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
@@ -72,6 +73,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
+        <INDEX NAME="stashid" UNIQUE="false" FIELDS="stashid"/>
         <INDEX NAME="itemid" UNIQUE="false" FIELDS="itemid"/>
       </INDEXES>
     </TABLE>
@@ -201,4 +203,3 @@
     </TABLE>
   </TABLES>
 </XMLDB>
-

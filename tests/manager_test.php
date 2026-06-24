@@ -78,6 +78,33 @@ final class block_stash_manager_testcase extends advanced_testcase {
         $this->assertGreaterThan(0, $pickup->get_lastpickup());
     }
 
+    public function test_create_or_update_drop_populates_stashid_for_fixed_drop(): void {
+        [$manager, , $stash, $dropitem] = $this->create_manager_fixture();
+
+        $drop = $manager->create_or_update_drop((object) [
+            'id' => 0,
+            'itemid' => $dropitem->get_id(),
+            'name' => 'Managed fixed drop',
+            'maxpickup' => 1,
+            'pickupinterval' => HOURSECS,
+            'hashcode' => random_string(6),
+            'droptype' => drop::TYPE_FIXED,
+        ]);
+
+        $this->assertSame($stash->get_id(), $drop->get_stashid());
+
+        $updated = $manager->create_or_update_drop((object) [
+            'id' => $drop->get_id(),
+            'name' => 'Managed fixed drop updated',
+            'maxpickup' => 2,
+            'pickupinterval' => DAYSECS,
+            'hashcode' => $drop->get_hashcode(),
+            'droptype' => drop::TYPE_FIXED,
+        ]);
+
+        $this->assertSame($stash->get_id(), $updated->get_stashid());
+    }
+
     public function test_invalid_random_drop_pool_cannot_be_picked_up_or_award_item(): void {
         [$manager, $user, $stash, $dropitem] = $this->create_manager_fixture();
         $poolitem = $this->create_item($stash, 'Pool only');

@@ -77,11 +77,16 @@ class block_stash_generator extends testing_block_generator {
 
         if (isset($record->item)) {
             $record->itemid = $record->item->get_id();
+            $record->stashid = $record->item->get_stashid();
             unset($record->item);
         }
 
         if (empty($record->itemid)) {
             throw new coding_exception('The item ID must be set.');
+        }
+
+        if (empty($record->stashid)) {
+            $record->stashid = (new item($record->itemid))->get_stashid();
         }
 
         if (!isset($record->name)) {

@@ -59,13 +59,26 @@ final class block_stash_drop_testcase extends advanced_testcase {
         $drop = $this->create_drop(['droptype' => drop::TYPE_RANDOM]);
 
         $this->assertSame(drop::TYPE_RANDOM, $drop->get_droptype());
+        $this->assertGreaterThan(0, $drop->get_stashid());
         $this->assertFalse($drop->is_fixed());
         $this->assertTrue($drop->is_random());
 
         $reloaded = new drop($drop->get_id());
         $this->assertSame(drop::TYPE_RANDOM, $reloaded->get_droptype());
+        $this->assertSame($drop->get_stashid(), $reloaded->get_stashid());
         $this->assertFalse($reloaded->is_fixed());
         $this->assertTrue($reloaded->is_random());
+    }
+
+    public function test_drop_stashid_accessor_round_trips_when_set(): void {
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_stash');
+        $course = $this->getDataGenerator()->create_course();
+        $stash = $generator->create_stash(['courseid' => $course->id]);
+
+        $drop = $this->create_drop_instance();
+        $drop->set_stashid($stash->get_id());
+
+        $this->assertSame($stash->get_id(), $drop->get_stashid());
     }
 
     public function test_invalid_drop_type_is_rejected(): void {
@@ -83,7 +96,11 @@ final class block_stash_drop_testcase extends advanced_testcase {
     }
 
     public function test_random_drop_does_not_require_itemid(): void {
-        $drop = new drop(null, (object) ['name' => 'Drop 1', 'droptype' => drop::TYPE_RANDOM]);
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_stash');
+        $stash = $generator->create_stash([
+            'courseid' => $this->getDataGenerator()->create_course()->id,
+        ]);
+        $drop = new drop(null, (object) ['name' => 'Drop 1', 'droptype' => drop::TYPE_RANDOM, 'stashid' => $stash->get_id()]);
 
         $this->assertTrue($drop->is_valid());
     }
@@ -107,6 +124,6 @@ final class block_stash_drop_testcase extends advanced_testcase {
             ]),
         ]);
 
-        return new drop(null, (object) ['itemid' => $item->get_id(), 'name' => 'Drop 1']);
+        return new drop(null, (object) ['itemid' => $item->get_id(), 'stashid' => $item->get_stashid(), 'name' => 'Drop 1']);
     }
 }

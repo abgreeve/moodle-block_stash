@@ -89,6 +89,7 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
 
         $this->assertSame(drop::TYPE_RANDOM, $drop->get_droptype());
         $this->assertSame(0, $drop->get_itemid());
+        $this->assertSame($manager->get_stash()->get_id(), $drop->get_stashid());
         $this->assertSame(2, drop_pool_item::count_records(['dropid' => $drop->get_id()]));
 
         $stored = drop_pool_item::get_records(['dropid' => $drop->get_id()], 'itemid');
@@ -105,6 +106,7 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         ]);
 
         $stored = drop_pool_item::get_records(['dropid' => $updated->get_id()], 'itemid');
+        $this->assertSame($manager->get_stash()->get_id(), $updated->get_stashid());
         $this->assertSame([10, 1], array_values(array_map(fn($poolitem) => $poolitem->get_weight(), $stored)));
     }
 

@@ -574,5 +574,72 @@ function xmldb_block_stash_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026061901, 'stash');
     }
 
+    if ($oldversion < 2026062400) {
+
+        // Define field stashid to be added to block_stash_drops.
+        $table = new xmldb_table('block_stash_drops');
+        $field = new xmldb_field('stashid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'id');
+
+        // Conditionally launch add field stashid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        block_stash_upgrade_backfill_drop_stashids();
+
+        // Define field stashid to be not null.
+        $field = new xmldb_field('stashid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Launch change of nullability for field stashid.
+        $dbman->change_field_notnull($table, $field);
+
+        // Define index stashid to be added to block_stash_drops.
+        $index = new xmldb_index('stashid', XMLDB_INDEX_NOTUNIQUE, ['stashid']);
+
+        // Conditionally launch add index stashid.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Stash savepoint reached.
+        upgrade_block_savepoint(true, 2026062400, 'stash');
+    }
+
     return true;
+}
+
+/**
+ * Populate the direct stash relationship on existing drops.
+ *
+ * Existing rows derive the owning stash from their related item.
+ *
+ * @return void
+ */
+function block_stash_upgrade_backfill_drop_stashids(): void {
+    global $DB;
+
+    $sql = "SELECT d.id,
+                   d.itemid,
+                   i.stashid AS itemstashid
+              FROM {block_stash_drops} d
+         LEFT JOIN {block_stash_items} i
+                ON i.id = d.itemid";
+    $records = $DB->get_records_sql($sql);
+
+    foreach ($records as $record) {
+        $stashid = $record->itemstashid ? (int) $record->itemstashid : 0;
+
+        if (!$stashid) {
+            $sql = "SELECT i.stashid
+                      FROM {block_stash_drop_pool_items} dpi
+                      JOIN {block_stash_items} i
+                        ON i.id = dpi.itemid
+                     WHERE dpi.dropid = :dropid";
+            $stashid = (int) $DB->get_field_sql($sql, ['dropid' => $record->id], IGNORE_MULTIPLE);
+        }
+
+        if ($stashid) {
+            $DB->set_field('block_stash_drops', 'stashid', $stashid, ['id' => $record->id]);
+        }
+    }
 }

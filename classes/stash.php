@@ -515,10 +515,8 @@ class stash {
 
         $sql = "SELECT s.*
                   FROM {" . drop::TABLE . "} d
-                  JOIN {" . item::TABLE . "} i
-                    ON i.id = d.itemid
                   JOIN {" . self::TABLE . "} s
-                    ON s.id = i.stashid
+                    ON s.id = d.stashid
                  WHERE d.id = ?";
         $record = $DB->get_record_sql($sql, [$dropid], MUST_EXIST);
         $stash = new static(null, $record);

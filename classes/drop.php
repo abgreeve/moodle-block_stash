@@ -61,6 +61,9 @@ class drop {
     /** @var int The item this drop is for. */
     private int $itemid = 0;
 
+    /** @var int The owning stash. */
+    private int $stashid = 0;
+
     /** @var int The drop type (TYPE_FIXED or TYPE_RANDOM). */
     private int $droptype = self::TYPE_FIXED;
 
@@ -120,6 +123,9 @@ class drop {
      */
     protected static function define_properties(): array {
         return [
+            'stashid' => [
+                'type' => PARAM_INT,
+            ],
             'itemid' => [
                 'type' => PARAM_INT,
             ],
@@ -225,6 +231,7 @@ class drop {
         foreach ((array) $record as $property => $value) {
             switch ($property) {
                 case 'id':             $this->id             = (int) $value; break;
+                case 'stashid':        $this->stashid        = (int) $value; break;
                 case 'itemid':         $this->itemid         = (int) $value; break;
                 case 'name':           $this->name           = (string) $value; break;
                 case 'maxpickup':      $this->maxpickup      = $value !== null ? (int) $value : null; break;
@@ -246,6 +253,7 @@ class drop {
     public function to_record(): stdClass {
         $record = new stdClass();
         $record->id             = $this->id;
+        $record->stashid        = $this->stashid;
         $record->itemid         = $this->itemid;
         $record->name           = $this->name;
         $record->maxpickup      = $this->maxpickup;
@@ -472,6 +480,27 @@ class drop {
     }
 
     /**
+     * Get the stash ID.
+     *
+     * @return int
+     */
+    public function get_stashid(): int {
+        return $this->stashid;
+    }
+
+    /**
+     * Set the stash ID.
+     *
+     * @param int $stashid
+     * @return static
+     */
+    public function set_stashid(int $stashid): static {
+        $this->stashid   = $stashid;
+        $this->validated = false;
+        return $this;
+    }
+
+    /**
      * Set the item ID.
      *
      * @param int $itemid
@@ -677,11 +706,7 @@ class drop {
         $sql = "
             SELECT d.*
               FROM {" . self::TABLE . "} d
-              JOIN {" . item::TABLE . "} i
-                ON i.id = d.itemid
-              JOIN {" . stash::TABLE . "} s
-                ON s.id = i.stashid
-             WHERE s.id = :stashid
+             WHERE d.stashid = :stashid
                AND $hashlike";
 
         $params = [
@@ -702,10 +727,8 @@ class drop {
         global $DB;
         $sql = "SELECT s.courseid
                   FROM {" . stash::TABLE . "} s
-                  JOIN {" . item::TABLE . "} i
-                    ON i.stashid = s.id
                   JOIN {" . self::TABLE . "} d
-                    ON d.itemid = i.id
+                    ON d.stashid = s.id
                  WHERE d.id = ?";
         return $DB->get_field_sql($sql, [$dropid], MUST_EXIST);
     }
@@ -723,12 +746,8 @@ class drop {
         $sql = "
             SELECT 'x'
               FROM {" . self::TABLE . "} d
-              JOIN {" . item::TABLE . "} i
-                ON i.id = d.itemid
-              JOIN {" . stash::TABLE . "} s
-                ON s.id = i.stashid
              WHERE d.hashcode = :hashcode
-               AND s.id = :stashid
+               AND d.stashid = :stashid
                AND d.id <> :dropid";
         $params = [
             'hashcode' => $hashcode,
@@ -773,15 +792,31 @@ class drop {
             return new lang_string('invaliddata', 'error');
         }
 
-        if ($this->is_random() && empty($this->get_itemid())) {
-            return true;
-        }
-
-        $item = new item($this->get_itemid());
-        if (static::hashcode_exists($value, $item->get_stashid(), $this->get_id())) {
+        if (static::hashcode_exists($value, $this->get_stashid(), $this->get_id())) {
             // The hashcode is not unique within the stash.
             return new lang_string('invaliddata', 'error');
         }
+        return true;
+    }
+
+    /**
+     * Validate the stash ID.
+     *
+     * @param int $value The stash ID.
+     * @return true|lang_string
+     */
+    protected function validate_stashid($value) {
+        if (empty($value) || !stash::record_exists($value)) {
+            return new lang_string('invaliddata', 'error');
+        }
+
+        if ($this->get_itemid() > 0 && item::record_exists($this->get_itemid())) {
+            $item = new item($this->get_itemid());
+            if ($item->get_stashid() !== $value) {
+                return new lang_string('invaliddata', 'error');
+            }
+        }
+
         return true;
     }
 
