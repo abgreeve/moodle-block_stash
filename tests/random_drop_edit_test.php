@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use block_stash\drop;
+use block_stash\drop_pool_item;
 use block_stash\form\random_drop as random_drop_form;
 use block_stash\manager;
 
@@ -52,7 +53,7 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $output = $this->execute_page(['courseid' => $course->id]);
 
         $this->assertStringContainsString(get_string('addrandomdrop', 'block_stash'), $output);
-        $this->assertStringContainsString(get_string('dropname', 'block_stash'), $output);
+        $this->assertStringContainsString(get_string('randomdroppool', 'block_stash'), $output);
     }
 
     public function test_page_requires_manage_capability(): void {
@@ -64,36 +65,170 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $this->execute_page(['courseid' => $course->id]);
     }
 
-    public function test_form_submission_creates_random_drop_without_pool_entries(): void {
-        global $DB;
+    public function test_teacher_can_create_random_drop_with_pool_items(): void {
+        [$manager, $drop, $items] = $this->create_random_drop_with_submission([7, 1]);
 
+        $this->assertSame(drop::TYPE_RANDOM, $drop->get_droptype());
+        $this->assertSame(0, $drop->get_itemid());
+        $this->assertSame(2, drop_pool_item::count_records(['dropid' => $drop->get_id()]));
+
+        $stored = drop_pool_item::get_records(['dropid' => $drop->get_id()], 'itemid');
+        $this->assertCount(2, $stored);
+        $this->assertSame([1, 7], array_values(array_map(fn($poolitem) => $poolitem->get_weight(), $stored)));
+    }
+
+    public function test_teacher_can_edit_existing_pool_items(): void {
+        [$manager, $drop, $items] = $this->create_random_drop_with_submission([1, 5]);
+
+        $updated = $this->submit_form_and_save($manager, $drop, [
+            'poolitemids' => [$items[0]->get_id(), $items[1]->get_id()],
+            'poolitemweights' => [10, 1],
+        ]);
+
+        $stored = drop_pool_item::get_records(['dropid' => $updated->get_id()], 'itemid');
+        $this->assertSame([10, 1], array_values(array_map(fn($poolitem) => $poolitem->get_weight(), $stored)));
+    }
+
+    public function test_teacher_can_remove_pool_items(): void {
+        [$manager, $drop, $items] = $this->create_random_drop_with_submission([1, 5, 10]);
+
+        $updated = $this->submit_form_and_save($manager, $drop, [
+            'poolitemids' => [$items[0]->get_id(), $items[2]->get_id()],
+            'poolitemweights' => [1, 10],
+        ]);
+
+        $stored = drop_pool_item::get_records(['dropid' => $updated->get_id()], 'itemid');
+        $this->assertCount(2, $stored);
+        $this->assertSame([$items[0]->get_id(), $items[2]->get_id()], array_values(array_map(fn($poolitem) => $poolitem->get_itemid(), $stored)));
+    }
+
+    public function test_duplicate_items_are_rejected(): void {
         [$course, $teacher] = $this->create_course_users();
         $this->setUser($teacher);
-
-        $this->create_enabled_stash($course->id);
+        $stash = $this->create_enabled_stash($course->id);
+        $item = $this->create_item($stash, 'Item 1');
         $manager = manager::get($course->id);
-        $beforecount = $DB->count_records(drop::TABLE);
 
-        random_drop_form::mock_submit([
-            'name' => 'Random location',
-            'maxpickup' => '7',
-            'pickupinterval' => HOURSECS * 3,
-            'submitbutton' => 1,
+        $form = $this->submit_form($manager, null, [
+            'poolitemids' => [$item->get_id(), $item->get_id()],
+            'poolitemweights' => [1, 5],
         ]);
-        $form = new random_drop_form(null, ['persistent' => null, 'item' => null, 'manager' => $manager]);
+
+        $this->assertNull($form->get_data());
+        $this->assertSame(0, drop_pool_item::count_records());
+    }
+
+    public function test_scarce_items_are_rejected(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $normal = $this->create_item($stash, 'Normal');
+        $scarce = $this->create_item($stash, 'Scarce', ['amountlimit' => 5, 'currentamount' => 5]);
+        $manager = manager::get($course->id);
+
+        $form = $this->submit_form($manager, null, [
+            'poolitemids' => [$normal->get_id(), $scarce->get_id()],
+            'poolitemweights' => [1, 5],
+        ]);
+
+        $this->assertNull($form->get_data());
+        $this->assertSame(0, drop_pool_item::count_records());
+    }
+
+    public function test_more_than_twenty_items_are_rejected(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+
+        $ids = [];
+        $weights = [];
+        for ($i = 0; $i < 21; $i++) {
+            $ids[] = $this->create_item($stash, 'Item ' . $i)->get_id();
+            $weights[] = random_drop_form::WEIGHT_MEDIUM;
+        }
+
+        $form = $this->submit_form($manager, null, [
+            'poolitemids' => $ids,
+            'poolitemweights' => $weights,
+        ]);
+
+        $this->assertNull($form->get_data());
+        $this->assertSame(0, drop_pool_item::count_records());
+    }
+
+    public function test_saving_with_fewer_than_two_items_is_allowed_but_pool_remains_invalid(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+        $item = $this->create_item($stash, 'Only one');
+
+        $drop = $this->submit_form_and_save($manager, null, [
+            'poolitemids' => [$item->get_id()],
+            'poolitemweights' => [random_drop_form::WEIGHT_MEDIUM],
+        ]);
+
+        $this->assertSame(1, drop_pool_item::count_records(['dropid' => $drop->get_id()]));
+        $this->assertFalse($drop->is_valid_random_pool());
+    }
+
+    public function test_no_pool_entries_are_created_for_invalid_item_ids(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+        $item = $this->create_item($stash, 'Valid');
+
+        $form = $this->submit_form($manager, null, [
+            'poolitemids' => [$item->get_id(), 999999],
+            'poolitemweights' => [1, 5],
+        ]);
+
+        $this->assertNull($form->get_data());
+        $this->assertSame(0, drop_pool_item::count_records());
+    }
+
+    private function create_random_drop_with_submission(array $weights): array {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+        $items = [];
+        foreach ($weights as $index => $weight) {
+            $items[] = $this->create_item($stash, 'Pool item ' . $index);
+        }
+
+        $drop = $this->submit_form_and_save($manager, null, [
+            'poolitemids' => array_map(fn($item) => $item->get_id(), $items),
+            'poolitemweights' => $weights,
+        ]);
+
+        return [$manager, $drop, $items];
+    }
+
+    private function submit_form_and_save(manager $manager, ?drop $drop, array $pooldata): drop {
+        $form = $this->submit_form($manager, $drop, $pooldata);
         $data = $form->get_data();
 
         $this->assertNotNull($data);
-        $drop = $manager->create_or_update_drop($data);
+        $saved = $manager->create_or_update_drop($data);
+        $manager->save_random_drop_pool($saved, random_drop_form::parse_pool_entries_from_data($data));
 
-        $reloaded = new drop($drop->get_id());
-        $this->assertSame($beforecount + 1, $DB->count_records(drop::TABLE));
-        $this->assertSame(drop::TYPE_RANDOM, $reloaded->get_droptype());
-        $this->assertSame(0, $reloaded->get_itemid());
-        $this->assertSame('Random location', $reloaded->get_name());
-        $this->assertSame(7, $reloaded->get_maxpickup());
-        $this->assertSame(HOURSECS * 3, $reloaded->get_pickupinterval());
-        $this->assertSame(0, $DB->count_records('block_stash_drop_pool', ['dropid' => $drop->get_id()]));
+        return new drop($saved->get_id());
+    }
+
+    private function submit_form(manager $manager, ?drop $drop, array $pooldata): random_drop_form {
+        random_drop_form::mock_submit([
+            'name' => $drop ? $drop->get_name() : 'Random location',
+            'maxpickup' => '7',
+            'pickupinterval' => HOURSECS * 3,
+            'poolitemids' => $pooldata['poolitemids'] ?? [],
+            'poolitemweights' => $pooldata['poolitemweights'] ?? [],
+            'submitbutton' => 1,
+        ]);
+
+        return new random_drop_form(null, ['persistent' => $drop, 'item' => null, 'manager' => $manager]);
     }
 
     private function execute_page(array $get): string {
@@ -135,5 +270,12 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $manager = manager::get($courseid, true);
         $manager->set_enabled();
         return $stash;
+    }
+
+    private function create_item(\block_stash\stash $stash, string $name, array $record = []): \block_stash\item {
+        return $this->getDataGenerator()->get_plugin_generator('block_stash')->create_item($record + [
+            'stash' => $stash,
+            'name' => $name,
+        ]);
     }
 }

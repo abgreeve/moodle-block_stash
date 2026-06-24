@@ -25,9 +25,10 @@
 require_once(__DIR__ . '/../../config.php');
 
 $dropid = optional_param('dropid', 0, PARAM_INT);
+$courseid = optional_param('courseid', 0, PARAM_INT);
 if (!$dropid) {
     $courseid = required_param('courseid', PARAM_INT);
-} else {
+} else if (!$courseid) {
     $courseid = \block_stash\manager::get_courseid_by_dropid($dropid);
 }
 
@@ -41,15 +42,24 @@ $url = new moodle_url('/blocks/stash/random_drop_edit.php', [
     'courseid' => $manager->get_courseid(),
     'dropid' => $dropid,
 ]);
-$drop = $dropid ? $manager->get_drop($dropid) : null;
+$drop = null;
+if ($dropid) {
+    $drop = new \block_stash\drop($dropid);
+    if (!$drop->is_random()) {
+        throw new coding_exception('Unexpected drop type.');
+    }
+}
 $pagetitle = $drop ? get_string('editdrop', 'block_stash', $drop->get_name()) : get_string('addrandomdrop', 'block_stash');
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_drop($url, $manager, $drop, $pagetitle);
 
 $form = new \block_stash\form\random_drop($url->out(false), ['persistent' => $drop, 'item' => null, 'manager' => $manager]);
 if ($data = $form->get_data()) {
     $drop = $manager->create_or_update_drop($data);
-    $returnurl->param('dropid', $drop->get_id());
-    redirect($returnurl);
+    $manager->save_random_drop_pool($drop, \block_stash\form\random_drop::parse_pool_entries_from_data($data));
+    redirect(new moodle_url('/blocks/stash/random_drop_edit.php', [
+        'courseid' => $manager->get_courseid(),
+        'dropid' => $drop->get_id(),
+    ]));
 } else if ($form->is_cancelled()) {
     redirect($returnurl);
 }

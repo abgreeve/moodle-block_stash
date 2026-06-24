@@ -61,8 +61,8 @@ class random_drop_pool_validator {
      * @param drop_pool_item[]|null $poolitems Candidate pool entries, or null to use stored entries.
      * @return bool
      */
-    public function is_valid(drop $drop, ?array $poolitems = null): bool {
-        return $this->applies_to($drop) && empty($this->get_errors($drop, $poolitems));
+    public function is_valid(drop $drop, ?array $poolitems = null, ?int $stashid = null): bool {
+        return $this->applies_to($drop) && empty($this->get_errors($drop, $poolitems, $stashid));
     }
 
     /**
@@ -74,7 +74,7 @@ class random_drop_pool_validator {
      * @param drop_pool_item[]|null $poolitems Candidate pool entries, or null to use stored entries.
      * @return array
      */
-    public function get_errors(drop $drop, ?array $poolitems = null): array {
+    public function get_errors(drop $drop, ?array $poolitems = null, ?int $stashid = null): array {
         if (!$this->applies_to($drop)) {
             return [];
         }
@@ -90,8 +90,7 @@ class random_drop_pool_validator {
             $errors['maxitems'] = $count;
         }
 
-        $dropitem = new item($drop->get_itemid());
-        $stashid = $dropitem->get_stashid();
+        $stashid = $this->resolve_stashid($drop, $poolitems, $stashid);
         $seenitemids = [];
         $duplicateitemids = [];
         $missingitemids = [];
@@ -113,7 +112,7 @@ class random_drop_pool_validator {
             }
 
             $item = new item($itemid);
-            if ($item->get_stashid() !== $stashid) {
+            if ($stashid !== null && $item->get_stashid() !== $stashid) {
                 $wrongstashitemids[$itemid] = $itemid;
             }
             if ($item->is_scarce_item()) {
@@ -136,4 +135,31 @@ class random_drop_pool_validator {
 
         return $errors;
     }
+
+    /**
+     * Resolve the stash ID to validate against.
+     *
+     * @param drop $drop The drop being validated.
+     * @param drop_pool_item[] $poolitems Candidate pool items.
+     * @param int|null $stashid Explicit stash ID override.
+     * @return int|null
+     */
+    protected function resolve_stashid(drop $drop, array $poolitems, ?int $stashid): ?int {
+        if ($stashid !== null) {
+            return $stashid;
+        }
+
+        if ($drop->get_itemid() > 0 && item::record_exists($drop->get_itemid())) {
+            return (new item($drop->get_itemid()))->get_stashid();
+        }
+
+        foreach ($poolitems as $poolitem) {
+            if (item::record_exists($poolitem->get_itemid())) {
+                return (new item($poolitem->get_itemid()))->get_stashid();
+            }
+        }
+
+        return null;
+    }
 }
+

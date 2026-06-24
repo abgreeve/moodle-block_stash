@@ -1123,6 +1123,57 @@ class manager {
         return $tradedata;
     }
 
+    /**
+     * Replace the stored pool items for a random drop.
+     *
+     * Pool-size minimum is not enforced here so partially configured drops can
+     * be saved and completed later. All other pool validation rules remain hard
+     * requirements.
+     *
+     * @param drop $drop The random drop.
+     * @param array<int, array{itemid:int, weight:int}> $entries Pool entries.
+     * @return void
+     */
+    public function save_random_drop_pool(drop $drop, array $entries): void {
+        global $DB;
+
+        $this->require_enabled();
+        $this->require_manage();
+
+        if (!$drop->is_random()) {
+            throw new coding_exception('Pool editing only applies to random drops.');
+        }
+
+        $poolitems = [];
+        foreach ($entries as $entry) {
+            $poolitems[] = new drop_pool_item(null, (object) [
+                'dropid' => $drop->get_id(),
+                'itemid' => (int) $entry['itemid'],
+                'weight' => (int) $entry['weight'],
+            ]);
+        }
+
+        $validator = new random_drop_pool_validator();
+        $errors = $validator->get_errors($drop, $poolitems, $this->get_stash()->get_id());
+        unset($errors['minitems']);
+        if (!empty($errors)) {
+            throw new coding_exception('Invalid random drop pool configuration.');
+        }
+
+        foreach ($poolitems as $poolitem) {
+            if (!$poolitem->is_valid()) {
+                throw new coding_exception('Invalid random drop pool item.');
+            }
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+        $DB->delete_records(drop_pool_item::TABLE, ['dropid' => $drop->get_id()]);
+        foreach ($poolitems as $poolitem) {
+            $poolitem->create();
+        }
+        $transaction->allow_commit();
+    }
+
     public function do_trade($tradeid, $userid = null, $checkifcantrade = false) {
         global $USER;
         $this->require_enabled();

@@ -1,0 +1,17 @@
+{{!
+    Random drop pool item row.
+}}
+<tr class="block-stash-random-drop-pool-item" data-itemid="{{itemid}}">
+    <td style="width: 60%;">{{>block_stash/item_xsmall}}</td>
+    <td style="width: 25%;">
+        <input type="hidden" name="poolitemids[]" value="{{itemid}}">
+        <select class="form-control" name="poolitemweights[]">
+            {{#weightoptions}}
+                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+            {{/weightoptions}}
+        </select>
+    </td>
+    <td style="width: 15%; text-align: right;">
+        <button type="button" class="btn btn-link block-stash-delete-pool-item" data-id="{{itemid}}">{{#pix}}t/delete, core, {{#str}}deleteitem, block_stash, {{name}}{{/str}}{{/pix}}</button>
+    </td>
+</tr>

@@ -1,0 +1,36 @@
+{{!
+    Random drop pool editor.
+}}
+<div class="block-stash-random-drop-pool-editor" data-course-id="{{courseid}}" data-default-weight="{{defaultweight}}" data-weight-options='{{weightoptionsjson}}'>
+    <div class="block-stash-will-do-for-now">
+        <table class="block-stash-random-drop-pool table">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 60%;">{{#str}}items, block_stash{{/str}}</th>
+                    <th style="width: 25%;">{{#str}}randomdroppoolweight, block_stash{{/str}}</th>
+                    <th style="width: 15%; text-align: right;">
+                        <div class="dropdown-container d-flex justify-content-end">
+                            <div class="btn btn-secondary dropdown-button noselect block-stash-random-drop-pool-add" tabindex="0" role="button" aria-label="{{#str}}addrandomdroppoolitem, block_stash{{/str}}">
+                                <i class="fa fa-plus"></i>
+                            </div>
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right p-2 wide show" style="display: none; position: absolute; transform: translate3d(0px, 35px, 0px); top: auto; left: auto; will-change: transform; max-height: 240px; overflow: auto;">
+                                <input type="search" placeholder="{{#str}}searchitems, block_stash{{/str}}" class="form-control withclear rounded dropdown-search"/>
+                                <ul class="list-group"></ul>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody data-region="pool-items">
+                {{#items}}
+                    {{>block_stash/random_drop_pool_item}}
+                {{/items}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{#js}}
+require(["block_stash/local/random_drop_pool_adder/main"], function(RandomDropPoolAdder) {
+    RandomDropPoolAdder.init();
+});
+{{/js}}
