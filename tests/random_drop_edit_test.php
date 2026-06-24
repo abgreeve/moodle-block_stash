@@ -65,6 +65,25 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $this->execute_page(['courseid' => $course->id]);
     }
 
+    public function test_form_get_data_includes_dynamic_pool_fields(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $stash = $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+        $itemone = $this->create_item($stash, 'Pool item 1');
+        $itemtwo = $this->create_item($stash, 'Pool item 2');
+
+        $form = $this->submit_form($manager, null, [
+            'poolitemids' => [$itemone->get_id(), $itemtwo->get_id()],
+            'poolitemweights' => [random_drop_form::WEIGHT_LOW, random_drop_form::WEIGHT_HIGH],
+        ]);
+        $data = $form->get_data();
+
+        $this->assertNotNull($data);
+        $this->assertSame([$itemone->get_id(), $itemtwo->get_id()], $data->poolitemids);
+        $this->assertSame([random_drop_form::WEIGHT_LOW, random_drop_form::WEIGHT_HIGH], $data->poolitemweights);
+    }
+
     public function test_teacher_can_create_random_drop_with_pool_items(): void {
         [$manager, $drop, $items] = $this->create_random_drop_with_submission([7, 1]);
 

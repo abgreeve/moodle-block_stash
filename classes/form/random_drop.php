@@ -115,6 +115,36 @@ class random_drop extends persistent {
         $this->add_action_buttons(true, get_string('savechanges', 'block_stash'));
     }
 
+
+    /**
+     * Get form data, including dynamic pool row inputs rendered as raw HTML.
+     *
+     * Moodle only exports registered form elements, so the pool editor inputs
+     * need to be merged back in explicitly.
+     *
+     * @return object|null
+     */
+    public function get_data() {
+        $data = parent::get_data();
+        if ($data) {
+            $data = $this->add_pool_data_to_form_data($data);
+        }
+        return $data;
+    }
+
+    /**
+     * Get submitted form data, including dynamic pool row inputs.
+     *
+     * @return object|null
+     */
+    public function get_submitted_data() {
+        $data = parent::get_submitted_data();
+        if ($data) {
+            $data = $this->add_pool_data_to_form_data($data);
+        }
+        return $data;
+    }
+
     /**
      * Extra validation for pool entries.
      *
@@ -179,6 +209,19 @@ class random_drop extends persistent {
         }
 
         return [];
+    }
+
+
+    /**
+     * Merge the raw posted pool data into exported form data.
+     *
+     * @param stdClass $data Existing form data.
+     * @return stdClass
+     */
+    protected function add_pool_data_to_form_data(stdClass $data): stdClass {
+        $data->poolitemids = optional_param_array('poolitemids', [], PARAM_INT);
+        $data->poolitemweights = optional_param_array('poolitemweights', [], PARAM_INT);
+        return $data;
     }
 
     /**
