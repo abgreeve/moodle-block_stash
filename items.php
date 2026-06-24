@@ -68,7 +68,9 @@ echo $renderer->navigation($manager, 'items');
 
 $addurl = new moodle_url('/blocks/stash/item_edit.php', ['courseid' => $courseid]);
 $addbtn = $OUTPUT->single_button($addurl, get_string('additem', 'block_stash'), 'get', ['class' => 'singlebutton heading-button']);
-$heading = get_string('itemslist', 'block_stash') . $addbtn;
+$addrandomeurl = new moodle_url('/blocks/stash/random_drop_edit.php', ['courseid' => $courseid]);
+$addrandomebtn = $OUTPUT->single_button($addrandomeurl, get_string('addrandomdrop', 'block_stash'), 'get', ['class' => 'singlebutton heading-button pe-1']);
+$heading = get_string('itemslist', 'block_stash') . $addbtn . $addrandomebtn;
 echo $OUTPUT->heading($heading, 3);
 
 $table = new \block_stash\output\items_table('itemstable', $manager, $renderer);
