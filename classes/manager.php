@@ -642,6 +642,14 @@ class manager {
         }
         $dp = drop_pickup::get_relation($drop->get_id(), $userid);
 
+        if ($drop->is_random()) {
+            $poolitems = $drop->get_pool_items();
+            if (!(new random_drop_pool_validator())->is_valid($drop, $poolitems)) {
+                return false;
+            }
+            return $drop->can_pickup($dp);
+        }
+
         $item = $this->get_item($drop->get_itemid());
         if ($item->is_scarce_item() && !$item->scarce_item_available()) {
             return false;

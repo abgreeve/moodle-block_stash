@@ -42,7 +42,7 @@ $drop = $dropid ? $manager->get_drop($dropid) : null;
 $pagetitle = get_string('dropsnippet', 'block_stash', $drop->get_name());
 
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_drop($url, $manager, $drop, $pagetitle, $returntype);
-$item = $manager->get_item($drop->get_itemid());
+$item = $drop->is_random() ? null : $manager->get_item($drop->get_itemid());
 
 $renderer = $PAGE->get_renderer('block_stash');
 echo $OUTPUT->header();

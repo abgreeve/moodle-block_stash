@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use renderable;
 use renderer_base;
+use stdClass;
 use templatable;
 
 use block_stash\drop as dropmodel;
@@ -47,7 +48,7 @@ class drop implements renderable, templatable {
     /** @var drop The drop. */
     protected $drop;
 
-    /** @var item The item. */
+    /** @var item|null The fixed item, when applicable. */
     protected $item;
 
     /** @var manager The manager. */
@@ -56,10 +57,11 @@ class drop implements renderable, templatable {
     /**
      * Constructor.
      *
-     * @param item $item The item.
+     * @param dropmodel $drop The drop.
+     * @param item|null $item The fixed item, when applicable.
      * @param manager $manager The manager.
      */
-    public function __construct(dropmodel $drop, item $item, manager $manager) {
+    public function __construct(dropmodel $drop, ?item $item, manager $manager) {
         $this->drop = $drop;
         $this->item = $item;
         $this->manager = $manager;
@@ -74,9 +76,29 @@ class drop implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $exporter = new drop_exporter($this->drop, ['context' => $this->manager->get_context()]);
         $data = $exporter->export($output);
-        $exporter = new item_exporter($this->item, ['context' => $this->manager->get_context()]);
-        $data->item = $exporter->export($output);
+        $data->item = $this->export_item_for_template($output);
         return $data;
     }
 
+    /**
+     * Export the item data used by drop templates.
+     *
+     * Random drops do not have a fixed item, so we provide a generic preview
+     * object using the drop name.
+     *
+     * @param renderer_base $output Renderer.
+     * @return stdClass
+     */
+    protected function export_item_for_template(renderer_base $output): stdClass {
+        if ($this->item !== null) {
+            $exporter = new item_exporter($this->item, ['context' => $this->manager->get_context()]);
+            return $exporter->export($output);
+        }
+
+        return (object) [
+            'id' => 0,
+            'name' => $this->drop->get_name(),
+            'imageurl' => '',
+        ];
+    }
 }

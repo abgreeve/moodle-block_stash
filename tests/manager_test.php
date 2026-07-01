@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use block_stash\drop;
 use block_stash\drop_pickup;
 use block_stash\drop_pool_item;
+use block_stash\external;
 use block_stash\manager;
 
 /**
@@ -76,6 +77,27 @@ final class block_stash_manager_testcase extends advanced_testcase {
         $pickup = drop_pickup::get_relation($drop->get_id(), $user->id);
         $this->assertSame(1, $pickup->get_pickupcount());
         $this->assertGreaterThan(0, $pickup->get_lastpickup());
+    }
+
+    public function test_random_drop_external_pickup_returns_awarded_item_summary(): void {
+        global $PAGE;
+
+        [$manager, $user, $stash, $dropitem] = $this->create_manager_fixture();
+        $poolitemone = $this->create_item($stash, 'Pool 1');
+        $poolitemtwo = $this->create_item($stash, 'Pool 2');
+        $drop = $this->create_drop($stash, $dropitem, drop::TYPE_RANDOM);
+        $this->create_pool_item($drop, $poolitemone->get_id(), 1);
+        $this->create_pool_item($drop, $poolitemtwo->get_id(), 10);
+
+        $PAGE->set_context($manager->get_context());
+        $PAGE->set_url(new moodle_url('/course/view.php', ['id' => $manager->get_courseid()]));
+
+        $summary = external::pickup_drop($drop->get_id(), $drop->get_hashcode());
+
+        $this->assertContains($summary->item->id, [$poolitemone->get_id(), $poolitemtwo->get_id()]);
+        $this->assertSame($summary->item->id, $summary->useritem->itemid);
+        $this->assertSame(1, (int) $summary->useritem->quantity);
+        $this->assertSame(0, (int) $manager->get_user_item($user->id, $dropitem->get_id())->get_quantity());
     }
 
     public function test_create_or_update_drop_populates_stashid_for_fixed_drop(): void {

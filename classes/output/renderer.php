@@ -33,7 +33,7 @@ use tabobject;
 use block_stash\drop as dropmodel;
 use block_stash\item;
 use block_stash\external\drop_exporter;
-use block_stash\external\item_exporter;
+use block_stash\manager;
 
 
 /**
@@ -49,17 +49,18 @@ class renderer extends plugin_renderer_base {
      * Renderer to output the snippet UI.
      *
      * @param drop $drop The drop.
-     * @param item $item The item.
+     * @param item|null $item The fixed item, when applicable.
      * @param context $context The context of the drop.
      * @return string
      */
-    public function drop_snippet_ui(dropmodel $drop, item $item, context $context) {
+    public function drop_snippet_ui(dropmodel $drop, ?item $item, context $context) {
         $data = (object) [];
         $exporter = new drop_exporter($drop, ['context' => $context]);
         $data->drop = $exporter->export($this);
         $data->dropjson = json_encode($data->drop);
-        $exporter = new item_exporter($item, ['context' => $context]);
-        $data->item = $exporter->export($this);
+
+        $droprenderable = new drop($drop, $item, manager::get($context->instanceid));
+        $data->item = $droprenderable->export_for_template($this)->item;
         $data->itemjson = json_encode($data->item);
 
         list($altsnippetmaker, $warning) = \block_stash\helper::get_alternate_amd_snippet_maker($context);

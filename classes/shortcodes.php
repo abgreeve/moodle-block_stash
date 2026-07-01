@@ -27,7 +27,6 @@ namespace block_stash;
 defined('MOODLE_INTERNAL') || die();
 
 use block_stash\drop;
-use block_stash\item;
 use block_stash\manager;
 use block_stash\output\drop as droprenderable;
 use block_stash\output\drop_image;
@@ -83,7 +82,7 @@ class shortcodes {
         // Attempt to find the drop.
         try {
             $drop = $manager->get_drop_by_hashcode_portion($hash);
-            $item = $manager->get_item($drop->get_itemid());
+            $item = $drop->is_random() ? null : $manager->get_item($drop->get_itemid());
 
         } catch (\dml_exception $e) {
             // Most likely the drop doesn't exist, or the hash is ambiguous.
