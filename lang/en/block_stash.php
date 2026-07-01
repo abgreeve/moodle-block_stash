@@ -197,6 +197,7 @@ $string['randomdroppoolweighthigh'] = 'High';
 $string['randomdroppoolweightlow'] = 'Low';
 $string['randomdroppoolweightmedium'] = 'Medium';
 $string['randomdroppoolwrongstashitems'] = 'Only items from this stash can be added to the random drop pool.';
+$string['randomdrops'] = 'Random drops';
 $string['received'] = 'Received';
 $string['removalconfigurations'] = 'Removal configurations';
 $string['removalexplanation'] = 'Removals are currently limited to attempting the quiz activity. Items listed for removal will be removed every time a student starts a new attempt. Access will be denied if the student does not have enough of the listed items.';

@@ -66,16 +66,24 @@ echo $notification;
 echo $OUTPUT->heading($title);
 echo $renderer->navigation($manager, 'items');
 
-$addurl = new moodle_url('/blocks/stash/item_edit.php', ['courseid' => $courseid]);
-$addbtn = $OUTPUT->single_button($addurl, get_string('additem', 'block_stash'), 'get', ['class' => 'singlebutton heading-button']);
-$addrandomeurl = new moodle_url('/blocks/stash/random_drop_edit.php', ['courseid' => $courseid]);
-$addrandomebtn = $OUTPUT->single_button($addrandomeurl, get_string('addrandomdrop', 'block_stash'), 'get', ['class' => 'singlebutton heading-button pe-1']);
-$heading = get_string('itemslist', 'block_stash') . $addbtn . $addrandomebtn;
-echo $OUTPUT->heading($heading, 3);
+$additemurl = new moodle_url('/blocks/stash/item_edit.php', ['courseid' => $courseid]);
+$additembtn = $OUTPUT->single_button($additemurl, get_string('additem', 'block_stash'), 'get',
+    ['class' => 'singlebutton heading-button']);
+$randomdropurl = new moodle_url('/blocks/stash/random_drop_edit.php', ['courseid' => $courseid]);
+$addrandomdropbtn = $OUTPUT->single_button($randomdropurl, get_string('addrandomdrop', 'block_stash'), 'get',
+    ['class' => 'singlebutton heading-button']);
 
-$table = new \block_stash\output\items_table('itemstable', $manager, $renderer);
-$table->define_baseurl($url);
-echo $table->out(50, false);
+echo $OUTPUT->heading(get_string('itemslist', 'block_stash') . $additembtn, 3);
+
+$itemstable = new \block_stash\output\items_table('itemstable', $manager, $renderer);
+$itemstable->define_baseurl($url);
+echo $itemstable->out(50, false);
+
+echo $OUTPUT->heading(get_string('randomdrops', 'block_stash') . $addrandomdropbtn, 3);
+
+$randomdropstable = new \block_stash\output\random_drops_table('randomdropstable', $manager, $renderer);
+$randomdropstable->define_baseurl($url);
+echo $randomdropstable->out(50, false);
 
 list($altsnippetmaker, $warning) = \block_stash\helper::get_alternate_amd_snippet_maker($manager->get_context());
 $altsnippetmaker = $altsnippetmaker->drop;
