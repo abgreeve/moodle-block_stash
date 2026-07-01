@@ -98,7 +98,7 @@ class drop implements renderable, templatable {
         return (object) [
             'id' => 0,
             'name' => $this->drop->get_name(),
-            'imageurl' => '',
+            'imageurl' => $output->image_url('random-item-md', 'block_stash')->out(false), // TODO replace with real art.
         ];
     }
 }
