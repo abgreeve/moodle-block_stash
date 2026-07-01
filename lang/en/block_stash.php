@@ -189,6 +189,7 @@ $string['randomdroppool'] = 'Random drop pool';
 $string['randomdroppoolduplicateitems'] = 'Duplicate items are not allowed in a random drop pool.';
 $string['randomdroppoolinvaliditems'] = 'One or more selected pool items are invalid.';
 $string['randomdroppoolinvalidweights'] = 'One or more selected pool weights are invalid.';
+$string['randomdroppoolnotenoughitems'] = 'A random drop pool must contain at least 2 items.';
 $string['randomdroppoolscarceitems'] = 'Scarce items cannot be added to a random drop pool.';
 $string['randomdroppooltoomanyitems'] = 'A random drop pool cannot contain more than 20 items.';
 $string['randomdroppoolweight'] = 'Weight';

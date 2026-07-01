@@ -27,16 +27,13 @@ namespace block_stash\output;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/tablelib.php');
 
+use block_stash\drop as dropmodel;
 use confirm_action;
-use help_icon;
 use html_writer;
 use moodle_url;
 use pix_icon;
 use stdClass;
 use table_sql;
-use block_stash\drop as dropmodel;
-use block_stash\external\drop_exporter;
-use block_stash\external\item_exporter;
 
 /**
  * Random drops table class.
@@ -61,47 +58,41 @@ class random_drops_table extends table_sql {
      */
     public function __construct($uniqueid, $manager, $renderer) {
         parent::__construct($uniqueid);
-        $this->set_attribute('class', $uniqueid . ' tablewithitems generaltable generalbox');
+        $this->set_attribute('class', $uniqueid . ' generaltable generalbox');
         $this->manager = $manager;
         $this->renderer = $renderer;
 
-        // Define columns.
-        $this->define_columns(array(
+        $this->define_columns([
             'name',
             'status',
-            'drops',
-            'actions'
-        ));
-        $this->define_headers(array(
-            get_string('itemname', 'block_stash'),
-            get_string('locations', 'block_stash'),
-            get_string('actions')
-        ));
-        $this->define_help_for_headers([
-            null,
-            new help_icon('drops', 'block_stash'),
-            null
+            'shortcode',
+            'actions',
+        ]);
+        $this->define_headers([
+            get_string('dropname', 'block_stash'),
+            get_string('status'),
+            get_string('snippet', 'block_stash'),
+            get_string('actions'),
         ]);
 
-        $sqlfields = dropmodel::get_sql_fields('d', '');
-        $sqlfrom = "{" . dropmodel::TABLE . "} d";
-
         $this->sql = new stdClass();
-        $this->sql->fields = $sqlfields;
-        $this->sql->from = $sqlfrom;
-        $this->sql->where = 'd.stashid = :stashid AND d.droptype = 1';
-        $this->sql->params = ['stashid' => $this->manager->get_stash()->get_id()];
+        $this->sql->fields = dropmodel::get_sql_fields('d', '');
+        $this->sql->from = '{' . dropmodel::TABLE . '} d';
+        $this->sql->where = 'd.stashid = :stashid AND d.droptype = :droptype';
+        $this->sql->params = [
+            'stashid' => $this->manager->get_stash()->get_id(),
+            'droptype' => dropmodel::TYPE_RANDOM,
+        ];
 
-        // Define various table settings.
         $this->sortable(true, 'name', SORT_ASC);
-        $this->no_sorting('actions');
-        $this->no_sorting('drops');
         $this->no_sorting('status');
+        $this->no_sorting('shortcode');
+        $this->no_sorting('actions');
         $this->collapsible(false);
     }
 
     /**
-     * Formats the column.
+     * Formats the actions column.
      *
      * @param stdClass $row Table row.
      * @return string Output produced.
@@ -109,90 +100,84 @@ class random_drops_table extends table_sql {
     protected function col_actions($row) {
         global $OUTPUT;
 
-        $url = new moodle_url('/blocks/stash/item_edit.php');
-        $url->params(['id' => $row->id, 'courseid' => $this->manager->get_courseid()]);
-        $actionlink = $OUTPUT->action_link($url, '', null, null, new pix_icon('t/edit',
-            get_string('edititem', 'block_stash', $row->name)));
-        $actions[] = $actionlink;
+        $actions = [];
 
-        $url = new moodle_url('/blocks/stash/drop.php');
-        $url->params(['itemid' => $row->id, 'courseid' => $this->manager->get_courseid()]);
-        $actionlink = $OUTPUT->action_link($url, '', null, null, new pix_icon('t/add',
-            get_string('addnewdrop', 'block_stash', $row->name)));
-        $actions[] = $actionlink;
+        $url = new moodle_url('/blocks/stash/random_drop_edit.php', [
+            'courseid' => $this->manager->get_courseid(),
+            'dropid' => $row->id,
+        ]);
+        $actions[] = $OUTPUT->action_link($url, '', null, null, new pix_icon('t/edit',
+            get_string('editdrop', 'block_stash', $row->name)));
 
-        $action = new confirm_action(get_string('reallydeleteitem', 'block_stash'));
+        $action = new confirm_action(get_string('reallydeletedrop', 'block_stash'));
         $url = new moodle_url($this->baseurl);
-        $url->params(['itemid' => $row->id, 'action' => 'delete', 'sesskey' => sesskey()]);
-        $actionlink = $OUTPUT->action_link($url, '', $action, null, new pix_icon('t/delete',
-            get_string('deleteitem', 'block_stash', $row->name)));
-        $actions[] = $actionlink;
+        $url->params(['action' => 'delete', 'dropid' => $row->id, 'sesskey' => sesskey()]);
+        $actions[] = $OUTPUT->action_link($url, '', $action, null, new pix_icon('t/delete',
+            get_string('deletedrop', 'block_stash', $row->name)));
 
         return implode(' ', $actions);
     }
 
     /**
-     * Formats the column.
-     *
-     * @param stdClass $row Table row.
-     * @return string Output produced.
-     */
-    protected function col_drops($row) {
-        // This is everything but efficient...
-        $drops = $this->manager->get_drops($row->id);
-        if (empty($drops)) {
-            return '-';
-        }
-
-        // Yay, code duplication.
-        $item = new itemmodel(null, $row);
-        $exporter = new item_exporter($item, ['context' => $this->manager->get_context()]);
-        $itemdata = $exporter->export($this->renderer);
-
-        // Construct the list of drops.
-        $html = html_writer::start_tag('ul', ['class' => 'block-stash-item-drops']);
-        foreach ($drops as $drop) {
-            $exporter = new drop_exporter($drop, ['context' => $this->manager->get_context()]);
-            $link = html_writer::link('#', $drop->get_name(), [
-                'rel' => 'block-stash-drop',
-                'data-id' => $drop->get_id(),
-                'data-json' => json_encode($exporter->export($this->renderer)),
-                'data-item' => json_encode($itemdata)
-            ]);
-            $html .= html_writer::tag('li', $link);
-        }
-        $html .= html_writer::end_tag('ul');
-
-        return $html;
-    }
-
-    /**
-     * Formats the column.
+     * Formats the name column.
      *
      * @param stdClass $row Table row.
      * @return string Output produced.
      */
     protected function col_name($row) {
-        $renderable = new item(new itemmodel(null, $row), $this->manager);
-        $str = '';
-        $str .= $this->renderer->render_item_xsmall($renderable);
-        $str .= format_string($row->name, null, ['context' => $this->manager->get_context()]);
+        $url = new moodle_url('/blocks/stash/random_drop_edit.php', [
+            'courseid' => $this->manager->get_courseid(),
+            'dropid' => $row->id,
+        ]);
 
-        return $str;
+        return html_writer::link($url, format_string($row->name, true, ['context' => $this->manager->get_context()]));
     }
 
     /**
-     * Formats the column.
+     * Formats the shortcode column.
      *
      * @param stdClass $row Table row.
      * @return string Output produced.
      */
-    protected function col_maxnumber($row) {
-        $str = $row->maxnumber;
-        if ($row->maxnumber === null) {
-            $str = get_string('unlimited', 'block_stash');
+    protected function col_shortcode($row) {
+        $shortcode = '[stashdrop secret="' . substr($row->hashcode, 0, 6) . '" image]';
+        return html_writer::tag('code', s($shortcode));
+    }
+
+    /**
+     * Formats the status column.
+     *
+     * @param stdClass $row Table row.
+     * @return string Output produced.
+     */
+    protected function col_status($row) {
+        $drop = new dropmodel(null, $row);
+        if ($drop->is_valid_random_pool()) {
+            return get_string('enabled', 'block_stash');
         }
-        return $str;
+
+        $messages = [];
+        $map = [
+            'minitems' => 'randomdroppoolnotenoughitems',
+            'maxitems' => 'randomdroppooltoomanyitems',
+            'duplicateitems' => 'randomdroppoolduplicateitems',
+            'missingitems' => 'randomdroppoolinvaliditems',
+            'stashmismatch' => 'randomdroppoolwrongstashitems',
+            'scarceitems' => 'randomdroppoolscarceitems',
+        ];
+
+        foreach (array_keys($drop->get_random_pool_validation_errors()) as $key) {
+            if (!isset($map[$key])) {
+                continue;
+            }
+            $messages[] = get_string($map[$key], 'block_stash');
+        }
+
+        if (empty($messages)) {
+            return get_string('invaliddata', 'error');
+        }
+
+        return implode(' ', $messages);
     }
 
     /**
@@ -201,26 +186,10 @@ class random_drops_table extends table_sql {
     public function print_nothing_to_display() {
         global $OUTPUT;
         if (method_exists($this, 'render_reset_button')) {
-            // Compability with 2.9.
+            // Compatibility with 2.9.
             echo $this->render_reset_button();
         }
         $this->print_initials_bar();
         echo $OUTPUT->heading(get_string('nothingtodisplay'), 4);
     }
-
-    /**
-     * Defines a help icon for the header
-     *
-     * Always use this function if you need to create header with sorting and help icon.
-     *
-     * @param renderable[] $helpicons An array of renderable objects to be used as help icons
-     */
-    public function define_help_for_headers($helpicons) {
-        // Check if parent method exists.
-        if (method_exists('table_sql', 'define_help_for_headers')) {
-            parent::define_help_for_headers($helpicons);
-        }
-        // This method does not exist in the parent yet. Do nothing.
-    }
-
 }
