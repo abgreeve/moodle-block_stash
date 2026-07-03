@@ -24,6 +24,7 @@ import base from 'block_stash/baseclass';
 import Ajax from 'core/ajax';
 import Log from 'core/log';
 import Item from 'block_stash/item';
+import * as PickupToast from 'block_stash/pickup-toast';
 import UserItem from 'block_stash/user-item';
 import * as PubSub from 'core/pubsub';
 
@@ -64,6 +65,11 @@ export default class Trade extends base {
                         id: this.get('id'),
                         hashcode: this.get('hashcode'),
                         useritem: userItem
+                    });
+
+                    PickupToast.showTrade(data.gaineditems[index].item,
+                        data.gaineditems[index].quantityawarded).catch(function(error) {
+                        Log.debug(error);
                     });
                 }
 

@@ -40,6 +40,7 @@ use stdClass;
 
 use block_stash\external\item_exporter;
 use block_stash\manager;
+use block_stash\external\user_item_exporter;
 use block_stash\external\user_item_summary_exporter;
 use block_stash\external\trade_items_exporter;
 use block_stash\external\trade_summary_exporter;
@@ -156,7 +157,10 @@ class external extends external_api {
             'item' => $item,
             'useritem' => $manager->get_user_item($USER->id, $item->get_id())
         ]);
-        return $exporter->export($output);
+        $summary = $exporter->export($output);
+        $summary->quantityawarded = 1;
+
+        return $summary;
     }
 
     /**
@@ -164,7 +168,11 @@ class external extends external_api {
      * @return external_value
      */
     public static function pickup_drop_returns() {
-        return user_item_summary_exporter::get_read_structure();
+        return new external_single_structure([
+            'item' => item_exporter::get_read_structure(),
+            'useritem' => user_item_exporter::get_read_structure(),
+            'quantityawarded' => new external_value(PARAM_INT),
+        ]);
     }
 
     /**
@@ -389,12 +397,14 @@ class external extends external_api {
         }
 
         $summarydata = $manager->do_trade($tradeid, $USER->id);
+        $gainedquantities = [];
 
         // Need to take this data and turn it into items and user items.
         $removeditems = [];
         $gaineditems = [];
         if ($summarydata) {
             foreach ($summarydata['acquireditems'] as $gaineditem) {
+                $gainedquantities[$gaineditem->get_itemid()] = $gaineditem->get_quantity();
                 $gaineditems[$gaineditem->get_itemid()] = new stdClass();
                 $gaineditems[$gaineditem->get_itemid()]->item = $manager->get_item($gaineditem->get_itemid());
                 $gaineditems[$gaineditem->get_itemid()]->useritem = $manager->get_user_item($USER->id, $gaineditem->get_itemid());
@@ -413,6 +423,10 @@ class external extends external_api {
         $output = $PAGE->get_renderer('block_stash');
         $records = $exporter->export($output);
 
+        foreach ($records->gaineditems as $gaineditem) {
+            $gaineditem->quantityawarded = $gainedquantities[$gaineditem->item->id] ?? 1;
+        }
+
         return $records;
 
     }
@@ -423,7 +437,17 @@ class external extends external_api {
      * @return external_value
      */
     public static function complete_trade_returns() {
-        return trade_summary_exporter::get_read_structure();
+        return new external_single_structure([
+            'gaineditems' => new external_multiple_structure(new external_single_structure([
+                'item' => item_exporter::get_read_structure(),
+                'useritem' => user_item_exporter::get_read_structure(),
+                'quantityawarded' => new external_value(PARAM_INT),
+            ])),
+            'removeditems' => new external_multiple_structure(new external_single_structure([
+                'item' => item_exporter::get_read_structure(),
+                'useritem' => user_item_exporter::get_read_structure(),
+            ])),
+        ]);
     }
 
     /**

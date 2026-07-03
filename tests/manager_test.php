@@ -96,8 +96,51 @@ final class block_stash_manager_testcase extends advanced_testcase {
 
         $this->assertContains($summary->item->id, [$poolitemone->get_id(), $poolitemtwo->get_id()]);
         $this->assertSame($summary->item->id, $summary->useritem->itemid);
+        $this->assertSame(1, (int) $summary->quantityawarded);
         $this->assertSame(1, (int) $summary->useritem->quantity);
         $this->assertSame(0, (int) $manager->get_user_item($user->id, $dropitem->get_id())->get_quantity());
+    }
+
+    public function test_fixed_drop_external_pickup_returns_awarded_item_summary(): void {
+        global $PAGE;
+
+        [$manager, $user, $stash, $dropitem] = $this->create_manager_fixture();
+        $drop = $this->create_drop($stash, $dropitem, drop::TYPE_FIXED);
+
+        $PAGE->set_context($manager->get_context());
+        $PAGE->set_url(new moodle_url('/course/view.php', ['id' => $manager->get_courseid()]));
+
+        $summary = external::pickup_drop($drop->get_id(), $drop->get_hashcode());
+
+        $this->assertSame($dropitem->get_id(), $summary->item->id);
+        $this->assertSame($dropitem->get_name(), $summary->item->name);
+        $this->assertSame(1, (int) $summary->quantityawarded);
+        $this->assertSame($summary->item->id, $summary->useritem->itemid);
+    }
+
+    public function test_complete_trade_external_returns_awarded_quantities_for_gained_items(): void {
+        global $PAGE;
+
+        [$manager, $user, $stash] = $this->create_manager_fixture();
+        $requireditem = $this->create_item($stash, 'Token');
+        $awardeditem = $this->create_item($stash, 'Voucher');
+        $this->create_user_item($requireditem, $user->id, 3);
+        $trade = $this->create_trade($stash, 'Voucher trade');
+        $this->create_trade_item($trade->get_id(), $requireditem->get_id(), 1, false);
+        $this->create_trade_item($trade->get_id(), $awardeditem->get_id(), 2, true);
+
+        $PAGE->set_context($manager->get_context());
+        $PAGE->set_url(new moodle_url('/course/view.php', ['id' => $manager->get_courseid()]));
+
+        $summary = external::complete_trade($trade->get_id(), $trade->get_hashcode());
+
+        $this->assertCount(1, $summary->gaineditems);
+        $this->assertCount(1, $summary->removeditems);
+        $this->assertSame($awardeditem->get_id(), $summary->gaineditems[0]->item->id);
+        $this->assertSame(2, (int) $summary->gaineditems[0]->quantityawarded);
+        $this->assertSame(2, (int) $summary->gaineditems[0]->useritem->quantity);
+        $this->assertSame($requireditem->get_id(), $summary->removeditems[0]->item->id);
+        $this->assertSame(2, (int) $summary->removeditems[0]->useritem->quantity);
     }
 
     public function test_create_or_update_drop_populates_stashid_for_fixed_drop(): void {
@@ -176,6 +219,40 @@ final class block_stash_manager_testcase extends advanced_testcase {
     private function create_item(\block_stash\stash $stash, string $name): \block_stash\item {
         $generator = $this->getDataGenerator()->get_plugin_generator('block_stash');
         return $generator->create_item(['stash' => $stash, 'name' => $name]);
+    }
+
+    private function create_trade(\block_stash\stash $stash, string $name): \block_stash\trade {
+        $trade = new \block_stash\trade(null, (object) [
+            'stashid' => $stash->get_id(),
+            'name' => $name,
+            'losstitle' => 'Give',
+            'gaintitle' => 'Receive',
+            'hashcode' => random_string(6),
+        ]);
+        $trade->create();
+
+        return $trade;
+    }
+
+    private function create_trade_item(int $tradeid, int $itemid, int $quantity, bool $gainloss): \block_stash\tradeitems {
+        $tradeitem = new \block_stash\tradeitems(null, (object) [
+            'tradeid' => $tradeid,
+            'itemid' => $itemid,
+            'quantity' => $quantity,
+            'gainloss' => $gainloss,
+        ]);
+        $tradeitem->create();
+
+        return $tradeitem;
+    }
+
+    private function create_user_item(\block_stash\item $item, int $userid, int $quantity): \block_stash\user_item {
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_stash');
+        return $generator->create_user_item([
+            'item' => $item,
+            'userid' => $userid,
+            'quantity' => $quantity,
+        ]);
     }
 
     private function create_pool_item(drop $drop, int $itemid, int $weight): drop_pool_item {

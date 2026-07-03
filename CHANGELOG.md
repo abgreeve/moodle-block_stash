@@ -1,6 +1,12 @@
 Block Stash
 ===========
 
+Version 3.0.0 (TBD)
+-------------------
+
+* Added random drops. This allows teachers to provide a pool of items that could be picked up at a drop.
+  Control over the drop rate is currently limited to high, medium, and low.
+
 Version 2.2.2 (8th June 2026)
 -------------------
 
