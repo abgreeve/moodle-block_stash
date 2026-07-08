@@ -180,9 +180,10 @@ class manager {
      * Create or update an item drop based on the data passed.
      *
      * @param stdClass $data Data to use to create or update.
+     * @param int|null $draftitemid Draft item ID of the current user to get the random drop image from, if any.
      * @return drop
      */
-    public function create_or_update_drop($data) {
+    public function create_or_update_drop($data, $draftitemid = null) {
         $this->require_enabled();
         $this->require_manage();
 
@@ -218,7 +219,41 @@ class manager {
             $drop->from_record($data);
             $drop->update();
         }
+
+        if ($draftitemid !== null) {
+            $this->save_drop_image($drop, $draftitemid);
+        }
+
         return $drop;
+    }
+
+    /**
+     * Save the optional custom image representing an unopened random drop.
+     *
+     * Mirrors the renaming convention used for item images, see {@link self::create_or_update_item()}.
+     *
+     * @param drop $drop The drop to save the image for.
+     * @param int $draftitemid Draft item ID of the current user holding the image.
+     * @return void
+     */
+    protected function save_drop_image(drop $drop, $draftitemid) {
+        global $USER;
+
+        $fs = get_file_storage();
+        $usercontextid = context_user::instance($USER->id)->id;
+        $files = $fs->get_area_files($usercontextid, 'user', 'draft', $draftitemid, '', false);
+        $image = array_pop($files);
+        if ($image) {
+            $ext = strtolower(pathinfo($image->get_filename(), PATHINFO_EXTENSION));
+            $filename = 'image' . ($ext ? '.' . $ext : '');
+            // Check that we don't already have this image saved before renaming it.
+            if (!$fs->file_exists($usercontextid, 'user', 'draft', $draftitemid, '/', $filename)) {
+                $image->rename('/', $filename);
+            }
+        }
+
+        file_save_draft_area_files($draftitemid, $this->context->id, 'block_stash', drop::FILEAREA_IMAGE, $drop->get_id(),
+            ['maxfiles' => 1]);
     }
 
     /**

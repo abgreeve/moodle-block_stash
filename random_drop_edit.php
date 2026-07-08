@@ -52,9 +52,25 @@ if ($dropid) {
 $pagetitle = $drop ? get_string('editdrop', 'block_stash', $drop->get_name()) : get_string('addrandomdrop', 'block_stash');
 list($title, $subtitle, $returnurl) = \block_stash\page_helper::setup_for_drop($url, $manager, $drop, $pagetitle);
 
-$form = new \block_stash\form\random_drop($url->out(false), ['persistent' => $drop, 'item' => null, 'manager' => $manager]);
+$context = $manager->get_context();
+$fileareaoptions = ['maxfiles' => 1];
+
+$form = new \block_stash\form\random_drop($url->out(false), [
+    'persistent' => $drop,
+    'item' => null,
+    'manager' => $manager,
+    'fileareaoptions' => $fileareaoptions,
+]);
+
+$draftitemid = file_get_submitted_draft_itemid('image');
+file_prepare_draft_area($draftitemid, $context->id, 'block_stash', \block_stash\drop::FILEAREA_IMAGE, $dropid, $fileareaoptions);
+$form->set_data((object) ['image' => $draftitemid]);
+
 if ($data = $form->get_data()) {
-    $drop = $manager->create_or_update_drop($data);
+    $draftitemid = $data->image;
+    unset($data->image);
+
+    $drop = $manager->create_or_update_drop($data, $draftitemid);
     $manager->save_random_drop_pool($drop, \block_stash\form\random_drop::parse_pool_entries_from_data($data));
     redirect(new moodle_url('/blocks/stash/random_drop_edit.php', [
         'courseid' => $manager->get_courseid(),

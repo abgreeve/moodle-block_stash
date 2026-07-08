@@ -25,6 +25,7 @@
 namespace block_stash\output;
 defined('MOODLE_INTERNAL') || die();
 
+use moodle_url;
 use renderable;
 use renderer_base;
 use stdClass;
@@ -98,7 +99,30 @@ class drop implements renderable, templatable {
         return (object) [
             'id' => 0,
             'name' => $this->drop->get_name(),
-            'imageurl' => $output->image_url('random-item-md', 'block_stash')->out(false), // TODO replace with real art.
+            'imageurl' => $this->get_random_drop_image_url($output),
         ];
+    }
+
+    /**
+     * Get the image URL representing the unopened random drop.
+     *
+     * Uses the teacher-configured image for this drop when one has been uploaded,
+     * falling back to the generic mystery drop placeholder otherwise.
+     *
+     * @param renderer_base $output Renderer.
+     * @return string
+     */
+    protected function get_random_drop_image_url(renderer_base $output): string {
+        $context = $this->manager->get_context();
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'block_stash', dropmodel::FILEAREA_IMAGE, $this->drop->get_id(), '', false);
+        $file = array_pop($files);
+
+        if ($file) {
+            return moodle_url::make_pluginfile_url($context->id, 'block_stash', dropmodel::FILEAREA_IMAGE,
+                $this->drop->get_id(), '/', $file->get_filename())->out(false);
+        }
+
+        return $output->image_url('random-item-md', 'block_stash')->out(false);
     }
 }

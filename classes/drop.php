@@ -55,6 +55,9 @@ class drop {
     /** Drop type: awards one item selected at pickup time from a configured pool. */
     const TYPE_RANDOM = 1;
 
+    /** File area for the optional custom image representing the unopened random drop. */
+    const FILEAREA_IMAGE = 'dropimage';
+
     /** @var int Primary key. */
     private int $id = 0;
 

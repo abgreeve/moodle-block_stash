@@ -187,6 +187,8 @@ $string['reallydeleteitem'] = 'Are you sure you want to delete this item?';
 $string['reallyresetstashof'] = 'Are you sure you want to completely reset the stash of {$a}?';
 $string['reallyresetusersitems'] = 'This will remove all items from all users in this course. It is highly recommended to backup the course before taking this action. Answering yes will continue to reset user items.';
 
+$string['randomdropimage'] = 'Random drop image';
+$string['randomdropimage_help'] = 'This image represents the unopened mystery drop, shown to students before they collect it. It is not the image of any item they might win. The recommended size is 200x200 pixels. If no image is set, a default mystery image is used.';
 $string['randomdroppool'] = 'Random drop pool';
 $string['randomdroppoolduplicateitems'] = 'Duplicate items are not allowed in a random drop pool.';
 $string['randomdroppoolinvaliditems'] = 'One or more selected pool items are invalid.';

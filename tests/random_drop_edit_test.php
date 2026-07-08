@@ -23,12 +23,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_stash;
 
-use block_stash\drop;
-use block_stash\drop_pool_item;
 use block_stash\form\random_drop as random_drop_form;
-use block_stash\manager;
+use context_course;
+use context_user;
 
 /**
  * Random drop edit page testcase class.
@@ -38,7 +37,7 @@ use block_stash\manager;
  * @copyright  2026
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class block_stash_random_drop_edit_testcase extends advanced_testcase {
+final class random_drop_edit_test extends \advanced_testcase {
 
     public function setUp(): void {
         $this->resetAfterTest();
@@ -54,6 +53,7 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
 
         $this->assertStringContainsString(get_string('addrandomdrop', 'block_stash'), $output);
         $this->assertStringContainsString(get_string('randomdroppool', 'block_stash'), $output);
+        $this->assertStringContainsString(get_string('randomdropimage', 'block_stash'), $output);
     }
 
     public function test_page_requires_manage_capability(): void {
@@ -61,7 +61,7 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $this->create_enabled_stash($course->id);
         $this->setUser($student);
 
-        $this->expectException(required_capability_exception::class);
+        $this->expectException(\required_capability_exception::class);
         $this->execute_page(['courseid' => $course->id]);
     }
 
@@ -85,7 +85,8 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
     }
 
     public function test_teacher_can_create_random_drop_with_pool_items(): void {
-        [$manager, $drop, $items] = $this->create_random_drop_with_submission([7, 1]);
+        [$manager, $drop, $items] = $this->create_random_drop_with_submission(
+            [random_drop_form::WEIGHT_HIGH, random_drop_form::WEIGHT_LOW]);
 
         $this->assertSame(drop::TYPE_RANDOM, $drop->get_droptype());
         $this->assertSame(0, $drop->get_itemid());
@@ -94,7 +95,8 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
 
         $stored = drop_pool_item::get_records(['dropid' => $drop->get_id()], 'itemid');
         $this->assertCount(2, $stored);
-        $this->assertSame([1, 7], array_values(array_map(fn($poolitem) => $poolitem->get_weight(), $stored)));
+        $this->assertSame([random_drop_form::WEIGHT_HIGH, random_drop_form::WEIGHT_LOW],
+            array_values(array_map(fn($poolitem) => $poolitem->get_weight(), $stored)));
     }
 
     public function test_teacher_can_edit_existing_pool_items(): void {
@@ -210,6 +212,86 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
         $this->assertSame(0, drop_pool_item::count_records());
     }
 
+    public function test_random_drop_image_is_persisted_and_served_via_pluginfile(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+
+        $drop = $this->submit_form_and_save($manager, null, []);
+        $this->assertFalse($this->drop_has_image($manager, $drop));
+
+        $draftitemid = $this->create_draft_image('mystery.png');
+        $updated = $manager->create_or_update_drop($drop->to_record(), $draftitemid);
+
+        $this->assertTrue($this->drop_has_image($manager, $updated));
+    }
+
+    public function test_random_drop_image_can_be_removed(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+
+        $drop = $this->submit_form_and_save($manager, null, []);
+        $draftitemid = $this->create_draft_image('mystery.png');
+        $drop = $manager->create_or_update_drop($drop->to_record(), $draftitemid);
+        $this->assertTrue($this->drop_has_image($manager, $drop));
+
+        // Saving again with an empty draft area removes the previously stored image.
+        $emptydraftitemid = file_get_unused_draft_itemid();
+        $drop = $manager->create_or_update_drop($drop->to_record(), $emptydraftitemid);
+
+        $this->assertFalse($this->drop_has_image($manager, $drop));
+    }
+
+    public function test_random_drop_without_draftitemid_leaves_existing_image_untouched(): void {
+        [$course, $teacher] = $this->create_course_users();
+        $this->setUser($teacher);
+        $this->create_enabled_stash($course->id);
+        $manager = manager::get($course->id);
+
+        $drop = $this->submit_form_and_save($manager, null, []);
+        $draftitemid = $this->create_draft_image('mystery.png');
+        $drop = $manager->create_or_update_drop($drop->to_record(), $draftitemid);
+        $this->assertTrue($this->drop_has_image($manager, $drop));
+
+        // No draft item ID passed at all, e.g. when only the pool is being updated.
+        $drop = $manager->create_or_update_drop($drop->to_record());
+
+        $this->assertTrue($this->drop_has_image($manager, $drop));
+    }
+
+    private function drop_has_image(manager $manager, drop $drop): bool {
+        $files = get_file_storage()->get_area_files($manager->get_context()->id, 'block_stash', drop::FILEAREA_IMAGE,
+            $drop->get_id(), '', false);
+        return !empty($files);
+    }
+
+    /**
+     * Create a draft area containing a single fake image file for the current user.
+     *
+     * @param string $filename The filename to use within the draft area.
+     * @return int The draft item ID.
+     */
+    private function create_draft_image(string $filename): int {
+        global $USER;
+
+        $draftitemid = file_get_unused_draft_itemid();
+        $usercontext = context_user::instance($USER->id);
+
+        get_file_storage()->create_file_from_string([
+            'contextid' => $usercontext->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $draftitemid,
+            'filepath' => '/',
+            'filename' => $filename,
+        ], 'fake image content');
+
+        return $draftitemid;
+    }
+
     private function create_random_drop_with_submission(array $weights): array {
         [$course, $teacher] = $this->create_course_users();
         $this->setUser($teacher);
@@ -242,8 +324,8 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
     private function submit_form(manager $manager, ?drop $drop, array $pooldata): random_drop_form {
         random_drop_form::mock_submit([
             'name' => $drop ? $drop->get_name() : 'Random location',
-            'maxpickup' => '7',
-            'pickupinterval' => HOURSECS * 3,
+            'maxpickup' => ['int' => 7, 'unl' => 0],
+            'pickupinterval' => ['number' => 3, 'timeunit' => HOURSECS],
             'poolitemids' => $pooldata['poolitemids'] ?? [],
             'poolitemweights' => $pooldata['poolitemweights'] ?? [],
             'submitbutton' => 1,
@@ -253,18 +335,24 @@ final class block_stash_random_drop_edit_testcase extends advanced_testcase {
     }
 
     private function execute_page(array $get): string {
-        global $CFG, $PAGE, $SITE;
+        global $CFG, $PAGE, $SITE, $OUTPUT;
 
         $_GET = $get;
         $_POST = [];
         $_REQUEST = $get;
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
-        $PAGE = null;
-        $SITE = null;
+        $PAGE = new \moodle_page();
+        $SITE = get_site();
+        $OUTPUT = new \bootstrap_renderer();
 
         ob_start();
-        require($CFG->dirroot . '/blocks/stash/random_drop_edit.php');
+        try {
+            require($CFG->dirroot . '/blocks/stash/random_drop_edit.php');
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
         return ob_get_clean();
     }
 

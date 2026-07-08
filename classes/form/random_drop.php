@@ -60,6 +60,8 @@ class random_drop extends persistent {
 
     protected static $fieldstoremove = ['submitbutton'];
 
+    protected static $foreignfields = ['image'];
+
     /**
      * Define the form.
      */
@@ -71,6 +73,11 @@ class random_drop extends persistent {
         $drop = $this->get_persistent();
 
         $mform->addElement('header', 'generalhdr', get_string('general'));
+
+        // Stash ID.
+        $mform->addElement('hidden', 'stashid');
+        $mform->setType('stashid', PARAM_INT);
+        $mform->setConstant('stashid', $manager->get_stash()->get_id());
 
         // Hash code.
         $mform->addElement('hidden', 'hashcode');
@@ -99,6 +106,11 @@ class random_drop extends persistent {
         $mform->addElement('duration', 'pickupinterval', get_string('pickupinterval', 'block_stash'));
         $mform->setType('pickupinterval', PARAM_INT);
         $mform->addHelpButton('pickupinterval', 'pickupinterval', 'block_stash');
+
+        // Random drop image. This represents the unopened mystery drop, not the items that can be won.
+        $fileareaoptions = $this->_customdata['fileareaoptions'] ?? ['maxfiles' => 1];
+        $mform->addElement('filemanager', 'image', get_string('randomdropimage', 'block_stash'), array(), $fileareaoptions);
+        $mform->addHelpButton('image', 'randomdropimage', 'block_stash');
 
         $mform->addElement('header', 'poolhdr', get_string('randomdroppool', 'block_stash'));
         $mform->addElement('static', 'poolvalidationnotice', '', '');

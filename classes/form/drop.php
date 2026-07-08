@@ -97,6 +97,11 @@ class drop extends persistent {
             $mform->addElement('select', 'itemid', get_string('item', 'block_stash'), $options);
         }
 
+        // Stash ID.
+        $mform->addElement('hidden', 'stashid');
+        $mform->setType('stashid', PARAM_INT);
+        $mform->setConstant('stashid', $manager->get_stash()->get_id());
+
         // Hash code.
         $mform->addElement('hidden', 'hashcode');
         $mform->setType('hashcode', PARAM_ALPHANUM);

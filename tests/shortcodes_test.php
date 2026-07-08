@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_stash;
+
+use context_course;
+use moodle_url;
+
 /**
  * Shortcode tests.
  *
@@ -22,23 +27,8 @@
  * @copyright  2026
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-use block_stash\drop;
-use block_stash\drop_pool_item;
-use block_stash\manager;
-use block_stash\shortcodes;
-
-/**
- * Shortcodes testcase class.
- *
- * @package    block_stash
- * @category   test
- * @copyright  2026
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-final class block_stash_shortcodes_testcase extends advanced_testcase {
+#[\PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses]
+final class shortcodes_test extends \advanced_testcase {
 
     public function setUp(): void {
         $this->resetAfterTest();
@@ -95,6 +85,48 @@ final class block_stash_shortcodes_testcase extends advanced_testcase {
 
         $this->assertFalse($manager->is_drop_visible($drop));
         $this->assertSame('', $this->render_drop_shortcode($manager, $drop, []));
+    }
+
+    public function test_random_drop_shortcode_uses_placeholder_image_when_no_custom_image_set(): void {
+        global $PAGE;
+
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        $output = $this->render_drop_shortcode($manager, $drop, ['image' => 1]);
+
+        $renderer = $PAGE->get_renderer('block_stash');
+        $placeholderurl = $renderer->image_url('random-item-md', 'block_stash')->out(false);
+
+        $this->assertStringContainsString($placeholderurl, $output);
+    }
+
+    public function test_random_drop_shortcode_uses_custom_image_when_configured(): void {
+        global $PAGE;
+
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        // The image is attached directly via the file API, as it would already be by the time
+        // a student (the current user in this fixture) views the rendered drop.
+        get_file_storage()->create_file_from_string([
+            'contextid' => $manager->get_context()->id,
+            'component' => 'block_stash',
+            'filearea' => drop::FILEAREA_IMAGE,
+            'itemid' => $drop->get_id(),
+            'filepath' => '/',
+            'filename' => 'image.png',
+        ], 'fake image content');
+
+        $output = $this->render_drop_shortcode($manager, $drop, ['image' => 1]);
+
+        $expectedurl = moodle_url::make_pluginfile_url($manager->get_context()->id, 'block_stash',
+            drop::FILEAREA_IMAGE, $drop->get_id(), '/', 'image.png')->out(false);
+        $renderer = $PAGE->get_renderer('block_stash');
+        $placeholderurl = $renderer->image_url('random-item-md', 'block_stash')->out(false);
+
+        $this->assertStringContainsString($expectedurl, $output);
+        $this->assertStringNotContainsString($placeholderurl, $output);
     }
 
     private function render_drop_shortcode(manager $manager, drop $drop, array $args): string {
@@ -156,5 +188,22 @@ final class block_stash_shortcodes_testcase extends advanced_testcase {
         ]);
         $poolitem->create();
         return $poolitem;
+    }
+
+    private function create_random_drop_with_pool(manager $manager, \block_stash\stash $stash, string $name): drop {
+        $drop = new drop(null, (object) [
+            'stashid' => $stash->get_id(),
+            'itemid' => 0,
+            'droptype' => drop::TYPE_RANDOM,
+            'name' => $name,
+        ]);
+        $drop->create();
+
+        $poolitemone = $this->create_item($stash, 'Pool item 1');
+        $poolitemtwo = $this->create_item($stash, 'Pool item 2');
+        $this->create_pool_item($drop, $poolitemone->get_id(), 1);
+        $this->create_pool_item($drop, $poolitemtwo->get_id(), 5);
+
+        return $drop;
     }
 }
