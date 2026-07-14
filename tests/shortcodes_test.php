@@ -42,8 +42,12 @@ final class shortcodes_test extends \advanced_testcase {
 
         $output = $this->render_drop_shortcode($manager, $drop, []);
 
+        // The hashcode only ever appears inside the template's {{#js}} block, which
+        // Moodle strips out of the returned HTML and queues separately via
+        // $PAGE->requires - it is never part of the rendered markup itself, so it must
+        // not be asserted on here.
         $this->assertStringContainsString('Fixed item', $output);
-        $this->assertStringContainsString($drop->get_hashcode(), $output);
+        $this->assertStringContainsString('item-image', $output);
         $this->assertNotSame('', $output);
     }
 
@@ -64,8 +68,12 @@ final class shortcodes_test extends \advanced_testcase {
 
         $output = $this->render_drop_shortcode($manager, $drop, []);
 
+        // The hashcode is only ever emitted inside the template's {{#js}} block, which
+        // Moodle strips out of the returned HTML and queues separately via
+        // $PAGE->requires - it is never part of the rendered markup itself, so it must
+        // not be asserted on here.
         $this->assertStringContainsString('Mystery drop', $output);
-        $this->assertStringContainsString($drop->get_hashcode(), $output);
+        $this->assertStringContainsString('item-image', $output);
         $this->assertStringNotContainsString('Pool item 1', $output);
         $this->assertStringNotContainsString('Pool item 2', $output);
     }

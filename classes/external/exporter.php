@@ -124,7 +124,10 @@ abstract class exporter {
         if (method_exists($this, 'update_values')) {
             $updatedata = $this->update_values();
             foreach ($updatedata as $key => $udata) {
-                if (!isset($values[$key])) {
+                // Use array_key_exists() rather than isset(): properties are allowed to be
+                // legitimately null (e.g. an item with no description), and isset() would
+                // incorrectly treat those as missing.
+                if (!array_key_exists($key, $values)) {
                     throw new coding_exception('Value to be updated does not exist.');
                 }
                 $values[$key] = $udata;
