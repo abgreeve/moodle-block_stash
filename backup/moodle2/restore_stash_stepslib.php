@@ -28,6 +28,7 @@ use block_stash\stash;
 use block_stash\item;
 use block_stash\drop;
 use block_stash\drop_pickup;
+use block_stash\drop_pool_item;
 use block_stash\user_item;
 use block_stash\trade;
 use block_stash\tradeitems;
@@ -77,8 +78,19 @@ class restore_stash_block_structure_step extends restore_structure_step {
         $paths[] = new restore_path_element('block_stash_removal', '/block/stash/removals/removal');
         $paths[] = new restore_path_element('block_stash_remove_items', '/block/stash/removals/removal/removaldetails/removaldetail');
 
+        // Random drops are not attached to any item, so they live directly under the
+        // stash. They are absent altogether in backups made before random drops
+        // existed, in which case these paths will simply never be matched.
+        $paths[] = new restore_path_element('block_stash_randomdrop', '/block/stash/randomdrops/randomdrop');
+        $paths[] = new restore_path_element('block_stash_pool_item',
+            '/block/stash/randomdrops/randomdrop/poolitems/poolitem');
+
         if ($userinfo) {
             $paths[] = new restore_path_element('pickup', '/block/stash/items/item/drops/drop/pickups/pickup');
+            // Path element names must be unique per structure step, so random drop
+            // pickups need their own name even though they share the processing logic.
+            $paths[] = new restore_path_element('randomdroppickup',
+                '/block/stash/randomdrops/randomdrop/randompickups/randompickup');
             $paths[] = new restore_path_element('useritem', '/block/stash/items/item/useritems/useritem');
         }
 
@@ -128,24 +140,84 @@ class restore_stash_block_structure_step extends restore_structure_step {
      */
     protected function process_block_stash_drop($data) {
         $data = (object) $data;
-        $data->itemid = $this->get_new_parentid('block_stash_item');
+        $this->restore_drop($data, $this->get_new_parentid('block_stash_item'));
+    }
+
+    /**
+     * Process random drop.
+     *
+     * Random drops are not attached to any item, so their itemid is always 0,
+     * regardless of whichever item was last restored.
+     */
+    protected function process_block_stash_randomdrop($data) {
+        $data = (object) $data;
+        $this->restore_drop($data, 0);
+    }
+
+    /**
+     * Shared logic to restore a drop record, fixed or random.
+     *
+     * Both kinds of drops are mapped under the same 'block_stash_drop' item name so
+     * that pickups nested under either can resolve their parent drop the same way.
+     *
+     * @param \stdClass $data The drop data, still carrying its backup id.
+     * @param int $itemid The new (already remapped) item ID, or 0 for random drops.
+     */
+    protected function restore_drop($data, $itemid) {
+        $data->stashid = $this->get_new_parentid('block_stash');
+        $data->itemid = $itemid;
         $oldid = $data->id;
         unset($data->id);
 
         // When the hashcode conflicts, regenerate it.
         $drop = new drop(null, $data);
-        while (drop::hashcode_exists($drop->get_hashcode(), $this->get_new_parentid('block_stash'))) {
+        while (drop::hashcode_exists($drop->get_hashcode(), $data->stashid)) {
             $drop->regenerate_hashcode();
         }
         $drop->create();
 
-        $this->set_mapping('block_stash_drop', $oldid, $drop->get_id());
+        // The restorefiles flag (plus the old course context) is what allows
+        // after_execute()'s add_related_files() to later locate this drop's
+        // dropimage files, keyed off this same 'block_stash_drop' mapping.
+        $this->set_mapping('block_stash_drop', $oldid, $drop->get_id(), true, $this->task->get_old_course_contextid());
+    }
+
+    /**
+     * Process random drop pool item.
+     */
+    protected function process_block_stash_pool_item($data) {
+        $data = (object) $data;
+        $data->dropid = $this->get_new_parentid('block_stash_drop');
+        $data->itemid = $this->get_mappingid('block_stash_item', $data->itemid);
+        unset($data->id);
+
+        $poolitem = new drop_pool_item(null, $data);
+        $poolitem->create();
     }
 
     /**
      * Process drop pickup.
      */
     protected function process_pickup($data) {
+        $this->restore_pickup($data);
+    }
+
+    /**
+     * Process random drop pickup.
+     *
+     * Uses a distinct path element name from process_pickup() because restore path
+     * element names must be unique per structure step, even when their paths differ.
+     */
+    protected function process_randomdroppickup($data) {
+        $this->restore_pickup($data);
+    }
+
+    /**
+     * Shared logic to restore a drop pickup record, fixed or random.
+     *
+     * @param array $data The pickup data, still carrying its backup id.
+     */
+    protected function restore_pickup($data) {
         $data = (object) $data;
         $data->dropid = $this->get_new_parentid('block_stash_drop');
         $data->userid = $this->get_mappingid('user', $data->userid);
@@ -226,6 +298,8 @@ class restore_stash_block_structure_step extends restore_structure_step {
     protected function after_execute() {
         $this->add_related_files('block_stash', 'item', 'block_stash_item', $this->task->get_old_course_contextid());
         $this->add_related_files('block_stash', 'detail', 'block_stash_item', $this->task->get_old_course_contextid());
+        $this->add_related_files('block_stash', drop::FILEAREA_IMAGE, 'block_stash_drop',
+            $this->task->get_old_course_contextid());
     }
 
     protected function after_restore() {

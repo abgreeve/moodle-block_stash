@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use block_stash\item;
 use block_stash\drop;
 use block_stash\drop_pickup;
+use block_stash\drop_pool_item;
 use block_stash\stash;
 use block_stash\user_item;
 use block_stash\trade;
@@ -54,11 +55,23 @@ class backup_stash_block_structure_step extends backup_block_structure_step {
         $items = new backup_nested_element('items');
         $item = new backup_nested_element('item', ['id'], ['name', 'maxnumber', 'detail', 'detailformat', 'amountlimit', 'currentamount']);
         $drops = new backup_nested_element('drops');
-        $drop = new backup_nested_element('drop', ['id'], ['name', 'maxpickup', 'pickupinterval', 'hashcode']);
+        $drop = new backup_nested_element('drop', ['id'], ['stashid', 'name', 'maxpickup', 'pickupinterval', 'hashcode', 'droptype']);
         $pickups = new backup_nested_element('pickups');
         $pickup = new backup_nested_element('pickup', ['id'], ['userid', 'pickupcount', 'lastpickup']);
         $useritems = new backup_nested_element('useritems');
         $useritem = new backup_nested_element('useritem', ['id'], ['userid', 'quantity']);
+
+        // Random drops. Unlike fixed drops, these are not attached to any item, so they
+        // are backed up directly under the stash rather than nested inside an item.
+        $randomdrops = new backup_nested_element('randomdrops');
+        $randomdrop = new backup_nested_element('randomdrop', ['id'],
+            ['stashid', 'name', 'maxpickup', 'pickupinterval', 'hashcode', 'droptype']);
+        // Nested element names must be unique across the whole backup structure tree,
+        // so these can't reuse the 'pickups'/'pickup' tags from the fixed drop branch.
+        $randompickups = new backup_nested_element('randompickups');
+        $randompickup = new backup_nested_element('randompickup', ['id'], ['userid', 'pickupcount', 'lastpickup']);
+        $poolitems = new backup_nested_element('poolitems');
+        $poolitem = new backup_nested_element('poolitem', ['id'], ['itemid', 'weight']);
 
         // Here we go.
         $trades = new backup_nested_element('trades');
@@ -81,6 +94,13 @@ class backup_stash_block_structure_step extends backup_block_structure_step {
         $drops->add_child($drop);
         $pickups->add_child($pickup);
         $useritems->add_child($useritem);
+
+        $stash->add_child($randomdrops);
+        $randomdrops->add_child($randomdrop);
+        $randomdrop->add_child($poolitems);
+        $poolitems->add_child($poolitem);
+        $randompickups->add_child($randompickup);
+
         $stash->add_child($trades);
         $trades->add_child($trade);
         $trade->add_child($tradeitems);
@@ -100,20 +120,34 @@ class backup_stash_block_structure_step extends backup_block_structure_step {
         $removal->set_source_table('block_stash_removal', ['stashid' => backup::VAR_PARENTID]);
         $removaldetail->set_source_table('block_stash_remove_items', ['removalid' => backup::VAR_PARENTID]);
 
+        // Random drops are stashid-owned rather than item-owned, so they need their own
+        // filtered query rather than a plain set_source_table() keyed on itemid.
+        $randomdrop->set_source_sql('
+                SELECT *
+                  FROM {block_stash_drops}
+                 WHERE stashid = ?
+                   AND droptype = ?',
+            [backup::VAR_PARENTID, backup_helper::is_sqlparam(drop::TYPE_RANDOM)]);
+        $poolitem->set_source_table(drop_pool_item::TABLE, array('dropid' => backup::VAR_PARENTID));
+
         // Define user data.
         if ($userinfo) {
             $item->add_child($useritems);
             $drop->add_child($pickups);
+            $randomdrop->add_child($randompickups);
 
             $useritem->set_source_table(user_item::TABLE, array('itemid' => backup::VAR_PARENTID));
             $pickup->set_source_table(drop_pickup::TABLE, array('dropid' => backup::VAR_PARENTID));
+            $randompickup->set_source_table(drop_pickup::TABLE, array('dropid' => backup::VAR_PARENTID));
         }
 
         // Annotations.
         $pickup->annotate_ids('user', 'userid');
+        $randompickup->annotate_ids('user', 'userid');
         $useritem->annotate_ids('user', 'userid');
         $item->annotate_files('block_stash', 'item', 'id', context_course::instance($this->get_courseid())->id);
         $item->annotate_files('block_stash', 'detail', 'id', context_course::instance($this->get_courseid())->id);
+        $randomdrop->annotate_files('block_stash', drop::FILEAREA_IMAGE, 'id', context_course::instance($this->get_courseid())->id);
 
         // Return the root element.
         return $wrapper;
