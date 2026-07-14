@@ -89,6 +89,7 @@ $string['gainloss'] = "Gain or lose";
 $string['gaintitle'] = "Gain title";
 $string['gaintitle_help'] = "Title for the column of items the user will acquire in this trade.";
 $string['generalsettings'] = 'General settings';
+$string['getsnippet'] = 'Get snippet';
 $string['grouponly'] = 'Only allow trades between students in their groups.';
 $string['leaderboard'] = 'Show leaderboard.';
 $string['leaderboards'] = 'Leaderboards';

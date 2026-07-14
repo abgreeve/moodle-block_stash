@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/tablelib.php');
 
 use block_stash\drop as dropmodel;
+use block_stash\external\drop_exporter;
 use confirm_action;
 use html_writer;
 use moodle_url;
@@ -136,12 +137,28 @@ class random_drops_table extends table_sql {
     /**
      * Formats the shortcode column.
      *
+     * Rather than a static shortcode, this renders a trigger that opens the same
+     * configurable snippet dialogue used for fixed item drops, so teachers can pick
+     * the appearance (image, button, or both) and the button text.
+     *
      * @param stdClass $row Table row.
      * @return string Output produced.
      */
     protected function col_shortcode($row) {
-        $shortcode = '[stashdrop secret="' . substr($row->hashcode, 0, 6) . '" image]';
-        return html_writer::tag('code', s($shortcode));
+        $drop = new dropmodel(null, $row);
+
+        $exporter = new drop_exporter($drop, ['context' => $this->manager->get_context()]);
+        $dropdata = $exporter->export($this->renderer);
+
+        $droprenderable = new drop($drop, null, $this->manager);
+        $itemdata = $droprenderable->export_for_template($this->renderer)->item;
+
+        return html_writer::link('#', get_string('getsnippet', 'block_stash'), [
+            'rel' => 'block-stash-drop',
+            'data-id' => $drop->get_id(),
+            'data-json' => json_encode($dropdata),
+            'data-item' => json_encode($itemdata),
+        ]);
     }
 
     /**

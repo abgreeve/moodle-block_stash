@@ -129,6 +129,48 @@ final class shortcodes_test extends \advanced_testcase {
         $this->assertStringNotContainsString($placeholderurl, $output);
     }
 
+    public function test_random_drop_shortcode_image_only_renders_image_without_button(): void {
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        $output = $this->render_drop_shortcode($manager, $drop, ['image' => 1]);
+
+        $this->assertStringContainsString('item-image', $output);
+        $this->assertStringNotContainsString('btn btn-secondary', $output);
+    }
+
+    public function test_random_drop_shortcode_button_only_renders_without_image(): void {
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        $output = $this->render_drop_shortcode($manager, $drop, ['text' => 'Open the mystery box']);
+
+        $this->assertStringContainsString('Open the mystery box', $output);
+        $this->assertStringNotContainsString('item-image', $output);
+    }
+
+    public function test_random_drop_shortcode_image_and_button_renders_both(): void {
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        $output = $this->render_drop_shortcode($manager, $drop, ['image' => 1, 'text' => 'Claim your prize']);
+
+        $this->assertStringContainsString('item-image', $output);
+        $this->assertStringContainsString('btn btn-secondary', $output);
+        $this->assertStringContainsString('Claim your prize', $output);
+    }
+
+    public function test_random_drop_shortcode_supports_custom_button_text(): void {
+        [$manager, $stash] = $this->create_shortcode_fixture();
+        $drop = $this->create_random_drop_with_pool($manager, $stash, 'Mystery drop');
+
+        $defaultoutput = $this->render_drop_shortcode($manager, $drop, ['image' => 1]);
+        $customoutput = $this->render_drop_shortcode($manager, $drop, ['image' => 1, 'text' => 'Unlock this!']);
+
+        $this->assertStringContainsString('Unlock this!', $customoutput);
+        $this->assertStringNotContainsString('Unlock this!', $defaultoutput);
+    }
+
     private function render_drop_shortcode(manager $manager, drop $drop, array $args): string {
         global $PAGE;
 

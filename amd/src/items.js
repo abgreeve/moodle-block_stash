@@ -70,7 +70,9 @@ const displayModal = async(modal) => {
 };
 
 export const init = (altsnippetmaker, warnings) => {
-    let tablenodes = document.querySelectorAll('table.itemstable [rel=block-stash-drop]');
+    let tablenodes = document.querySelectorAll(
+        'table.itemstable [rel=block-stash-drop], table.randomdropstable [rel=block-stash-drop]'
+    );
     tablenodes.forEach((tablenode) => {
         tablenode.addEventListener('click', (e) => {
             showModal(e, altsnippetmaker, warnings);

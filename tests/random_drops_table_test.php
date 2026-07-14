@@ -133,7 +133,12 @@ final class block_stash_random_drops_table_testcase extends advanced_testcase {
         );
 
         $shortcodehtml = html_entity_decode($table->render_shortcode($validrow));
-        $this->assertStringContainsString('[stashdrop secret="' . $validdrop->get_hashcode() . '" image]', $shortcodehtml);
+        $this->assertStringContainsString(get_string('getsnippet', 'block_stash'), $shortcodehtml);
+        $this->assertStringContainsString('rel="block-stash-drop"', $shortcodehtml);
+        $this->assertStringContainsString('data-id="' . $validdrop->get_id() . '"', $shortcodehtml);
+        $this->assertStringContainsString($validdrop->get_hashcode(), $shortcodehtml);
+        $this->assertStringContainsString('Valid random drop', $shortcodehtml);
+        $this->assertStringContainsString('random-item-md', $shortcodehtml);
 
         $actionshtml = html_entity_decode($table->render_actions($validrow));
         $this->assertStringContainsString('random_drop_edit.php?courseid=' . $course->id . '&dropid=' . $validdrop->get_id(), $actionshtml);

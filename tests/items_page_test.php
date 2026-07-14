@@ -79,7 +79,11 @@ final class block_stash_items_page_testcase extends advanced_testcase {
 
         $this->assertStringContainsString('item_edit.php?courseid=' . $course->id, $output);
         $this->assertStringContainsString('random_drop_edit.php?courseid=' . $course->id, $output);
-        $this->assertStringContainsString('[stashdrop secret="' . $randomdrop->get_hashcode() . '" image]', html_entity_decode($output));
+
+        $decodedoutput = html_entity_decode($output);
+        $this->assertStringContainsString(get_string('getsnippet', 'block_stash'), $decodedoutput);
+        $this->assertStringContainsString('rel="block-stash-drop"', $decodedoutput);
+        $this->assertStringContainsString($randomdrop->get_hashcode(), $decodedoutput);
     }
 
     public function test_items_page_requires_manage_capability(): void {

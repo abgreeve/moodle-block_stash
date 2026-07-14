@@ -65,8 +65,11 @@ class drop_exporter extends persistent_exporter {
         $maxpickup = $this->persistent->get_maxpickup();
         $unlimited = $this->persistent->is_unlimited();
 
+        $editscript = $this->persistent->is_random() ? 'random_drop_edit.php' : 'drop.php';
+        $editurl = new moodle_url('/blocks/stash/' . $editscript, ['dropid' => $this->persistent->get_id()]);
+
         return [
-            'editurl' => (new moodle_url('/blocks/stash/drop.php', ['dropid' => $this->persistent->get_id()]))->out(false),
+            'editurl' => $editurl->out(false),
             'maxpickupformatted' => $unlimited ? get_string('unlimited', 'block_stash') : $maxpickup,
             'pickupintervalformatted' => $interval ? format_time($interval) : get_string('none', 'block_stash'),
         ];
