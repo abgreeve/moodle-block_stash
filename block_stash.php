@@ -46,7 +46,7 @@ class block_stash extends block_base {
      * @return array
      */
     public function applicable_formats() {
-        return ['course' => true, 'course-index-category' => false];
+        return ['course-view' => true, 'all' => false];
     }
 
     /**
