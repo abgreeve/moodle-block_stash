@@ -1304,7 +1304,7 @@ class manager {
         $context = context_course::instance($courseid);
         if ($this->leaderboard_groups_enabled()) {
             $groupids = groups_get_user_groups($courseid, $USER->id)[0];
-            $userids = $DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context));
+            $userids = empty($groupids) ? [] : $DB->get_records_sql(...groups_get_members_ids_sql($groupids, $context));
         } else {
             $userids = get_enrolled_users($context, '', 0, 'u.id');
         }
