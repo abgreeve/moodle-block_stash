@@ -438,13 +438,26 @@ class external extends external_api {
     }
 
     public static function get_stash_for_user($courseid, $userid) {
-        global $PAGE;
+        global $PAGE, $USER;
         $params = self::validate_parameters(self::get_stash_for_user_parameters(), compact('courseid', 'userid'));
         $courseid = $params['courseid'];
         $userid = $params['userid'];
 
         $manager = manager::get($courseid);
         self::validate_context($manager->get_context());
+
+        if ($userid != $USER->id && !$manager->can_manage()) {
+            if (!$manager->is_swapping_enabled()) {
+                throw new \moodle_exception('tradesnotenabled', 'block_stash');
+            }
+            if ($manager->group_trading_enabled()) {
+                $mygroups = groups_get_user_groups($courseid, $USER->id)[0];
+                $theirgroups = groups_get_user_groups($courseid, $userid)[0];
+                if (!array_intersect($mygroups, $theirgroups)) {
+                    throw new \moodle_exception('nopermissions', 'error', '', 'block_stash_get_user_stash_items');
+                }
+            }
+        }
 
         $stashitems = $manager->get_all_user_items_in_stash($userid);
 

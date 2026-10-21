@@ -525,7 +525,7 @@ class manager {
      */
     public function get_all_user_items_in_stash($userid) {
         $this->require_enabled();
-        $this->require_view($userid);
+        $this->require_view();
 
         return user_item::get_all_in_stash($userid, $this->get_stash()->get_id());
     }

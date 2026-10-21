@@ -82,7 +82,7 @@ function block_stash_myprofile_navigation(\core_user\output\myprofile\tree $tree
     $manager = block_stash\manager::get($course->id);
 
     // Show nothing if stash is not on this course.
-    if (!$manager->is_enabled()) {
+    if (!$manager->is_enabled() || !$manager->can_view()) {
         return;
     }
 
