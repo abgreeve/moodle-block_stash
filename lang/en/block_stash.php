@@ -196,6 +196,7 @@ $string['requestsent'] = 'Request has been sent.';
 $string['requestswap'] = 'Make an offer';
 $string['resetallusersitems'] = 'Reset all users items';
 $string['resetstashof'] = 'Reset the stash of {$a}';
+$string['resultslimit'] = 'Results limit';
 $string['saveandnext'] = 'Save and next';
 $string['savechanges'] = 'Save changes';
 $string['savequantity'] = 'Save the quantity for the {$a} item';

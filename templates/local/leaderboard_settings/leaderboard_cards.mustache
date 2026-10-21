@@ -33,7 +33,7 @@
             {{{optionshtml}}}
             <input type="hidden" name="leaderboard-options-{{id}}" data-options="">
             <div class="row">
-                <label class="form-label">Results limit</label>
+                <label class="form-label">{{#str}}resultslimit, block_stash{{/str}}</label>
                 <div class="col-sm-1">
                     <input type="number" class="block_stash_change_element block_stash-leaderboard-limit form-control" min="1" value="{{rowlimit}}"
                         {{^active}}disabled{{/active}}
