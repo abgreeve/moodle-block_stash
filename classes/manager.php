@@ -1328,15 +1328,16 @@ class manager {
     }
 
     /**
-     * Delete the leader board setting using the boardname as a comparison.
+     * Delete the leader board setting of this stash using the boardname as a comparison.
      *
      * @param string $boardname The name of the board to delete.
      */
     public function delete_leaderboard_settings(string $boardname): void {
         global $DB;
         $thing = $DB->sql_compare_text('boardname');
-        $where = "$thing = :boardname";
-        $DB->delete_records_select('block_stash_lb_settings', $where, ['boardname' => $boardname]);
+        $where = "$thing = :boardname AND stashid = :stashid";
+        $params = ['boardname' => $boardname, 'stashid' => $this->get_stash()->get_id()];
+        $DB->delete_records_select('block_stash_lb_settings', $where, $params);
     }
 
     /**
