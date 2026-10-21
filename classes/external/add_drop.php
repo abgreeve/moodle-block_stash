@@ -45,6 +45,10 @@ class add_drop extends external_api {
         $manager = manager::get($data->courseid);
         self::validate_context($manager->get_context());
 
+        if (!\block_stash\stash::course_has_item($data->courseid, $data->itemid)) {
+            throw new \invalid_parameter_exception('Unknown item');
+        }
+
         if ($data->maxpickup == 0) {
             $data->maxpickup = null;
         }

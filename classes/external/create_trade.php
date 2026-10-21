@@ -26,6 +26,7 @@ namespace block_stash\external;
 
 use stdClass;
 use block_stash\manager;
+use block_stash\stash;
 
 class create_trade extends external_api {
 
@@ -77,13 +78,19 @@ class create_trade extends external_api {
         $manager = manager::get($info['courseid']);
         self::validate_context($manager->get_context());
 
+        foreach (array_merge($info['additems'], $info['lossitems']) as $item) {
+            if (!stash::course_has_item($info['courseid'], $item['itemid'])) {
+                throw new \invalid_parameter_exception('Unknown item');
+            }
+        }
+
         $data = new stdClass();
         $data->id = 0;
         $data->name = $info['title'];
         $data->gaintitle = !empty($info['gain']) ? $info['gain'] : get_string('gain', 'block_stash') ;
         $data->losstitle = !empty($info['loss']) ? $info['loss'] : get_string('loss', 'block_stash') ;
         $data->hashcode = $info['hashcode'];
-        $data->stashid = $info['stashid'];
+        $data->stashid = $manager->get_stash()->get_id();
 
         $trade = $manager->create_or_update_trade($data);
 
