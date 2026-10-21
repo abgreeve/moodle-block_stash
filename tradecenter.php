@@ -60,7 +60,10 @@ if (!is_null($itemid)) {
 }
 
 if (!is_null($userid)) {
-    $user = \core_user::get_user($userid);
+    if (!is_enrolled($context, $userid, '', true)) {
+        throw new moodle_exception('invaliduserid');
+    }
+    $user = \core_user::get_user($userid, '*', MUST_EXIST);
     $data['id'] = $userid;
     $data['userview'] = true;
     $data['fullname'] = \fullname($user);
