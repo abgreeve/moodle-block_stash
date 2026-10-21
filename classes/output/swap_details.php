@@ -69,7 +69,7 @@ class swap_details implements renderable, templatable {
 
         $params = ['id' => $this->swapid,'courseid' => $this->manager->get_courseid()];
         $this->declineurl = new moodle_url('/blocks/stash/swapdetail.php', $params);
-        $this->declineurl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_DECLINE]);
+        $this->declineurl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_DECLINE, 'sesskey' => sesskey()]);
     }
 
     private function get_user_details(array $swapdata) {
@@ -119,7 +119,7 @@ class swap_details implements renderable, templatable {
     public function use_offer_decline_url() {
         $params = ['id' => $this->swapid,'courseid' => $this->manager->get_courseid()];
         $this->declineurl = new moodle_url('/blocks/stash/swapofferdetail.php', $params);
-        $this->declineurl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_DECLINE]);
+        $this->declineurl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_DECLINE, 'sesskey' => sesskey()]);
     }
 
     /**
@@ -139,7 +139,7 @@ class swap_details implements renderable, templatable {
         $data['requestpossible'] = $swapbasics['requestpossible'];
         $params = ['id' => $this->swapid,'courseid' => $this->manager->get_courseid()];
         $accepturl = new moodle_url('/blocks/stash/swapdetail.php', $params);
-        $accepturl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_APPROVE]);
+        $accepturl->params(['decision' => \block_stash\swap::BLOCK_STASH_SWAP_APPROVE, 'sesskey' => sesskey()]);
         $data['accepturl'] = $accepturl->out(false);
         $data['declineurl'] = $this->declineurl->out(false);
 

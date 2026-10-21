@@ -44,6 +44,7 @@ if (!$swaphandler->veryify_my_swap_offers($swapid, $userid)) {
 $renderer = $PAGE->get_renderer('block_stash');
 
 if (isset($decision)) {
+    require_sesskey();
     if ($decision == \block_stash\swap::BLOCK_STASH_SWAP_DECLINE) {
         $swaphandler->decline_swap($swapid);
         // Redirect to requests page.

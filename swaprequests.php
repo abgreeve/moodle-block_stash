@@ -39,6 +39,7 @@ $swaphandler = new \block_stash\swap_handler($manager);
 $userid = $USER->id;
 
 if (!is_null($swapid)) {
+    require_sesskey();
     if ($swaphandler->veryify_my_swap_offers($swapid, $userid)) {
         $swaphandler->delete_swap($swapid);
     }
