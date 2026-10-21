@@ -44,6 +44,7 @@ class leaderboard_settings extends external_api {
         $manager = manager::get($data->courseid);
         $context = $manager->get_context();
         self::validate_context($context);
+        $manager->require_manage();
 
         return $manager->set_config_entry($data->key, $data->value);
     }
@@ -70,6 +71,7 @@ class leaderboard_settings extends external_api {
         $manager = manager::get($data->courseid);
         $context = $manager->get_context();
         self::validate_context($context);
+        $manager->require_manage();
 
         if (!$data->enabled) {
             $manager->delete_leaderboard_settings($data->boardname);
