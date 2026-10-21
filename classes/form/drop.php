@@ -74,10 +74,14 @@ class drop extends persistent {
             $mform->addElement('select', 'itemid', get_string('item', 'block_stash'), $options);
         }
 
-        // Hash code.
-        $mform->addElement('hidden', 'hashcode');
-        $mform->setType('hashcode', PARAM_ALPHANUM);
-        $mform->setConstant('hashcode', $drop->get_hashcode());
+        // Drop code / identifier.
+        $mform->addElement('text', 'hashcode', get_string('dropcode', 'block_stash'),
+            'maxlength="40" placeholder="' . s(get_string('dropcode_placeholder', 'block_stash')) . '"');
+        $mform->setType('hashcode', PARAM_ALPHANUMEXT);
+        $mform->setDefault('hashcode', $drop->get_hashcode());
+        $mform->addRule('hashcode', null, 'required', null, 'client');
+        $mform->addRule('hashcode', get_string('maximumchars', '', 40), 'maxlength', 40, 'client');
+        $mform->addHelpButton('hashcode', 'dropcode', 'block_stash');
 
         // Name.
         $mform->addElement('text', 'name', get_string('dropname', 'block_stash'),

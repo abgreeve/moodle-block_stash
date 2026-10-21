@@ -33,7 +33,7 @@ class create_trade extends external_api {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT),
             'stashid' => new external_value(PARAM_INT),
-            'hashcode' => new external_value(PARAM_ALPHANUM),
+            'hashcode' => new external_value(PARAM_ALPHANUMEXT),
             'title' => new external_value(PARAM_TEXT),
             'gain' => new external_value(PARAM_TEXT),
             'loss' => new external_value(PARAM_TEXT),
@@ -109,6 +109,6 @@ class create_trade extends external_api {
     }
 
     public static function execute_returns() {
-        return new external_value(PARAM_ALPHANUM);
+        return new external_value(PARAM_ALPHANUMEXT);
     }
 }

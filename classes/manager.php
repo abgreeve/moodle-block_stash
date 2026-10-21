@@ -188,6 +188,9 @@ class manager {
 
         if (!$data->id) {
             $drop = new drop(null, $data);
+            if (empty($drop->get_hashcode())) {
+                $drop->regenerate_hashcode();
+            }
             while (drop::hashcode_exists($drop->get_hashcode(), $this->get_stash()->get_id())) {
                 $drop->regenerate_hashcode();
             }
@@ -198,8 +201,14 @@ class manager {
             if ($data->itemid != $drop->get_itemid()) {
                 throw new coding_exception('The item ID of a drop cannot be changed.');
             }
+            $oldhashcode = $drop->get_hashcode();
             $drop->from_record($data);
             $drop->update();
+
+            if (!empty($oldhashcode) && $oldhashcode !== $drop->get_hashcode()) {
+                $replacements = $this->update_drop_code_in_course_content($oldhashcode, $drop->get_hashcode());
+                $drop->replacements_count = $replacements;
+            }
         }
         return $drop;
     }
@@ -460,6 +469,146 @@ class manager {
     public function get_drop_by_hashcode_portion($hash) {
         $this->require_enabled();
         return drop::get_by_hashcode_portion($this->get_stash()->get_id(), $hash);
+    }
+
+    /**
+     * Search and replace drop codes / secrets in course content.
+     *
+     * @param string $oldcode The old drop code/secret.
+     * @param string $newcode The new drop code/secret.
+     * @return int Number of content areas updated.
+     */
+    public function update_drop_code_in_course_content(string $oldcode, string $newcode): int {
+        global $DB, $CFG;
+
+        if ($oldcode === $newcode || empty($oldcode) || empty($newcode)) {
+            return 0;
+        }
+
+        require_once($CFG->dirroot . '/course/lib.php');
+
+        $courseid = $this->get_courseid();
+        $dbman = $DB->get_manager();
+        $totalupdated = 0;
+
+        $replacer = function(string $text) use ($oldcode, $newcode, &$updated): string {
+            $quoted = preg_quote($oldcode, '/');
+            // Shortcode attribute: (secret|code|id)="oldcode" or 'oldcode' or unquoted.
+            $pattern1 = '/(\b(?:secret|code|id)\s*=\s*(["\']?))' . $quoted . '(\2|(?=[\s\]]))/i';
+            // JavaScript / JSON: hashcode: "oldcode" or 'oldcode'.
+            $pattern2 = '/(\bhashcode\s*:\s*(["\']))' . $quoted . '(\2)/i';
+
+            $newtext = preg_replace_callback([$pattern1, $pattern2], function($m) use ($newcode) {
+                $prefix = $m[1];
+                $suffix = $m[3] ?? '';
+                return $prefix . $newcode . $suffix;
+            }, $text);
+
+            if ($newtext !== $text) {
+                $updated = true;
+            }
+            return $newtext;
+        };
+
+        // 1. Course sections.
+        if ($dbman->table_exists('course_sections') && $dbman->field_exists('course_sections', 'summary')) {
+            $sections = $DB->get_records_select('course_sections',
+                'course = :courseid AND summary IS NOT NULL AND summary != \'\'',
+                ['courseid' => $courseid]);
+            foreach ($sections as $section) {
+                $updated = false;
+                $newsummary = $replacer($section->summary);
+                if ($updated) {
+                    $section->summary = $newsummary;
+                    $DB->update_record('course_sections', $section);
+                    $totalupdated++;
+                }
+            }
+        }
+
+        // 2. Activities directly linked to course via course column.
+        $standardtables = [
+            'page' => ['intro', 'content'],
+            'label' => ['intro'],
+            'assign' => ['intro', 'activity'],
+            'quiz' => ['intro'],
+            'forum' => ['intro'],
+            'glossary' => ['intro'],
+            'resource' => ['intro'],
+            'url' => ['intro'],
+            'folder' => ['intro'],
+            'feedback' => ['intro', 'page_after_submit'],
+            'choice' => ['intro'],
+            'data' => ['intro'],
+            'scorm' => ['intro'],
+            'h5pactivity' => ['intro'],
+        ];
+
+        foreach ($standardtables as $table => $fields) {
+            if (!$dbman->table_exists($table) || !$dbman->field_exists($table, 'course')) {
+                continue;
+            }
+            $records = $DB->get_records($table, ['course' => $courseid]);
+            foreach ($records as $record) {
+                $recordupdated = false;
+                foreach ($fields as $field) {
+                    if (isset($record->$field) && !empty($record->$field)) {
+                        $updated = false;
+                        $newval = $replacer($record->$field);
+                        if ($updated) {
+                            $record->$field = $newval;
+                            $recordupdated = true;
+                        }
+                    }
+                }
+                if ($recordupdated) {
+                    $DB->update_record($table, $record);
+                    $totalupdated++;
+                }
+            }
+        }
+
+        // 3. Book chapters (book_chapters joined on book.course).
+        if ($dbman->table_exists('book') && $dbman->table_exists('book_chapters')) {
+            $sql = "SELECT bc.*
+                      FROM {book_chapters} bc
+                      JOIN {book} b ON b.id = bc.bookid
+                     WHERE b.course = :courseid AND bc.content IS NOT NULL AND bc.content != ''";
+            $chapters = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+            foreach ($chapters as $chapter) {
+                $updated = false;
+                $newcontent = $replacer($chapter->content);
+                if ($updated) {
+                    $chapter->content = $newcontent;
+                    $DB->update_record('book_chapters', $chapter);
+                    $totalupdated++;
+                }
+            }
+        }
+
+        // 4. Lesson pages (lesson_pages joined on lesson.course).
+        if ($dbman->table_exists('lesson') && $dbman->table_exists('lesson_pages')) {
+            $sql = "SELECT lp.*
+                      FROM {lesson_pages} lp
+                      JOIN {lesson} l ON l.id = lp.lessonid
+                     WHERE l.course = :courseid AND lp.contents IS NOT NULL AND lp.contents != ''";
+            $pages = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+            foreach ($pages as $page) {
+                $updated = false;
+                $newcontents = $replacer($page->contents);
+                if ($updated) {
+                    $page->contents = $newcontents;
+                    $DB->update_record('lesson_pages', $page);
+                    $totalupdated++;
+                }
+            }
+        }
+
+        if ($totalupdated > 0) {
+            rebuild_course_cache($courseid, true);
+        }
+
+        return $totalupdated;
     }
 
     /**
@@ -1034,8 +1183,13 @@ class manager {
 
         } else {
             $trade = new trade($data->id);
+            $oldhashcode = $trade->get_hashcode();
             $trade->from_record($data);
             $trade->update();
+
+            if (!empty($oldhashcode) && $oldhashcode !== $trade->get_hashcode()) {
+                $this->update_drop_code_in_course_content($oldhashcode, $trade->get_hashcode());
+            }
         }
         return $trade;
     }

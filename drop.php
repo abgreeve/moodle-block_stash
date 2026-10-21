@@ -56,6 +56,11 @@ if ($data = $form->get_data()) {
 
     $drop = $manager->create_or_update_drop($data);
 
+    if (isset($drop->replacements_count) && $drop->replacements_count > 0) {
+        $a = (object) ['code' => $drop->get_hashcode(), 'count' => $drop->replacements_count];
+        \core\notification::success(get_string('dropcodeupdatedwithreplacements', 'block_stash', $a));
+    }
+
     if ($saveandnext) {
         $dropsnippeturl = new moodle_url('/blocks/stash/drop_snippet.php', ['dropid' => $drop->get_id()]);
         if (!empty($returntype)) {

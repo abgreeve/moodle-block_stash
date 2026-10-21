@@ -62,7 +62,7 @@ class external extends external_api {
     public static function is_drop_visible_parameters() {
         return new external_function_parameters([
             'dropid' => new external_value(PARAM_INT),
-            'hashcode' => new external_value(PARAM_ALPHANUM),
+            'hashcode' => new external_value(PARAM_ALPHANUMEXT),
         ]);
     }
 
@@ -113,7 +113,7 @@ class external extends external_api {
     public static function pickup_drop_parameters() {
         return new external_function_parameters([
             'dropid' => new external_value(PARAM_INT),
-            'hashcode' => new external_value(PARAM_ALPHANUM),
+            'hashcode' => new external_value(PARAM_ALPHANUMEXT),
         ]);
     }
 
@@ -352,7 +352,7 @@ class external extends external_api {
     public static function complete_trade_parameters() {
         return new external_function_parameters([
             'tradeid' => new external_value(PARAM_INT),
-            'hashcode' => new external_value(PARAM_ALPHANUM),
+            'hashcode' => new external_value(PARAM_ALPHANUMEXT),
         ]);
     }
 

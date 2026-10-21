@@ -59,9 +59,9 @@ class shortcodes {
 
         $text = isset($args['text']) ? $args['text'] : '';
         $image = !empty($args['image']) || empty($text);
-        $hash = isset($args['secret']) ? $args['secret'] : null;
+        $hash = isset($args['code']) ? $args['code'] : (isset($args['id']) ? $args['id'] : (isset($args['secret']) ? $args['secret'] : null));
 
-        if (empty($hash) || strlen($hash) < 6) {
+        if (empty($hash) || strlen($hash) < 2) {
             return '';
         }
 
@@ -123,8 +123,8 @@ class shortcodes {
     public static function trade($tag, $args, $content, $env, $next) {
         global $PAGE;
 
-        $hash = isset($args['secret']) ? $args['secret'] : null;
-        if (empty($hash) || strlen($hash) < 6) {
+        $hash = isset($args['code']) ? $args['code'] : (isset($args['id']) ? $args['id'] : (isset($args['secret']) ? $args['secret'] : null));
+        if (empty($hash) || strlen($hash) < 2) {
             return '';
         }
 

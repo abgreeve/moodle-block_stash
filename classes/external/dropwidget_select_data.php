@@ -100,7 +100,7 @@ class dropwidget_select_data extends external_api {
                     [
                         'id' => new external_value(PARAM_INT, 'The drop ID'),
                         'name' => new external_value(PARAM_TEXT, 'The name of the item'),
-                        'hashcode' => new external_value(PARAM_ALPHANUM, 'The hashcode for the drop'),
+                        'hashcode' => new external_value(PARAM_ALPHANUMEXT, 'The hashcode for the drop'),
                         'itemid' => new external_value(PARAM_INT, 'The item ID'),
                         'location' => new external_value(PARAM_TEXT, 'The location of the item')
                     ]
@@ -111,7 +111,7 @@ class dropwidget_select_data extends external_api {
                         'name' => new external_value(PARAM_TEXT, 'The name of the trade'),
                         'losstitle' => new external_value(PARAM_TEXT, 'The title for losing items'),
                         'gaintitle' => new external_value(PARAM_TEXT, 'The title for gaining items'),
-                        'hashcode' => new external_value(PARAM_ALPHANUM, 'The hashcode for the trade'),
+                        'hashcode' => new external_value(PARAM_ALPHANUMEXT, 'The hashcode for the trade'),
                         'additems' => new external_multiple_structure (
                             new external_single_structure(
                                 [
