@@ -214,6 +214,11 @@ class removal_helper {
     public function delete_removal_configuration(int $removalid): void {
         global $DB;
 
+        $stashid = $this->manager->get_stash()->get_id();
+        if (!$DB->record_exists('block_stash_removal', ['id' => $removalid, 'stashid' => $stashid])) {
+            throw new \moodle_exception('invalidaccess');
+        }
+
         $cache = cache::make_from_params(cache_store::MODE_APPLICATION, 'block_stash', 'removal_details');
         $cache->purge();
 

@@ -1066,7 +1066,11 @@ class manager {
     public function get_trade_item($id) {
         $this->require_enabled();
 
-        return tradeitems::get_record(['id' => $id]);
+        $tradeitem = tradeitems::get_record(['id' => $id]);
+        if (!$tradeitem || !$this->is_trade_in_stash($tradeitem->get_tradeid())) {
+            throw new coding_exception('Unexpected trade item ID.');
+        }
+        return $tradeitem;
     }
 
     public function get_trade_items($tradeid) {
