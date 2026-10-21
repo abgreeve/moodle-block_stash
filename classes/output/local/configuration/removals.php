@@ -65,7 +65,11 @@ class removals implements renderable, templatable {
                 if ($tmepp->cmid > 0) {
                     [$course, $cm] = get_course_and_cm_from_cmid($tmepp->cmid, 'quiz');
                     $action = new confirm_action(get_string('reallydeleteitem', 'block_stash'));
-                    $url = new moodle_url('removals.php', ['courseid' => $course->id, 'removalid' => $tmepp->removalid]);
+                    $url = new moodle_url('removals.php', [
+                        'courseid' => $course->id,
+                        'removalid' => $tmepp->removalid,
+                        'sesskey' => sesskey(),
+                    ]);
                     $actionlink = new action_link($url, '',$action, [], new pix_icon('t/delete', 'delete thing'));
                     if (isset($jsondata[$tmepp->removalid])) {
                         $jsondata[$tmepp->removalid] = $this->add_to_jsondata($tmepp->itemid, $tmepp->quantity, $jsondata[$tmepp->removalid]);

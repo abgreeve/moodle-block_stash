@@ -35,6 +35,7 @@ $manager->require_manage();
 
 $removalhelper = new \block_stash\local\stash_elements\removal_helper($manager);
 if (isset($removalid)) {
+    require_sesskey();
     $removalhelper->delete_removal_configuration($removalid);
 }
 
