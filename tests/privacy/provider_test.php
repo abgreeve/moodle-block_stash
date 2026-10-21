@@ -14,28 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Data provider tests.
- *
- * @package    block_stash
- * @category   test
- * @copyright  2018 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace block_stash\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-
-use core_privacy\tests\provider_testcase;
+use advanced_testcase;
+use context_course;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
-use block_stash\privacy\provider;
 use block_stash\drop_pickup;
 use block_stash\user_item;
-use block_stash\manager;
-use block_stash\swap_handler;
 
 /**
  * Data provider testcase class.
@@ -45,9 +32,12 @@ use block_stash\swap_handler;
  * @copyright  2018 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \block_stash\privacy\provider
  */
-class block_stash_privacy_testcase extends advanced_testcase {
-
+final class provider_test extends advanced_testcase {
+    /**
+     * Basic tests setup.
+     */
     public function setUp(): void {
         if (!class_exists('core_privacy\manager')) {
             $this->markTestSkipped('Moodle versions does not support privacy subsystem.');
@@ -58,7 +48,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         parent::setUp();
     }
 
-    public function test_get_contexts_for_userid() {
+    /**
+     * Tests the get_contexts_for_userid function.
+     */
+    public function test_get_contexts_for_userid(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -90,7 +83,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertTrue(in_array($c1ctx->id, $contextids));
     }
 
-    public function test_delete_data_for_user() {
+    /**
+     * Tests the delete_data_for_user function.
+     */
+    public function test_delete_data_for_user(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -138,7 +134,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals(0, drop_pickup::count_records(['userid' => $u2->id]));
     }
 
-    public function test_delete_data_for_all_users_in_context() {
+    /**
+     * Tests the delete_data_for_all_users_in_context function.
+     */
+    public function test_delete_data_for_all_users_in_context(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -186,7 +185,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals(0, drop_pickup::count_records(['userid' => $u2->id]));
     }
 
-    public function test_export_data_for_user() {
+    /**
+     * Tests the export_data_for_user function.
+     */
+    public function test_export_data_for_user(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -222,7 +224,7 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $sg->create_drop_pickup(['drop' => $d1a, 'userid' => $u2->id, 'lastpickup' => $now, 'pickupcount' => 123]);
         $sg->create_drop_pickup(['drop' => $d2a, 'userid' => $u2->id, 'lastpickup' => $now - YEARSECS, 'pickupcount' => 1]);
 
-        $assertu1inc1 = function($data) use ($now, $i1a, $i1b, $d1b, $d1b2) {
+        $assertu1inc1 = function ($data) use ($now, $i1a, $i1b, $d1b, $d1b2) {
             $this->assertCount(2, $data->items);
             $item = $data->items[0];
             $this->assertEquals($i1a->get_name(), $item['name']);
