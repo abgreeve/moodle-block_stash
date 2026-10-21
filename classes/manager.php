@@ -792,6 +792,7 @@ class manager {
      * @param  int $itemid The item id to reset for this user.
      */
     public function reset_user_item($userid, $itemid) {
+        $this->require_manage();
         $useritem = $this->get_user_item($userid, $itemid);
         // Before deleting the item, check if it is scarce and return it if so.
         $item = $this->get_item($useritem->get_itemid());
