@@ -88,7 +88,7 @@ class trade {
      * @param int|null $id If > 0, load the record with this ID from the DB.
      * @param stdClass|null $record If set, hydrate from this record.
      */
-    public function __construct(int|null $id = 0, stdClass $record = null) {
+    public function __construct(int|null $id = 0, ?stdClass $record = null) {
         // Evaluate the callable default for hashcode upfront; from_record() will
         // override this with the stored value if a record is provided.
         $this->hashcode = random_string(6);
@@ -127,7 +127,7 @@ class trade {
                 'type' => PARAM_TEXT,
             ],
             'hashcode' => [
-                'type' => PARAM_ALPHANUM,
+                'type' => PARAM_ALPHANUMEXT,
                 'default' => function() {
                     return random_string(6);
                 },
@@ -662,10 +662,14 @@ class trade {
      * @return true|lang_string
      */
     protected function validate_hashcode($value) {
-        if (strlen($value) != 40 && strlen($value) != 6) {
-            return new lang_string('invaliddata', 'error');
-        } else if (static::hashcode_exists($value, $this->get_stashid(), $this->get_id())) {
-            return new lang_string('invaliddata', 'error');
+        if (strlen($value) < 2 || strlen($value) > 40) {
+            return new lang_string('invalidtradelength', 'block_stash');
+        }
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+            return new lang_string('invalidtradeformat', 'block_stash');
+        }
+        if ($this->get_stashid() && static::hashcode_exists($value, $this->get_stashid(), $this->get_id())) {
+            return new lang_string('errorcodeinuse', 'block_stash', $value);
         }
 
         return true;

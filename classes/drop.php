@@ -85,7 +85,7 @@ class drop {
      * @param int|null $id If > 0, load the record with this ID from the DB.
      * @param stdClass|null $record If set, hydrate from this record.
      */
-    public function __construct(int|null $id = 0, stdClass $record = null) {
+    public function __construct(int|null $id = 0, ?stdClass $record = null) {
         // Eagerly evaluate the callable defaults that define_properties() describes.
         $this->pickupinterval = HOURSECS;
         $this->hashcode       = random_string(6);
@@ -127,7 +127,7 @@ class drop {
                 'default' => HOURSECS,
             ],
             'hashcode' => [
-                'type'    => PARAM_ALPHANUM,
+                'type'    => PARAM_ALPHANUMEXT,
                 'default' => function() {
                     return random_string(6);
                 },
@@ -684,15 +684,20 @@ class drop {
      * @return true|lang_string
      */
     protected function validate_hashcode($value) {
-        if (strlen($value) != 40 && strlen($value) != 6) {
-            // There are two formats of hashes, the old one at 40 chars, and the new one at 6.
-            return new lang_string('invaliddata', 'error');
+        if (strlen($value) < 2 || strlen($value) > 40) {
+            return new lang_string('invaliddroplength', 'block_stash');
+        }
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+            return new lang_string('invaliddropformat', 'block_stash');
         }
 
-        $item = new item($this->get_itemid());
-        if (static::hashcode_exists($value, $item->get_stashid(), $this->get_id())) {
-            // The hashcode is not unique within the stash.
-            return new lang_string('invaliddata', 'error');
+        $itemid = $this->get_itemid();
+        if ($itemid) {
+            $item = new item($itemid);
+            if (static::hashcode_exists($value, $item->get_stashid(), $this->get_id())) {
+                // The hashcode is not unique within the stash.
+                return new lang_string('errorcodeinuse', 'block_stash', $value);
+            }
         }
         return true;
     }

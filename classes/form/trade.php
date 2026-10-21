@@ -49,10 +49,14 @@ class trade extends persistent {
         $mform->setType('stashid', PARAM_INT);
         $mform->setConstant('stashid', $stash->get_id());
 
-        // Hash code.
-        $mform->addElement('hidden', 'hashcode');
-        $mform->setType('hashcode', PARAM_ALPHANUM);
-        $mform->setConstant('hashcode', $trade->get_hashcode());
+        // Trade code / identifier.
+        $mform->addElement('text', 'hashcode', get_string('tradecode', 'block_stash'),
+            'maxlength="40" placeholder="' . s(get_string('tradecode_placeholder', 'block_stash')) . '"');
+        $mform->setType('hashcode', PARAM_ALPHANUMEXT);
+        $mform->setDefault('hashcode', $trade->get_hashcode());
+        $mform->addRule('hashcode', null, 'required', null, 'client');
+        $mform->addRule('hashcode', get_string('maximumchars', '', 40), 'maxlength', 40, 'client');
+        $mform->addHelpButton('hashcode', 'tradecode', 'block_stash');
 
         // Name.
         $mform->addElement('text', 'name', get_string('tradename', 'block_stash'), 'maxlength="255"');

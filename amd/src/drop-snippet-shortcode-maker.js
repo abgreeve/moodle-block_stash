@@ -49,8 +49,7 @@ define([
 
     Maker.prototype.getSnippet = function() {
         var drop = this.getDrop(),
-            hashLength = 6,
-            secret = drop.get('hashcode').substring(0, hashLength),
+            secret = drop.get('hashcode'),
             shortcode = '[stashdrop secret="' + secret + '"',
             text = '',
             image = true;

@@ -43,8 +43,7 @@ define([
      */
     Maker.prototype.getSnippet = function() {
         var trade = this.getTrade(),
-            hashLength = 6,
-            secret = trade.get('hashcode').substring(0, hashLength);
+            secret = trade.get('hashcode');
 
         return '[stashtrade secret="' + secret + '"]';
     };
