@@ -14,28 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Data provider tests.
- *
- * @package    block_stash
- * @category   test
- * @copyright  2018 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace block_stash;
 
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
-
-use core_privacy\tests\provider_testcase;
+use advanced_testcase;
+use context_course;
 use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\transform;
+use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 use block_stash\privacy\provider;
-use block_stash\drop_pickup;
-use block_stash\user_item;
-use block_stash\manager;
-use block_stash\swap_handler;
 
 /**
  * Data provider testcase class.
@@ -45,9 +33,12 @@ use block_stash\swap_handler;
  * @copyright  2018 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \block_stash\privacy\provider
  */
-class block_stash_privacy_testcase extends advanced_testcase {
-
+final class privacy_test extends advanced_testcase {
+    /**
+     * Basic tests setup.
+     */
     public function setUp(): void {
         if (!class_exists('core_privacy\manager')) {
             $this->markTestSkipped('Moodle versions does not support privacy subsystem.');
@@ -58,7 +49,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         parent::setUp();
     }
 
-    public function test_get_contexts_for_userid() {
+    /**
+     * Tests the get_contexts_for_userid function.
+     */
+    public function test_get_contexts_for_userid(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -90,7 +84,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertTrue(in_array($c1ctx->id, $contextids));
     }
 
-    public function test_delete_data_for_user() {
+    /**
+     * Tests the delete_data_for_user function.
+     */
+    public function test_delete_data_for_user(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -138,7 +135,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals(0, drop_pickup::count_records(['userid' => $u2->id]));
     }
 
-    public function test_delete_data_for_all_users_in_context() {
+    /**
+     * Tests the delete_data_for_all_users_in_context function.
+     */
+    public function test_delete_data_for_all_users_in_context(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -186,7 +186,10 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals(0, drop_pickup::count_records(['userid' => $u2->id]));
     }
 
-    public function test_export_data_for_user() {
+    /**
+     * Tests the export_user_data function.
+     */
+    public function test_export_data_for_user(): void {
         $dg = $this->getDataGenerator();
         $sg = $dg->get_plugin_generator('block_stash');
 
@@ -264,5 +267,139 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals($d2a->get_name(), $drop['location']);
         $this->assertEquals(23, $drop['quantity']);
         $this->assertEquals(transform::datetime($now - DAYSECS), $drop['last_pickup']);
+    }
+
+    /**
+     * Tests the get_users_in_context function.
+     */
+    public function test_get_users_in_context(): void {
+        $dg = $this->getDataGenerator();
+        $sg = $dg->get_plugin_generator('block_stash');
+
+        $c1 = $dg->create_course();
+        $c2 = $dg->create_course();
+        $u1 = $dg->create_user();
+        $u2 = $dg->create_user();
+        $u3 = $dg->create_user();
+        $u4 = $dg->create_user();
+        $u5 = $dg->create_user();
+        $c1ctx = context_course::instance($c1->id);
+        $c2ctx = context_course::instance($c2->id);
+
+        $s1 = $sg->create_stash(['courseid' => $c1->id]);
+        $s2 = $sg->create_stash(['courseid' => $c2->id]);
+        $i1a = $sg->create_item(['stash' => $s1]);
+        $d1a = $sg->create_drop(['item' => $i1a]);
+        $i2a = $sg->create_item(['stash' => $s2]);
+
+        $sg->create_user_item(['item' => $i1a, 'userid' => $u1->id]);
+        $sg->create_drop_pickup(['drop' => $d1a, 'userid' => $u2->id]);
+        $this->create_swap($s1->get_id(), $u3->id, $u4->id);
+        $sg->create_user_item(['item' => $i2a, 'userid' => $u5->id]);
+
+        $userlist = new userlist($c1ctx, 'block_stash');
+        provider::get_users_in_context($userlist);
+        $userids = $userlist->get_userids();
+        sort($userids);
+        $this->assertEquals([$u1->id, $u2->id, $u3->id, $u4->id], $userids);
+
+        $userlist = new userlist($c2ctx, 'block_stash');
+        provider::get_users_in_context($userlist);
+        $this->assertEquals([$u5->id], $userlist->get_userids());
+
+        $userlist = new userlist(\context_system::instance(), 'block_stash');
+        provider::get_users_in_context($userlist);
+        $this->assertEmpty($userlist->get_userids());
+    }
+
+    /**
+     * Tests the delete_data_for_users function.
+     */
+    public function test_delete_data_for_users(): void {
+        global $DB;
+
+        $dg = $this->getDataGenerator();
+        $sg = $dg->get_plugin_generator('block_stash');
+
+        $c1 = $dg->create_course();
+        $c2 = $dg->create_course();
+        $u1 = $dg->create_user();
+        $u2 = $dg->create_user();
+        $u3 = $dg->create_user();
+        $c1ctx = context_course::instance($c1->id);
+
+        $s1 = $sg->create_stash(['courseid' => $c1->id]);
+        $s2 = $sg->create_stash(['courseid' => $c2->id]);
+        $i1a = $sg->create_item(['stash' => $s1]);
+        $d1a = $sg->create_drop(['item' => $i1a]);
+        $i2a = $sg->create_item(['stash' => $s2]);
+        $d2a = $sg->create_drop(['item' => $i2a]);
+
+        $ui1 = $sg->create_user_item(['item' => $i1a, 'userid' => $u1->id]);
+        $sg->create_drop_pickup(['drop' => $d1a, 'userid' => $u1->id]);
+        $sg->create_user_item(['item' => $i2a, 'userid' => $u1->id]);
+        $sg->create_drop_pickup(['drop' => $d2a, 'userid' => $u1->id]);
+        $ui2 = $sg->create_user_item(['item' => $i1a, 'userid' => $u2->id]);
+        $sg->create_drop_pickup(['drop' => $d1a, 'userid' => $u2->id]);
+        $sg->create_user_item(['item' => $i1a, 'userid' => $u3->id]);
+
+        $swap1 = $this->create_swap($s1->get_id(), $u1->id, $u3->id, $ui1->get_id());
+        $swap2 = $this->create_swap($s1->get_id(), $u2->id, $u3->id, $ui2->get_id());
+        $swap3 = $this->create_swap($s2->get_id(), $u1->id, $u2->id);
+
+        provider::delete_data_for_users(new approved_userlist($c1ctx, 'block_stash', [$u1->id]));
+
+        // Only the data of u1 in c1 is gone.
+        $this->assertEquals(1, user_item::count_records(['userid' => $u1->id]));
+        $this->assertEquals(1, drop_pickup::count_records(['userid' => $u1->id]));
+        $this->assertEquals(1, user_item::count_records(['userid' => $u2->id]));
+        $this->assertEquals(1, drop_pickup::count_records(['userid' => $u2->id]));
+        $this->assertEquals(1, user_item::count_records(['userid' => $u3->id]));
+        $this->assertFalse($DB->record_exists('block_stash_swap', ['id' => $swap1]));
+        $this->assertFalse($DB->record_exists('block_stash_swap_detail', ['swapid' => $swap1]));
+        $this->assertTrue($DB->record_exists('block_stash_swap', ['id' => $swap2]));
+        $this->assertTrue($DB->record_exists('block_stash_swap_detail', ['swapid' => $swap2]));
+        $this->assertTrue($DB->record_exists('block_stash_swap', ['id' => $swap3]));
+
+        provider::delete_data_for_users(new approved_userlist($c1ctx, 'block_stash', [$u2->id, $u3->id]));
+
+        $this->assertEquals(1, user_item::count_records(['userid' => $u1->id]));
+        $this->assertEquals(1, drop_pickup::count_records(['userid' => $u1->id]));
+        $this->assertEquals(0, user_item::count_records(['userid' => $u2->id]));
+        $this->assertEquals(0, drop_pickup::count_records(['userid' => $u2->id]));
+        $this->assertEquals(0, user_item::count_records(['userid' => $u3->id]));
+        $this->assertFalse($DB->record_exists('block_stash_swap', ['id' => $swap2]));
+        $this->assertFalse($DB->record_exists('block_stash_swap_detail', ['swapid' => $swap2]));
+        $this->assertTrue($DB->record_exists('block_stash_swap', ['id' => $swap3]));
+    }
+
+    /**
+     * Create a swap between two users.
+     *
+     * @param int $stashid The stash ID.
+     * @param int $initiator The initiating user ID.
+     * @param int $receiver The receiving user ID.
+     * @param int|null $useritemid The user item ID to add as swap detail.
+     * @return int The swap ID.
+     */
+    protected function create_swap(int $stashid, int $initiator, int $receiver, ?int $useritemid = null): int {
+        global $DB;
+
+        $swapid = $DB->insert_record('block_stash_swap', (object) [
+            'stashid' => $stashid,
+            'initiator' => $initiator,
+            'receiver' => $receiver,
+            'status' => swap::BLOCK_STASH_SWAP_APPROVE,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+        if ($useritemid) {
+            $DB->insert_record('block_stash_swap_detail', (object) [
+                'swapid' => $swapid,
+                'useritemid' => $useritemid,
+                'quantity' => 1,
+            ]);
+        }
+        return $swapid;
     }
 }
